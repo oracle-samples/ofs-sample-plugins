@@ -14,16 +14,6 @@ Inside the `templates/` folder you will find the templates provided. Those can b
 ## Documentation
 
 All the plugins are self documented but feel free to contact the library maintainers if you think there is not enough information.
-
-## Examples
-
-<!-- Describe any included examples or provide a link to a demo/tutorial -->
-
-## Help
-
-<!-- Inform users on where to get help or how to receive official support from Oracle
-     (if applicable). -->
-
 ## Contributing
 
 This project welcomes contributions from the community. Before submitting a pull
