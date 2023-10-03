@@ -1,0 +1,22 @@
+{
+    "properties": {
+        "activity": [
+            "aid",
+            "XA_GEOFENCE_RESULT",
+            "XA_GEOFENCE_LAST_STAGE",
+            "acoord_x",
+            "acoord_y",
+            "acoord_status"
+        ],
+        "resource": []
+    },
+    "securedParams": [
+        {
+            "name": "radius",
+            "value": "200"
+        },
+        {
+            "name": "test02"
+        }
+    ]
+}
