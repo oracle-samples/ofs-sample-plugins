@@ -11,6 +11,12 @@ Inside the `samples/`  directory you will find the different samples provided. S
 
 Inside the `templates/` folder you will find the templates provided. Those can be used with `cookiecutter`
 
+
+If you just want to create a new plugin based on a template:
+```
+    cookiecutter https://github.com/oracle-samples/ofs-sample-plugins --directory="templates/basic"
+```
+
 ## Documentation
 
 All the plugins are self documented but feel free to contact the library maintainers if you think there is not enough information.
