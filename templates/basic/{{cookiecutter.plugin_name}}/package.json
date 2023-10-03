@@ -32,7 +32,7 @@
   },
   "dependencies": {
     "@ofs-users/plugin": "^1.0.0",
-    "@ofs-users/proxy": "^1.6.0",
+    "@ofs-users/proxy": "^1.4.0",
     "buffer": "^6.0.3"
   }
 }

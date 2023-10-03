@@ -3,9 +3,9 @@
     "Copyright © 2022, 2023, Oracle and/or its affiliates.",
     "Licensed under the Universal Permissive License (UPL), Version 1.0  as shown at https://oss.oracle.com/licenses/upl/"
   ],
-  "name": "soft_close",
+  "name": "HelloWorld",
   "version": "1.1.0",
-  "description": "Example of Soft Close Plugin",
+  "description": "Template for Oracle Field Service plugins",
   "main": "index.js",
   "scripts": {
     "test": "jest"
@@ -27,12 +27,12 @@
     "ts-jest": "^29.0.5",
     "ts-loader": "^9.4.2",
     "typescript": "^4.9.4",
-    "webpack": "^5.75.0",
+    "webpack": "5.76",
     "webpack-cli": "^5.0.1"
   },
   "dependencies": {
     "@ofs-users/plugin": "^1.0.0",
-    "@ofs-users/proxy": "^1.6.0",
+    "@ofs-users/proxy": "^1.4.0",
     "buffer": "^6.0.3"
   }
 }

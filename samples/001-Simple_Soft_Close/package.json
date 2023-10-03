@@ -1,7 +1,11 @@
 {
-  "name": "geofence",
+  "//": [
+    "Copyright © 2022, 2023, Oracle and/or its affiliates.",
+    "Licensed under the Universal Permissive License (UPL), Version 1.0  as shown at https://oss.oracle.com/licenses/upl/"
+  ],
+  "name": "soft_close",
   "version": "1.1.0",
-  "description": "A sample plugin to show how to control geo-fencing in OFSC",
+  "description": "Example of Soft Close Plugin",
   "main": "index.js",
   "scripts": {
     "test": "jest"
@@ -11,7 +15,7 @@
     "ofsc"
   ],
   "author": "borja.toron@oracle.com",
-  "license": "ISC",
+  "license": "UPL-1.0",
   "devDependencies": {
     "@types/jest": "^29.4.0",
     "@types/node-sass": "^4.11.3",
@@ -20,15 +24,15 @@
     "sass": "^1.57.1",
     "sass-loader": "^13.2.0",
     "style-loader": "^3.3.1",
-    "ts-jest": "^29.1.1",
+    "ts-jest": "^29.0.5",
     "ts-loader": "^9.4.2",
     "typescript": "^4.9.4",
-    "webpack": "^5.75.0",
+    "webpack": "5.76",
     "webpack-cli": "^5.0.1"
   },
   "dependencies": {
     "@ofs-users/plugin": "^1.0.0",
-    "@ofs-users/proxy": "^1.6.0",
+    "@ofs-users/proxy": "^1.4.0",
     "buffer": "^6.0.3"
   }
 }
