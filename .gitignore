@@ -1,2 +1,9 @@
+#Ignore all local credentials files
+
 credentials*.json
 **/credentials.json
+
+# Ignore DS_store files
+
+.DS_Store
+**/.DS_Store
