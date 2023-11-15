@@ -1,4 +1,4 @@
-# getUsers
+# SuspensionMgr
 
 ## Description
 
@@ -17,7 +17,17 @@ None
 
 **Properties needed**
 
-None
+"appt_number",
+"length",
+"ETA",
+"astatus",
+"aid",
+"date",
+"A_TOTAL_DURATION",
+"A_TOTAL_DURATION_COMPLETE",
+"A_ORIGINAL_START_TIME",
+"A_ORIGINAL_START_TIME_TZ",
+"A_TOTAL_TIME_TO_SOLVE"
 
 ## How to use
 
