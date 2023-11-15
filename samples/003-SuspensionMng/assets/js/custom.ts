@@ -181,6 +181,9 @@ export class CustomPlugin extends OFSPlugin {
       console.log(
         `${plugin.tag} We need to add ${total_duration} minutes to the total duration`
       );
+      console.log(
+        `${plugin.tag} The total duration between ${data.activity["A_ORIGINAL_START_TIME"]} and ${data.activity.date} ${data.activity.ETA} is ${total_time_to_solve} minutes`
+      );
       let activityToUpdate = {
         aid: data.activity.aid,
         A_TOTAL_DURATION_COMPLETE: total_duration,
