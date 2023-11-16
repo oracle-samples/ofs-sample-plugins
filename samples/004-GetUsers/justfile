@@ -1,0 +1,25 @@
+build:
+	tsc
+
+dist-clean:
+	-@rm -rf dist/
+	-@mkdir dist
+	@cp index.html dist/
+
+pack: dist-clean
+	webpack --mode=production
+
+dev-pack: dist-clean
+	webpack --mode=development
+
+zip: pack
+	cd dist; zip plugin.zip index.html main.js
+
+dev-zip: dev-pack
+	cd dist; zip plugin.zip index.html main.js
+
+upload:
+	pluginmgr --filename dist/plugin.zip upload getUsers
+
+distribute:
+	zip -r getUsers.zip assets/ index.html justfile package.json tsconfig.json webpack.config.js README.md

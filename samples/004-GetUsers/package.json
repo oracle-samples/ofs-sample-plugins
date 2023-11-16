@@ -1,0 +1,34 @@
+{
+  "name": "getUsers",
+  "version": "1.1.0",
+  "description": "Template for Oracle Field Service plugins",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "keywords": [
+    "ofs",
+    "ofsc"
+  ],
+  "author": "borja.toron@oracle.com",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/jest": "^29.4.0",
+    "@types/node-sass": "^4.11.3",
+    "css-loader": "^6.7.3",
+    "node-sass": "^9.0.0",
+    "sass": "^1.57.1",
+    "sass-loader": "^13.2.0",
+    "style-loader": "^3.3.1",
+    "ts-jest": "^29.0.5",
+    "ts-loader": "^9.4.2",
+    "typescript": "^5.2.2",
+    "webpack": "^5.75.0",
+    "webpack-cli": "^5.0.1"
+  },
+  "dependencies": {
+    "@ofs-users/plugin": "^1.0.2",
+    "@ofs-users/proxy": "^1.7.0",
+    "buffer": "^6.0.3"
+  }
+}
