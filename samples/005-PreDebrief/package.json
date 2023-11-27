@@ -1,7 +1,7 @@
 {
-  "name": "SuspensionMng",
+  "name": "PreDebrief",
   "version": "1.1.0",
-  "description": "Template for Oracle Field Service plugins",
+  "description": "PreDebrief Plugin",
   "main": "index.js",
   "scripts": {
     "test": "jest"
@@ -27,8 +27,8 @@
     "webpack-cli": "^5.0.1"
   },
   "dependencies": {
-    "@ofs-users/plugin": "^0.11.1",
-    "@ofs-users/proxy": "^1.0.3",
+    "@ofs-users/plugin": "^1.0.0",
+    "@ofs-users/proxy": "^1.4.0",
     "buffer": "^6.0.3"
   }
 }

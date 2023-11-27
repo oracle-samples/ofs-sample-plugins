@@ -126,22 +126,21 @@ export class CustomPlugin extends OFSPlugin {
     globalThis.debriefPluginLabel = "debriefing";
     var thisPluginLabel = plugin.tag;
 
-    for (var param in data.openParams) {
+    for (var param in data.securedData) {
       if (param == "laborInvType") {
-         laborInvType = data.openParams.laborInvType;
+        laborInvType = data.securedData.laborInvType;
       } else if (param == "laborItemNumber") {
-         laborItemNumber = data.openParams.laborItemNumber;
+        laborItemNumber = data.securedData.laborItemNumber;
       } else if (param == "laborItemDesc") {
-         laborItemDesc = data.openParams.laborItemDesc;
+        laborItemDesc = data.securedData.laborItemDesc;
       } else if (param == "laborServActivity") {
-         laborServActivity = data.openParams.laborServActivity;
+        laborServActivity = data.securedData.laborServActivity;
       } else if (param == "debriefPluginLabel") {
-        globalThis.debriefPluginLabel = data.openParams.debriefPluginLabel;
-      }else if (param == "thisPluginLabel") {
-         thisPluginLabel = data.openParams.thisPluginLabel;
+        globalThis.debriefPluginLabel = data.securedData.debriefPluginLabel;
+      } else if (param == "thisPluginLabel") {
+        thisPluginLabel = data.securedData.thisPluginLabel;
       }
     }
-
 
     if (laborItems.length > 0) {
       let activityToUpdate = {

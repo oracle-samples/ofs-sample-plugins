@@ -9,16 +9,14 @@ to the Debrief Screen
 
 **Secure Parameters**
 
-None
-
-**Open Parameters**
-
 - `laborInvType`: Value for the property invtype of the line this plugin is going to create. Default = labor
 - `laborItemNumber`: Value for the property labor_item_number of the line this plugin is going to create. Default = "FS Reg Labor"
 - `laborItemDesc`: Value for the property labor_item_description of the line this plugin is going to create. Default = "FS Reg Labor"
 - `laborServActivity`: Value for the property labor_service_activity of the line this plugin is going to create. Default = Labor
 - `debriefPluginLabel`: Label of the Debrief Plugin. Used to redirect. default = debriefing
 - `thisPluginLabel`: Label of this Plugin. Used to redirect after creating the line. default = PreDebrief
+
+**Open Parameters**
 
 **Properties needed**
 

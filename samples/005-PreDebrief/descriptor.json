@@ -47,8 +47,28 @@
   },
   "securedParams": [
     {
-      "name": "test",
-      "value": "test"
+      "name": "debriefPluginLabel",
+      "value": "debriefing"
+    },
+    {
+      "name": "laborInvType",
+      "value": "labor"
+    },
+    {
+      "name": "laborItemNumber",
+      "value": "FS Reg Labor"
+    },
+    {
+      "name": "laborItemDesc",
+      "value": "FS Reg Labor"
+    },
+    {
+      "name": "laborServActivity",
+      "value": "Labor"
+    },
+    {
+      "name": "debriefPluginLabel",
+      "value": "PreDebrief"
     }
   ]
 }
