@@ -1,0 +1,74 @@
+{
+  "properties": {
+    "activity": [
+      "appt_number",
+      "length",
+      "ETA",
+      "astatus",
+      "date",
+      "caddress",
+      "ccity",
+      "ccompany",
+      "cname",
+      "cstate",
+      "appt_number",
+      "czip"
+    ],
+    "provider": ["pname", "pid"],
+    "inventory": [
+      "invpool",
+      "invtype",
+      "invid",
+      "inv_pid",
+      "invsn",
+      "inv_aid",
+      "inventory_model",
+      "labor_start_time",
+      "labor_end_time",
+      "labor_service_activity",
+      "labor_item_number",
+      "labor_item_desc",
+      "I_DEFAULT_VALUE",
+      "expense_amount",
+      "part_disposition_code",
+      "part_item_number",
+      "part_item_number_rev",
+      "part_item_desc",
+      "part_item_revision",
+      "part_uom_code",
+      "part_service_activity_returned",
+      "part_service_activity_used",
+      "expense_service_activity",
+      "expense_currency_code",
+      "expense_item_number",
+      "expense_item_desc",
+      "quantity"
+    ]
+  },
+  "securedParams": [
+    {
+      "name": "debriefPluginLabel",
+      "value": "debriefing"
+    },
+    {
+      "name": "laborInvType",
+      "value": "labor"
+    },
+    {
+      "name": "laborItemNumber",
+      "value": "FS Reg Labor"
+    },
+    {
+      "name": "laborItemDesc",
+      "value": "FS Reg Labor"
+    },
+    {
+      "name": "laborServActivity",
+      "value": "Labor"
+    },
+    {
+      "name": "debriefPluginLabel",
+      "value": "PreDebrief"
+    }
+  ]
+}
