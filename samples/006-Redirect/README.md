@@ -53,6 +53,10 @@ The plugin still not supports backPluginOpenParameters
 **Properties needed**
 
 All the properties that are expected to be used in the openParameters
+In addition to that, if it is required to capture the last screen and the last timestamp when the plugin was open, you can create an use 2 custom properties
+
+- `PA_REDIRECT_TS`: Last timestamp when the plugin was opened.
+- `PA_REDIRECT_BACKSCREEN`: Last timestamp when the plugin was opened.
 
 ## How to use
 

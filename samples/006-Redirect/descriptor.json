@@ -1,5 +1,5 @@
 {
   "properties": {
-    "activity": ["aid"]
+    "activity": ["aid", "PA_REDIRECT_BACKSCREEN", "PA_REDIRECT_TS"]
   }
 }

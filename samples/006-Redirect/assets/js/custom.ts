@@ -33,6 +33,18 @@ export class CustomPlugin extends OFSPlugin {
       }
       closeData[openParam] = paramValue;
     }
+    var activityDict: any = {};
+    if ("PA_REDIRECT_BACKSCREEN" in data.activity) {
+      activityDict["PA_REDIRECT_BACKSCREEN"] = data.openParams["backScreen"];
+    }
+    if ("PA_REDIRECT_TS" in data.activity) {
+      activityDict["PA_REDIRECT_TS"] = Date.now();
+    }
+    if (Object.keys(activityDict).length > 0) {
+      activityDict["aid"] = data.activity.aid;
+      closeData["activity"] = activityDict;
+    }
+
     console.debug(`${plugin.tag} : FEEDBACK: ${closeData}`);
     plugin.close(closeData);
   }
