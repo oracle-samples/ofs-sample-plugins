@@ -14,11 +14,20 @@ export class CustomPlugin extends OFSPlugin {
   open(data: OFSCustomOpenMessage) {
     var plugin = this;
     var closeData: any = {};
+    if (!("backScreen" in data.openParams)) {
+      alert(`backScreen is a mandatory openParameter`);
+      var closeData: any = {
+        activity: { aid: data.activity.aid },
+      };
+      plugin.close(closeData);
+      // throw new Error(`backScreen is a mandatory openParameter`);
+    }
     for (var openParam in data.openParams) {
       console.debug(
         `${plugin.tag} : OPEN PARAM: ${openParam} = ${data.openParams[openParam]}`
       );
       var paramValue: string = data.openParams[openParam];
+
       if (paramValue.includes("`")) {
         paramValue = paramValue.replace(/`/g, "");
         var entity: string = paramValue.split(".")[0];
@@ -28,7 +37,12 @@ export class CustomPlugin extends OFSPlugin {
         } else if (entity == "resource") {
           paramValue = data.resource[label];
         } else {
-          throw new Error(`Unknown entity ${entity}`);
+          //throw new Error(`Unknown entity ${entity}`);
+          alert(`Unknown entity ${entity}`);
+          var closeData: any = {
+            activity: { aid: data.activity.aid },
+          };
+          plugin.close(closeData);
         }
       }
       closeData[openParam] = paramValue;
