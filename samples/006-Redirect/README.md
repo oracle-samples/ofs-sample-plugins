@@ -2,7 +2,7 @@
 
 ## Description
 
-This plugin is designed to facilitate access to any standard screen thas is available as redirect options in the Plugin Framework
+This plugin is designed to facilitate access to any standard screen that is available as redirect options in the Plugin Framework
 
 Use this document to find the possible screens you can redirect a plugin to
 
