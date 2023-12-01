@@ -2,7 +2,11 @@
 
 ## Description
 
-This plugin is designed to facilitate access to any standard screen thas is avaiable as redirect options in the Plugin Framework
+This plugin is designed to facilitate access to any standard screen thas is available as redirect options in the Plugin Framework
+
+Use this document to find the possible screens you can redirect a plugin to
+
+https://docs.oracle.com/en/cloud/saas/field-service/fapcf/c-redirectionwithclosemethod.html#RedirectionWithTheCloseMethod-1BA7B347
 
 ## Parameters
 
