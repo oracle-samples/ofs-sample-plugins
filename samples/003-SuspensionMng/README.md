@@ -33,6 +33,8 @@ None
 
 Add the plugin to 2 buttons inside the activity details. Both will be visible only when the activity is started. One button will be used to suspend, the other one will be used to open the close activity screen.
 
+Add a message scenario to update the A_ORIGINAL_START_TIME property with {ETA} when the activity is started, adding the blocking condition A_ORIGINAL_START_TIME is not empty. This way, it will be set only the first time the activity is started
+
 ## For development
 
 ### How to build
