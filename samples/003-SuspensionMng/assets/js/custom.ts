@@ -170,7 +170,7 @@ export class CustomPlugin extends OFSPlugin {
     } else if (openAction == "complete suspended") {
       let currentTimestamp = new Date(data.resource.currentTime).getTime();
       let startTimestamp = new Date(
-        data.activity.date + " " + data.activity.ETA
+        Date.parse(data.activity.date + " " + data.activity.ETA)
       ).getTime();
       let originalStartTimestamp = new Date(
         data.activity["A_ORIGINAL_START_TIME"]
@@ -184,7 +184,7 @@ export class CustomPlugin extends OFSPlugin {
         +((currentTimestamp - originalStartTimestamp) / 60000)
       );
       console.log(
-        `${plugin.tag} We need to add ${total_duration} minutes to the total duration`
+        `${plugin.tag} We need to add ${total_duration} minutes to the total duration based on ${currentTimestamp} - ${startTimestamp} ( ${data.activity.date} ${data.activity.ETA})`
       );
       console.log(
         `${plugin.tag} The total duration between ${data.activity["A_ORIGINAL_START_TIME"]} and ${data.activity.date} ${data.activity.ETA} is ${total_time_to_solve} minutes`
