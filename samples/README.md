@@ -1,6 +1,8 @@
 # Samples:
 
-These instructions are valid for all the provided samples. For specific sample information please read the README file on each folder
+These instructions are valid for all the provided samples. For specific sample information please read the README file on each folder.
+
+The commands provided are an example, valid when using Windows / WSL, Linux (any flavour) or MacOS via the terminal. If you are building the plugins without using any of those environments please refere to your OS for the equivalent ones.
 
 ## Before you start ###
 
@@ -42,6 +44,7 @@ The medium way:
 1. Create the zip file for the plugin
 ```
     cd dist
+    cp ../index.html .
     zip plugin.zip index.html main.js *.html *.css`
 ```
 2. Log into OFS and in Configuration / Plugins create a hosted plugin
