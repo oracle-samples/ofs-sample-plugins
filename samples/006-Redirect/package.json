@@ -18,9 +18,7 @@
   "license": "UPL-1.0",
   "devDependencies": {
     "@types/jest": "^29.4.0",
-    "@types/node-sass": "^4.11.3",
     "css-loader": "^6.7.3",
-    "node-sass": "^8.0.0",
     "sass": "^1.57.1",
     "sass-loader": "^13.2.0",
     "style-loader": "^3.3.1",
