@@ -19,4 +19,4 @@ dev-zip: dev-pack
 	cd dist; zip plugin.zip index.html main.js
 
 upload:
-	pluginmgr --filename dist/plugin.zip upload soft_close
+	pluginmgr --filename dist/plugin.zip --credentials $HOME/.ssh/credentials.json upload soft_close

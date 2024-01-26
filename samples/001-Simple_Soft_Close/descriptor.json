@@ -3,20 +3,33 @@
         "activity": [
             "aid",
             "aworktype",
-            "XP_CAN_COMPLETE",
-            "XP_CAN_NOT_DONE",
-            "XP_FLAG_I01",
-            "XP_FLAG_I02"
+            {
+                "label": "XP_CAN_COMPLETE",
+                "name": "Can Complete",
+                "type": "integer",
+                "gui": "checkbox"
+            },
+            {
+                "label": "XP_CAN_NOT_DONE",
+                "name": "Can Not Done",
+                "type": "integer",
+                "gui": "checkbox"
+            },
+            {
+                "label": "XP_FLAG_I01",
+                "type": "integer",
+                "gui": "checkbox"
+            },
+            {
+                "label": "XP_FLAG_I02",
+                "type": "integer",
+                "gui": "checkbox"
+            }
         ],
-        "resource": [],
         "inventory": [
             "invpool",
             "inv_aid"
         ]
     },
-    "securedParams": [
-        {
-            "name": "test02"
-        }
-    ]
+    "securedParams": []
 }

@@ -20,3 +20,6 @@ dev-zip: dev-pack
 
 upload:
 	pluginmgr --filename dist/plugin.zip upload {{cookiecutter.plugin_name}}
+
+create-upload:
+	pluginmgr --filename dist/plugin.zip create-upload {{cookiecutter.plugin_name}} --createProperties

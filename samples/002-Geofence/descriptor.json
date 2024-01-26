@@ -2,8 +2,18 @@
     "properties": {
         "activity": [
             "aid",
-            "XA_GEOFENCE_RESULT",
-            "XA_GEOFENCE_LAST_STAGE",
+            {
+                "name": "Geofence result",
+                "label": "XA_GEOFENCE_RESULT",
+                "type": "integer",
+                "gui": "checkbox"
+            },
+            {
+                "name": "Geofence last stage",
+                "label": "XA_GEOFENCE_LAST_STAGE",
+                "type": "string",
+                "gui": "text"
+            },
             "acoord_x",
             "acoord_y",
             "acoord_status"

@@ -1,7 +1,13 @@
 {
     "properties": {
         "activity": [
-            "aid"
+            "aid",
+            {
+                "label": "TO_BE_CREATED",
+                "type": "string",
+                "name": "test02",
+                "gui": "text"
+            }
         ],
         "provider": []
     },
