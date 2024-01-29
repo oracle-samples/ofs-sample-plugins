@@ -18,5 +18,8 @@ zip: pack
 dev-zip: dev-pack
 	cd dist; zip plugin.zip index.html main.js
 
+upload:
+	pluginmgr --filename dist/plugin.zip upload Iframe
+
 upload-debug:
-	pluginmgr --filename dist/plugin.zip upload  --verbose true --debug true --save true   Redirect
+	pluginmgr --filename dist/plugin.zip upload  --verbose true --debug true --save true  Iframe
