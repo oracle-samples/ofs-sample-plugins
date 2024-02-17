@@ -17,4 +17,4 @@ Example:
 The following templates are available:
 
 - `basic`: A basic plugin with the minimum required files. Uses a simple bootstrap presentation layer. Uses the packages `@ofs-users/plugin` and `@ofs-users/core`.
-- `ojet-beta`: A plugin with a more complex presentation layer. Uses Oracle JET as the presentation layer. Currently in beta mode. Self-contained.
+- `ojet-beta`: A plugin with a more complex presentation layer. Uses Oracle JET with Virtual DOM as the presentation layer. Currently in beta mode. Self-contained. See {this} (https://docs.oracle.com/en/middleware/developer-tools/jet/15.1/index.html) for a full guide on Oracle JET.
