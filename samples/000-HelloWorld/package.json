@@ -3,9 +3,9 @@
     "Copyright © 2022, 2023, Oracle and/or its affiliates.",
     "Licensed under the Universal Permissive License (UPL), Version 1.0  as shown at https://oss.oracle.com/licenses/upl/"
   ],
-  "name": "HelloWorld",
+  "name": "helloworld",
   "version": "1.1.0",
-  "description": "Template for Oracle Field Service plugins",
+  "description": "Sample HelloWorld plugin for Oracle Field Service plugins",
   "main": "index.js",
   "scripts": {
     "test": "jest"
@@ -31,8 +31,8 @@
     "webpack-cli": "^5.0.1"
   },
   "dependencies": {
-    "@ofs-users/plugin": "^1.0.0",
-    "@ofs-users/proxy": "^1.4.0",
+    "@ofs-users/plugin": "^1.1.0",
+    "@ofs-users/proxy": "^1.8.3",
     "buffer": "^6.0.3"
   }
 }
