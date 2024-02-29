@@ -21,10 +21,12 @@ This template is designed to help you get started with building a plugin using O
 4. Build the code by running the following command:
 
     ```bash
-   ojet build
+   ojet build --release
     ```
 
     This will compile the source code and generate the necessary files for the plugin, including a zip file that you can use to install the plugin in Oracle Field Service.
+
+   Note: due to the restriction in number of files uploaded as part of a plugin itis important to upload the code in `release` form. If you forget to add `--release` the code will not be bundled and therefor it will not be fully uploaded. In case your plugin is very simple and you want to upload all the source code and libs it is possible to do it by modifying the `plugin_descriptor.json` file.
 
 ## Installation
 
