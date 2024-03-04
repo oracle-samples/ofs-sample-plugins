@@ -13,9 +13,7 @@ import { CustomPlugin } from "../services/custom";
 import { pluginContext } from "./app";
 import { Table } from "./table";
 import { Language, LocaleProvider } from "../services/locale";
-import { Button } from "oj-c/button";
 import { ButtonBar } from "./buttonbar";
-import { TestButtonBar } from "./testbuttonbar";
 
 export type QuotaInformation = {
     key: string;
@@ -215,7 +213,6 @@ export function OfsContainer() {
         /* Hide this section if no debug is needed */
         <div class="oj-web-applayout-max-width oj-web-applayout-content">
             <ButtonBar tag={ofsPlugin.tag} language={language} />
-            <TestButtonBar tag={ofsPlugin.tag} language={language} />
             <Table tag={ofsPlugin.tag} language={language} />
             <hr></hr>
             <oj-button
