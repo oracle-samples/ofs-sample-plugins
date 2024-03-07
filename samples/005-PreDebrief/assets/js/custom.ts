@@ -117,21 +117,20 @@ export class CustomPlugin extends OFSPlugin {
     console.log(
       `${plugin.tag} Times Variables [${data.resource.currentTime} , ${currentTimestampDate} ,${endTimeTxt} ,]`
     );
-    alert("Start time 1" + `${data.activity.date} ${data.activity.ETA}`);
 
     var etaFormated: string = this.convertTime12to24(data.activity.ETA);
-    alert("Start time 2" + `${etaFormated}`);
+
     let startTimestampDate = new Date(
       `${data.activity.date} ${etaFormated}`.replace(" ", "T")
     );
-    alert("Start time 3" + startTimestampDate);
+
     let startTimeTxt =
       "T" +
       ("0" + startTimestampDate.getHours()).slice(-2) +
       ":" +
       ("0" + startTimestampDate.getMinutes()).slice(-2) +
       ":00";
-    alert("Start time 4" + startTimeTxt);
+
     var laborInvType: string = "labor";
     var laborItemNumber: string = "FS Reg Labor";
     var laborItemDesc: string = "FS Reg Labor";
