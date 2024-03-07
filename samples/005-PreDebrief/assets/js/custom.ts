@@ -106,8 +106,7 @@ export class CustomPlugin extends OFSPlugin {
       laborItemElement,
       "install"
     );
-    console.log(`${plugin.tag} Labor items found [${laborItems.length}]`);
-
+    console.log(`${plugin.tag} Labor items found : [${laborItems.length}]`);
     let currentTimestampDate = new Date(data.resource.currentTime);
     let endTimeTxt =
       "T" +
@@ -115,15 +114,23 @@ export class CustomPlugin extends OFSPlugin {
       ":" +
       ("0" + currentTimestampDate.getMinutes()).slice(-2) +
       ":00";
-    let startTimestampDate = new Date(
-      `${data.activity.date} ${data.activity.ETA}`
+    console.log(
+      `${plugin.tag} Times Variables [${data.resource.currentTime} , ${currentTimestampDate} ,${endTimeTxt} ,]`
     );
+
+    var etaFormated: string = this.convertTime12to24(data.activity.ETA);
+
+    let startTimestampDate = new Date(
+      `${data.activity.date} ${etaFormated}`.replace(" ", "T")
+    );
+
     let startTimeTxt =
       "T" +
       ("0" + startTimestampDate.getHours()).slice(-2) +
       ":" +
       ("0" + startTimestampDate.getMinutes()).slice(-2) +
       ":00";
+
     var laborInvType: string = "labor";
     var laborItemNumber: string = "FS Reg Labor";
     var laborItemDesc: string = "FS Reg Labor";
@@ -212,5 +219,20 @@ export class CustomPlugin extends OFSPlugin {
       activityList: activityList,
     };
     this.close(closeData);
+  }
+  convertTime12to24(time12h: string) {
+    const [time, modifier] = time12h.split(" ");
+
+    let [hours, minutes] = time.split(":");
+
+    if (hours === "12") {
+      hours = "00";
+    }
+
+    if (modifier === "PM") {
+      hours = `${parseInt(hours, 10) + 12}`;
+    }
+
+    return `${hours}:${minutes}:00`;
   }
 }
