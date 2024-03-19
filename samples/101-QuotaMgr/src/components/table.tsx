@@ -257,9 +257,9 @@ export function Table(props: Props) {
             <oj-accordion id="a1">
                 <oj-collapsible id="c1">
                     <h3 slot="header">
-                        {locale.getLocale("Warning Range")}: [{warningThreshold}{" "}
-                        - {criticalThreshold}
-                        ], {locale.getLocale("Filter Closed")}:{" "}
+                        {locale.getLocale("Warning Range")}: [{warningThreshold}
+                        {"% "}- {criticalThreshold}%],{" "}
+                        {locale.getLocale("Filter Closed")}:{" "}
                         {filterClosed
                             ? locale.getLocale("Yes")
                             : locale.getLocale("No")}
@@ -273,7 +273,7 @@ export function Table(props: Props) {
                         id="range-slider-id"
                         labelHint={`${locale.getLocale(
                             "Warning and Critical Thresholds"
-                        )}: ${warningThreshold} - ${criticalThreshold}`}
+                        )}: ${warningThreshold}% - ${criticalThreshold}%`}
                         value={{
                             start: warningThreshold,
                             end: criticalThreshold,
