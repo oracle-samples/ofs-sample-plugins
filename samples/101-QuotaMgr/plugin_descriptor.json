@@ -1,0 +1,27 @@
+{
+    "id": "",
+    "src_files": [
+        "web/index.html",
+        "web/index.js",
+        "web/bundle.js",
+        "web/main.js",
+        "web/styles/app.css"
+    ],
+    "properties": {
+        "activity": []
+    },
+    "securedParams": [
+        {
+            "name": "ofsClientId",
+            "value": ""
+        },
+        {
+            "name": "ofsClientSecret",
+            "value": ""
+        },
+        {
+            "name": "ofsInstance",
+            "value": ""
+        }
+    ]
+}

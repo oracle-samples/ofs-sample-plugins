@@ -1,0 +1,19 @@
+build:
+    ojet build --release
+
+deploy:
+    pluginmgr upload TESTOJET --credentials $HOME/.ssh/credentials.json
+
+convert $library $file:
+    echo Converting $library
+    mkdir node_modules/$library/dist/cjs
+    cp node_modules/$library/dist/$file node_modules/$library/dist/cjs/
+    npx r.js -convert node_modules/$library/dist/cjs node_modules/$library/dist/amd
+    echo Finishing...
+
+signals:
+    # Just for rememebering it: TODO fix
+    convert("@preact/signals", signals.js)
+    convert("@preact/signals-core", signals-core.js)
+    
+

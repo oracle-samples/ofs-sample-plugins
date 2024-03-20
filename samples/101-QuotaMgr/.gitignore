@@ -1,0 +1,6 @@
+dist/
+node_modules/
+web/
+staged-themes/
+styles/
+*.zip
