@@ -19,12 +19,14 @@ export class InventoryItemElement implements InventoryItem {
   I_DEFAULT_VALUE: string | undefined;
 
   constructor(
+    inv_aid: number,
     invtype: string,
     invpool?: string,
     I_DEFAULT_VALUE?: string,
     inventory_model?: any,
     invsn?: string
   ) {
+    this.inv_aid = inv_aid;
     this.invtype = invtype;
     this.I_DEFAULT_VALUE = I_DEFAULT_VALUE;
     this.inventory_model = inventory_model;
