@@ -126,8 +126,8 @@ export class CustomPlugin extends OFSPlugin {
     window.activityMap = new ActivityMap();
     var inventory = new InventoryCustom(data.inventoryList);
     var laborItemElement = new InventoryItemElement(
-      data.activity.aid,
       laborInvType,
+      data.activity.aid,
       "install",
       "1"
     );
