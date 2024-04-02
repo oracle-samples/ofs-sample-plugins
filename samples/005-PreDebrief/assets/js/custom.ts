@@ -10,7 +10,7 @@ class InventoryCustom extends Inventory {
   find_like_custom(item: InventoryItem, pool?: string) {
     console.debug(
       item,
-      `looking for items with ${item.invtype} ,${item.inventory_model}  and ${item.I_DEFAULT_VALUE} `
+      `looking for items with ${item.inv_aid} , ${item.invtype}  and ${item.I_DEFAULT_VALUE}   `
     );
     var data = this._data;
     if (pool != null) {
@@ -18,6 +18,7 @@ class InventoryCustom extends Inventory {
     }
     data = data.filter((row) => {
       return (
+        item.inv_aid == row.inv_aid &&
         item.invtype == row.invtype &&
         item.I_DEFAULT_VALUE == row.I_DEFAULT_VALUE
       );
@@ -99,9 +100,37 @@ export class CustomPlugin extends OFSPlugin {
   // Presentation functions
   open(data: OFSCustomOpenMessage) {
     var plugin = this;
+    var laborInvType: string = "labor";
+    var laborItemNumber: string = "FS Reg Labor";
+    var laborItemDesc: string = "FS Reg Labor";
+    var laborServActivity: string = "Labor";
+    globalThis.debriefPluginLabel = "debriefing";
+    var thisPluginLabel = plugin.tag;
+
+    for (var param in data.securedData) {
+      if (param == "laborInvType") {
+        laborInvType = data.securedData.laborInvType;
+      } else if (param == "laborItemNumber") {
+        laborItemNumber = data.securedData.laborItemNumber;
+      } else if (param == "laborItemDesc") {
+        laborItemDesc = data.securedData.laborItemDesc;
+      } else if (param == "laborServActivity") {
+        laborServActivity = data.securedData.laborServActivity;
+      } else if (param == "debriefPluginLabel") {
+        globalThis.debriefPluginLabel = data.securedData.debriefPluginLabel;
+      } else if (param == "thisPluginLabel") {
+        thisPluginLabel = data.securedData.thisPluginLabel;
+      }
+    }
+
     window.activityMap = new ActivityMap();
     var inventory = new InventoryCustom(data.inventoryList);
-    var laborItemElement = new InventoryItemElement("labor", "install", "1");
+    var laborItemElement = new InventoryItemElement(
+      laborInvType,
+      data.activity.aid,
+      "install",
+      "1"
+    );
     var laborItems: InventoryItem[] = inventory.find_like_custom(
       laborItemElement,
       "install"
@@ -130,29 +159,6 @@ export class CustomPlugin extends OFSPlugin {
       ":" +
       ("0" + startTimestampDate.getMinutes()).slice(-2) +
       ":00";
-
-    var laborInvType: string = "labor";
-    var laborItemNumber: string = "FS Reg Labor";
-    var laborItemDesc: string = "FS Reg Labor";
-    var laborServActivity: string = "Labor";
-    globalThis.debriefPluginLabel = "debriefing";
-    var thisPluginLabel = plugin.tag;
-
-    for (var param in data.securedData) {
-      if (param == "laborInvType") {
-        laborInvType = data.securedData.laborInvType;
-      } else if (param == "laborItemNumber") {
-        laborItemNumber = data.securedData.laborItemNumber;
-      } else if (param == "laborItemDesc") {
-        laborItemDesc = data.securedData.laborItemDesc;
-      } else if (param == "laborServActivity") {
-        laborServActivity = data.securedData.laborServActivity;
-      } else if (param == "debriefPluginLabel") {
-        globalThis.debriefPluginLabel = data.securedData.debriefPluginLabel;
-      } else if (param == "thisPluginLabel") {
-        thisPluginLabel = data.securedData.thisPluginLabel;
-      }
-    }
 
     if (laborItems.length > 0) {
       let activityToUpdate = {

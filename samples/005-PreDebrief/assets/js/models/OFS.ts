@@ -20,11 +20,13 @@ export class InventoryItemElement implements InventoryItem {
 
   constructor(
     invtype: string,
+    inv_aid?: number,
     invpool?: string,
     I_DEFAULT_VALUE?: string,
     inventory_model?: any,
     invsn?: string
   ) {
+    this.inv_aid = inv_aid;
     this.invtype = invtype;
     this.I_DEFAULT_VALUE = I_DEFAULT_VALUE;
     this.inventory_model = inventory_model;
