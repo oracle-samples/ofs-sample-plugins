@@ -5,7 +5,6 @@
 
 import { OFSPlugin, OFSMessage, OFSOpenMessage } from "@ofs-users/plugin";
 import { Activity, ActivityItem, ActivityItemElement } from "./models/OFS";
-import { JSONTree } from "./utils/jsonview";
 
 class OFSCustomOpenMessage extends OFSOpenMessage {
   inventoryList: any;
