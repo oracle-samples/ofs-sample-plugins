@@ -15,12 +15,12 @@ none
 
 **Secure Parameters**
 
-backScreen : screen where I want to redirect the technician after starting the activity ( default : plugin_by_label )
-redirectPluginLabel : if the redirect option is a plugin, label of the plugin ( default : debriefing )
+none
 
 **Open Parameters**
 
-none
+backScreen : screen where I want to redirect the technician after starting the activity ( default : plugin_by_label )
+redirectPluginLabel : if the redirect option is a plugin, label of the plugin ( default : debriefing )
 
 **Properties needed**
 

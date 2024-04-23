@@ -127,11 +127,11 @@ export class CustomPlugin extends OFSPlugin {
     globalThis.backScreen = "activity_by_id";
     globalThis.aid = data.activity.aid;
 
-    for (var param in data.securedData) {
+    for (var param in data.openParams) {
       if (param == "redirectPluginLabel") {
-        globalThis.redirectPluginLabel = data.securedData.redirectPluginLabel;
+        globalThis.redirectPluginLabel = data.openParams.redirectPluginLabel;
       } else if (param == "backScreen") {
-        globalThis.backScreen = data.securedData.backScreen;
+        globalThis.backScreen = data.openParams.backScreen;
       }
     }
     this.decide_action(data);
