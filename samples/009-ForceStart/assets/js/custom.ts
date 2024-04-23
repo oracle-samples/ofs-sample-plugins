@@ -67,10 +67,10 @@ export class CustomPlugin extends OFSPlugin {
     globalThis.actionAtReturn = "RECHECK";
     this.update(dataToSend);
   }
-  suspend_activity() {
+  not_order_activity() {
     let activityToUpdate = {
       aid: globalThis.aid,
-      astatus: "suspended",
+      position_in_route: "-1",
     };
     var dataToSend = {
       activity: activityToUpdate,
@@ -155,7 +155,7 @@ export class CustomPlugin extends OFSPlugin {
           if (nextActivity.aid == data.activity.aid) {
             this.start_activity();
           } else {
-            this.suspend_activity();
+            this.not_order_activity();
           }
         }
       }
