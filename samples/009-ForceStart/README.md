@@ -11,8 +11,6 @@ If the pending activity I want to start is not the next one in the route, I will
 
 ## Parameters
 
-none
-
 **Secure Parameters**
 
 none
