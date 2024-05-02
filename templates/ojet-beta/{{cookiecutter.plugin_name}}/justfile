@@ -1,2 +1,2 @@
 deploy:
-    pluginmgr upload TEMPLATE --credentials $HOME/.ssh/credentials.json
+    pluginmgr upload {{cookiecutter.plugin_name}} --credentials $HOME/.ssh/credentials.json
