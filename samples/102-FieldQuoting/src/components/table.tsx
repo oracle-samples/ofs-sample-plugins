@@ -92,10 +92,10 @@ export function Table(props: Props) {
   return (
     <div class="oj-md-margin-4x-horizontal">
       <br></br>
-      <h3 slot="header">{"Price Information"}</h3>
+      <h3 slot="header">{"Charges Summary"}</h3>
       <oj-table
         id="table"
-        aria-label="Price Table"
+        aria-label="Charges Table"
         data={tableDataList}
         selectionMode={setSelectionMode}
         scrollPolicy="loadMoreOnScroll"
@@ -103,7 +103,7 @@ export function Table(props: Props) {
         columnsDefault={setColumnsDefault}
         columns={columnsDef}
         class="oj-bg-body table-sizing"
-      ><oj-row-expander></oj-row-expander>
+      >
       </oj-table>
    
     </div>
