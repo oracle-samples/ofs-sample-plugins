@@ -4,6 +4,13 @@
  */
 
 import { OFS } from "./OFS";
+export interface InventoryGroupItem {
+  invtype: any;
+  accText: string | undefined;
+  totalCharges: number | 0.0;
+  count: number | 0.0;
+  children: InventoryItem[];
+}
 export interface InventoryItem {
   inv_aid?: number | null;
   invid: any;
@@ -13,6 +20,26 @@ export interface InventoryItem {
   invsn: any;
   invpool: string | undefined;
   I_TOTAL_PRICE: number | 0.0;
+}
+export class InventoryGroupItemElement implements InventoryGroupItem {
+  invtype: any;
+  accText: string | undefined;
+  totalCharges: number = 0.0;
+  count: number = 0.0;
+  children: InventoryItem[] = [];
+
+  constructor(invtype: string) {
+    this.invtype = invtype;
+    this.accText = "Grouped Element of " + invtype;
+  }
+
+  addElement(newChild: InventoryItem) {
+    this.children.push(newChild);
+    this.count = this.children.length;
+    let sum = 0;
+    this.children.forEach((el) => (sum += el.I_TOTAL_PRICE));
+    this.totalCharges = sum;
+  }
 }
 export class InventoryItemElement implements InventoryItem {
   inv_aid?: number | null | undefined;
@@ -34,10 +61,23 @@ export class InventoryItemElement implements InventoryItem {
 export class Inventory {
   protected _data: InventoryItem[];
   private _original_data: InventoryItem[];
+  protected _grouped_data: InventoryGroupItem[] = [];
+
   data() {
     return this._data;
   }
-
+  grouped_data() {
+    return this._grouped_data;
+  }
+  compare(a: InventoryItem, b: InventoryItem) {
+    if (a.invtype < b.invtype) {
+      return -1;
+    }
+    if (a.invtype > b.invtype) {
+      return 1;
+    }
+    return 0;
+  }
   customer({ serialized = true, non_serialized = true, aid = -1 }) {
     // Returns the installed pool inventory
     var data = this._data.filter((item) => item.invpool == "customer");
@@ -79,7 +119,15 @@ export class Inventory {
     }
     return data;
   }
-
+  installed_grouped({ serialized = true, non_serialized = true, aid = -1 }) {
+    return this.group_data(
+      this.installed({
+        serialized: serialized,
+        non_serialized: non_serialized,
+        aid: aid,
+      })
+    );
+  }
   find_like(item: InventoryItem, pool?: string) {
     console.debug(
       item,
@@ -100,7 +148,27 @@ export class Inventory {
     }
     return data;
   }
+  private group_data(data_to_group: InventoryItem[]) {
+    var groupElement: InventoryGroupItemElement[] = [];
+    var previousInvtype: string = "";
+    let currentGroupedElement: InventoryGroupItemElement;
+    data_to_group.sort(this.compare).forEach((element, key, arr) => {
+      if (previousInvtype != element.invtype) {
+        if (currentGroupedElement != null) {
+          groupElement.push(currentGroupedElement);
+        }
+        currentGroupedElement = new InventoryGroupItemElement(element.invtype);
+      }
+      currentGroupedElement.addElement(element);
+      if (Object.is(arr.length - 1, key)) {
+        if (currentGroupedElement != null) {
+          groupElement.push(currentGroupedElement);
+        }
+      }
+    });
 
+    return groupElement;
+  }
   constructor(inventoryData: any) {
     // Due to the structure we iterate through the keys of the object to get the array
     this._data = [];
@@ -108,6 +176,7 @@ export class Inventory {
     for (const property in inventoryData) {
       this._data = this._data.concat(inventoryData[property]);
     }
+
     // TODO: Check if installed inv is only for the current activity
   }
 }

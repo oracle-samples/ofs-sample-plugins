@@ -8,7 +8,11 @@
 import { createContext } from "preact";
 import { useState, useContext } from "preact/hooks";
 import "oj-c/button";
-import { OFSOpenMessage, OFSPlugin } from "../libs/ofs/main";
+import {
+  InventoryGroupItem,
+  OFSOpenMessage,
+  OFSPlugin,
+} from "../libs/ofs/main";
 import { Table } from "./table";
 import { CustomPlugin } from "../services/custom";
 import {
@@ -16,6 +20,7 @@ import {
   InventoryItem,
   InventoryItemElement,
 } from "../libs/ofs/main";
+import GroupByTable from "./group-by-table";
 
 let tag: string = "ofs";
 
@@ -28,19 +33,26 @@ export function OfsProxy() {
   ofsPlugin.setState = setData;
   tag = ofsPlugin.tag;
   var inventoryDataString = "";
-  var inventoryList: InventoryItem[] = [];
+  var inventoryList: InventoryGroupItem[] = [];
   if ("inventoryList" in data) {
     inventoryDataString = data.inventoryList;
     var inventoryData = new Inventory(inventoryDataString);
-    inventoryList = inventoryData.installed({
+    //inventoryList = inventoryData.installed({
+    //  aid: data.activity.aid,
+    //});
+    inventoryList = inventoryData.installed_grouped({
       aid: data.activity.aid,
     });
+    console.log(
+      ofsPlugin.tag,
+      "Group created " + JSON.stringify(inventoryList)
+    );
   }
 
   console.log(ofsPlugin.tag, "Items to draw " + inventoryList.length);
   return (
     <div class="oj-web-applayout-max-width oj-web-applayout-content">
-      <Table tag={ofsPlugin.tag} tableDataArray={inventoryList} />
+      <GroupByTable tag={ofsPlugin.tag} tableDataArray={inventoryList} />
       <hr></hr>
       <oj-button
         id="submit_button"
