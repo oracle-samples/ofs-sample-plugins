@@ -42,14 +42,27 @@
     "accText": "Grouped Element of labor"
   },
   {
-    "totalCharges": "0821.00",
-    "count": 1,
+    "totalCharges": "0821.00null",
+    "count": 2,
     "children": [
       {
         "invid": "21260521",
         "inventory_model": null,
         "part_item_desc": "Running belt, 60x20, Multi-ply, Pre-lubricated",
         "I_TOTAL_PRICE": "821.00",
+        "invtype": "part",
+        "labor_start_time": null,
+        "labor_end_time": null,
+        "expense_currency_code": null,
+        "expense_amount": null,
+        "invpool": "install",
+        "inv_aid": 3954799
+      },
+      {
+        "invid": "21260522",
+        "inventory_model": null,
+        "part_item_desc": "Treadmill Fuse 002",
+        "I_TOTAL_PRICE": null,
         "invtype": "part",
         "labor_start_time": null,
         "labor_end_time": null,

@@ -154,6 +154,7 @@ export class Inventory {
     let currentGroupedElement: InventoryGroupItemElement;
     data_to_group.sort(this.compare).forEach((element, key, arr) => {
       if (previousInvtype != element.invtype) {
+        previousInvtype = element.invtype;
         if (currentGroupedElement != null) {
           groupElement.push(currentGroupedElement);
         }
