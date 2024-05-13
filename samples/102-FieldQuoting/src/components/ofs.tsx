@@ -59,6 +59,15 @@ export function OfsProxy() {
         label={"Close"}
         onojAction={() => ofsPlugin.close()}
       ></oj-button>
+      <oj-button
+        id="submit_button"
+        label={"Accept"}
+        onojAction={() =>
+          ofsPlugin.close({
+            activity: { aid: data.activity.aid, XA_ESTIMATION_ACCEPTED: "1" },
+          })
+        }
+      ></oj-button>
     </div>
   );
 }

@@ -8,7 +8,7 @@ export interface InventoryGroupItem {
   invtype: any;
   accText: string | undefined;
   totalCharges: number | 0.0;
-  count: number | 0.0;
+  count: number | 0;
   children: InventoryItem[];
 }
 export interface InventoryItem {
@@ -20,6 +20,7 @@ export interface InventoryItem {
   invsn: any;
   invpool: string | undefined;
   I_TOTAL_PRICE: number | 0.0;
+  id?: string;
 }
 export class InventoryGroupItemElement implements InventoryGroupItem {
   invtype: any;
@@ -27,17 +28,21 @@ export class InventoryGroupItemElement implements InventoryGroupItem {
   totalCharges: number = 0.0;
   count: number = 0.0;
   children: InventoryItem[] = [];
+  id: string;
 
-  constructor(invtype: string) {
+  constructor(invtype: string, id: string) {
     this.invtype = invtype;
     this.accText = "Grouped Element of " + invtype;
+    this.id = id;
+    this.count = 0;
   }
 
   addElement(newChild: InventoryItem) {
+    newChild.id = "" + this.id + ":" + (+this.count + 1);
     this.children.push(newChild);
     this.count = this.children.length;
     let sum = 0;
-    this.children.forEach((el) => (sum += el.I_TOTAL_PRICE));
+    this.children.forEach((el) => (sum += +el.I_TOTAL_PRICE));
     this.totalCharges = sum;
   }
 }
@@ -50,6 +55,7 @@ export class InventoryItemElement implements InventoryItem {
   invsn: any;
   invpool: string | undefined;
   I_TOTAL_PRICE: number = 0.0;
+  id?: string;
 
   constructor(invpool: string, inventory_model?: any, invsn?: string) {
     this.inventory_model = inventory_model;
@@ -152,13 +158,18 @@ export class Inventory {
     var groupElement: InventoryGroupItemElement[] = [];
     var previousInvtype: string = "";
     let currentGroupedElement: InventoryGroupItemElement;
+    let groupCount = 0;
     data_to_group.sort(this.compare).forEach((element, key, arr) => {
       if (previousInvtype != element.invtype) {
         previousInvtype = element.invtype;
         if (currentGroupedElement != null) {
           groupElement.push(currentGroupedElement);
         }
-        currentGroupedElement = new InventoryGroupItemElement(element.invtype);
+        groupCount += 1;
+        currentGroupedElement = new InventoryGroupItemElement(
+          element.invtype,
+          "" + groupCount
+        );
       }
       currentGroupedElement.addElement(element);
       if (Object.is(arr.length - 1, key)) {
@@ -368,6 +379,7 @@ export abstract class OFSPlugin {
     console.log(`${this._tag}: Empty init method`);
   }
 
+  
   public close(data?: any): void {
     this.sendMessage(Method.Close, data);
   }

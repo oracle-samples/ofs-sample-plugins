@@ -9,6 +9,7 @@ import { KeySetImpl } from "ojs/ojkeyset";
 import * as groupData from "text!./data/groupdatainventory.json";
 
 type TableItem = {
+  id: string;
   count?: number;
   accText?: string;
   inv_aid?: number | null;
@@ -101,13 +102,13 @@ const columnsDef: TableProps["columns"] = [
 ];
 
 const rowItemTemplate = (
-  row: ojTable.RowTemplateContext<TableItem["invid"], TableItem>
+  row: ojTable.RowTemplateContext<TableItem["id"], TableItem>
 ) => {
   return (
     <tr>
       {row.item.metadata.treeDepth === 0 && (
         <td
-          colSpan={6}
+          colSpan={8}
           aria-label={row.item.data.accText}
           class="oj-sm-padding-0-start"
         >
@@ -175,14 +176,12 @@ const rowItemTemplate = (
 };
 
 const GroupByTable = (props: Props) => {
-  const dataArray = JSON.parse(groupData);
-  //const dataArray = props.tableDataArray;
-  const dataprovider: MutableArrayTreeDataProvider<
-    TableItem["invid"],
-    TableItem
-  > = new MutableArrayTreeDataProvider(dataArray, "invid", {
-    keyAttributeScope: "global",
-  });
+  //const dataArray = JSON.parse(groupData);
+  const dataArray = props.tableDataArray;
+  const dataprovider: MutableArrayTreeDataProvider<TableItem["id"], TableItem> =
+    new MutableArrayTreeDataProvider(dataArray, "id", {
+      keyAttributeScope: "global",
+    });
 
   const expanded = new KeySetImpl(["3"]);
   const flattenedTreeDataProviderView = new FlattenedTreeDataProviderView(
@@ -192,14 +191,14 @@ const GroupByTable = (props: Props) => {
     }
   );
 
-  const setRowSelectable = (item: Item<TableItem["invid"], TableItem>) => {
+  const setRowSelectable = (item: Item<TableItem["id"], TableItem>) => {
     if (item.metadata.treeDepth === 0) {
       return "off";
     }
     return "on";
   };
 
-  const setRowSticky = (item: Item<TableItem["invid"], TableItem>) => {
+  const setRowSticky = (item: Item<TableItem["id"], TableItem>) => {
     if (item.metadata.treeDepth === 0) {
       return "on";
     }
