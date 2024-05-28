@@ -1,0 +1,5 @@
+build:
+    ojet build --release
+	
+deploy: 
+	pluginmgr upload FieldQuoting --credentials $HOME/.ssh/credentials.json

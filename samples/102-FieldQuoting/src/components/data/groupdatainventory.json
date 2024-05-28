@@ -1,0 +1,85 @@
+[
+  {
+    "totalCharges": 14,
+    "count": 1,
+    "children": [
+      {
+        "inventory_model": null,
+        "part_item_desc": null,
+        "I_TOTAL_PRICE": "14.00",
+        "invtype": "expense",
+        "labor_start_time": null,
+        "labor_end_time": null,
+        "expense_currency_code": "USD",
+        "expense_amount": "14",
+        "invid": "21260520",
+        "invpool": "install",
+        "inv_aid": 3954799,
+        "id": "1:1"
+      }
+    ],
+    "invtype": "expense",
+    "accText": "Grouped Element of expense",
+    "id": "1"
+  },
+  {
+    "totalCharges": 237.15,
+    "count": 1,
+    "children": [
+      {
+        "inventory_model": null,
+        "part_item_desc": null,
+        "I_TOTAL_PRICE": "237.15",
+        "invtype": "labor",
+        "labor_start_time": "T12:55:00",
+        "labor_end_time": "T13:22:00",
+        "expense_currency_code": null,
+        "expense_amount": null,
+        "invid": "21260519",
+        "invpool": "install",
+        "inv_aid": 3954799,
+        "id": "2:1"
+      }
+    ],
+    "invtype": "labor",
+    "accText": "Grouped Element of labor",
+    "id": "2"
+  },
+  {
+    "totalCharges": 821,
+    "count": 2,
+    "children": [
+      {
+        "inventory_model": null,
+        "part_item_desc": "Running belt, 60x20, Multi-ply, Pre-lubricated",
+        "I_TOTAL_PRICE": "821.00",
+        "invtype": "part",
+        "labor_start_time": null,
+        "labor_end_time": null,
+        "expense_currency_code": null,
+        "expense_amount": null,
+        "invid": "21260521",
+        "invpool": "install",
+        "inv_aid": 3954799,
+        "id": "3:1"
+      },
+      {
+        "inventory_model": null,
+        "part_item_desc": "Treadmill Fuse 002",
+        "I_TOTAL_PRICE": null,
+        "invtype": "part",
+        "labor_start_time": null,
+        "labor_end_time": null,
+        "expense_currency_code": null,
+        "expense_amount": null,
+        "invid": "21260522",
+        "invpool": "install",
+        "inv_aid": 3954799,
+        "id": "3:2"
+      }
+    ],
+    "invtype": "part",
+    "accText": "Grouped Element of part",
+    "id": "3"
+  }
+]

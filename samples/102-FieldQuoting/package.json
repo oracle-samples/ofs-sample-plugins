@@ -1,0 +1,24 @@
+{
+  "name": "FieldQuoting",
+  "version": "1.0.0",
+  "description": "An Oracle JavaScript Extension Toolkit(JET) web app",
+  "dependencies": {
+    "@oracle/oraclejet": "~15.1.0",
+    "@oracle/oraclejet-core-pack": "~15.1.0"
+  },
+  "devDependencies": {
+    "@oracle/ojet-cli": "~15.1.0",
+    "@types/node": "^20.11.10",
+    "extract-zip": "^1.7.0",
+    "fs-extra": "^8.1.0",
+    "glob": "7.2.0",
+    "typescript": "5.0.4",
+    "underscore": "^1.10.2",
+    "yargs-parser": "13.1.2",
+    "@ofs-users/proxy": "^1.8.3"
+  },
+  "engines": {
+    "node": ">=12.21.0"
+  },
+  "private": true
+}
