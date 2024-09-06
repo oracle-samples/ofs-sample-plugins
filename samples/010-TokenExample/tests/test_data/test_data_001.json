@@ -1,0 +1,383 @@
+{
+    "apiVersion": 1,
+    "method": "open",
+    "entity": "activity",
+    "user": {
+        "allow_desktop_notifications": 0,
+        "allow_vibration": 0,
+        "design_theme": 12,
+        "format": {
+            "date": "m/d/y",
+            "long_date": "l, F jS, Y",
+            "time": "h:i A",
+            "datetime": "m/d/y h:i A"
+        },
+        "providers": [
+            2
+        ],
+        "sound_theme": 0,
+        "su_zid": 2,
+        "uid": 2315,
+        "ulanguage": 1,
+        "ulogin": "admin",
+        "uname": "Admin",
+        "week_start": 1
+    },
+    "resource": {
+        "currentTime": "2023-01-26 13:24:18",
+        "deviceUTCDiffSeconds": 0,
+        "timeZoneDiffSeconds": -19860
+    },
+    "team": {
+        "teamMembers": {},
+        "assistingTo": {},
+        "assistingMe": []
+    },
+    "queue": {
+        "date": "2023-01-26",
+        "status": "activated",
+        "isActual": true,
+        "activationTime": "2023-01-26 06:52:08"
+    },
+    "activity": {
+        "aid": "3954799"
+    },
+    "activityList": {
+        "3954794": {
+            "aid": "3954794"
+        },
+        "3954795": {
+            "aid": "3954795"
+        },
+        "3954796": {
+            "aid": "3954796"
+        },
+        "3954797": {
+            "aid": "3954797"
+        },
+        "3954798": {
+            "aid": "3954798"
+        },
+        "3954799": {
+            "aid": "3954799"
+        },
+        "3954800": {
+            "aid": "3954800"
+        },
+        "3954888": {
+            "aid": "3954888"
+        },
+        "3955794": {
+            "aid": "3955794"
+        },
+        "3955795": {
+            "aid": "3955795"
+        },
+        "3969605": {
+            "aid": "3969605"
+        },
+        "3974302": {
+            "aid": "3974302"
+        },
+        "4224288": {
+            "aid": "4224288"
+        }
+    },
+    "inventoryList": {
+        "20993705": {
+            "invpool": "customer",
+            "invtype": "RH_HW",
+            "invid": "20993705",
+            "inventory_model": null,
+            "part_item_desc": null,
+            "invsn": "SABDKNDVS",
+            "quantity": 1,
+            "inv_aid": 3954794
+        },
+        "20993974": {
+            "invpool": "customer",
+            "invtype": "RH_WH",
+            "invid": "20993974",
+            "inventory_model": null,
+            "part_item_desc": null,
+            "invsn": "WR72151FB125003",
+            "quantity": 1,
+            "inv_aid": 3954794
+        },
+        "20994331": {
+            "invpool": "customer",
+            "invtype": "TR_AC",
+            "invid": "20994331",
+            "inventory_model": null,
+            "part_item_desc": null,
+            "invsn": "0007559212",
+            "quantity": 1,
+            "inv_aid": 3954794
+        },
+        "20995002": {
+            "invpool": "customer",
+            "invtype": "RH_HW",
+            "invid": "20995002",
+            "inventory_model": null,
+            "part_item_desc": null,
+            "invsn": "SABKGCRDF",
+            "quantity": 1,
+            "inv_aid": 3954794
+        },
+        "20996182": {
+            "invpool": "customer",
+            "invtype": "RH_HW",
+            "invid": "20996182",
+            "inventory_model": null,
+            "part_item_desc": null,
+            "invsn": "58ABME39T093226",
+            "quantity": 1,
+            "inv_aid": 3954795
+        },
+        "20996183": {
+            "invpool": "customer",
+            "invtype": "RH_HW",
+            "invid": "20996183",
+            "inventory_model": null,
+            "part_item_desc": null,
+            "invsn": "PZAL04B88",
+            "quantity": 1,
+            "inv_aid": 3954795
+        },
+        "20996184": {
+            "invpool": "customer",
+            "invtype": "TR_AC",
+            "invid": "20996184",
+            "inventory_model": null,
+            "part_item_desc": null,
+            "invsn": "0006757102",
+            "quantity": 1,
+            "inv_aid": 3954795
+        },
+        "20996185": {
+            "invpool": "customer",
+            "invtype": "RH_HW",
+            "invid": "20996185",
+            "inventory_model": null,
+            "part_item_desc": null,
+            "invsn": "SABBRVZQS",
+            "quantity": 1,
+            "inv_aid": 3954796
+        },
+        "20996186": {
+            "invpool": "customer",
+            "invtype": "TR_AC",
+            "invid": "20996186",
+            "inventory_model": null,
+            "part_item_desc": null,
+            "invsn": "0002506742",
+            "quantity": 1,
+            "inv_aid": 3954796
+        },
+        "20996187": {
+            "invpool": "customer",
+            "invtype": "RH_WH",
+            "invid": "20996187",
+            "inventory_model": null,
+            "part_item_desc": null,
+            "invsn": "408180308479",
+            "quantity": 1,
+            "inv_aid": 3954796
+        },
+        "20996188": {
+            "invpool": "customer",
+            "invtype": "RH_WH",
+            "invid": "20996188",
+            "inventory_model": null,
+            "part_item_desc": null,
+            "invsn": "HRSC82171",
+            "quantity": 1,
+            "inv_aid": 3954797
+        },
+        "20996189": {
+            "invpool": "customer",
+            "invtype": "RH_HW",
+            "invid": "20996189",
+            "inventory_model": null,
+            "part_item_desc": null,
+            "invsn": "SABJWJHDB",
+            "quantity": 1,
+            "inv_aid": 3954797
+        },
+        "20996190": {
+            "invpool": "customer",
+            "invtype": "RH_HW",
+            "invid": "20996190",
+            "inventory_model": null,
+            "part_item_desc": null,
+            "invsn": "PMAI0867A",
+            "quantity": 1,
+            "inv_aid": 3954798
+        },
+        "20996191": {
+            "invpool": "customer",
+            "invtype": "RH_WH",
+            "invid": "20996191",
+            "inventory_model": null,
+            "part_item_desc": null,
+            "invsn": "HRSC95188",
+            "quantity": 1,
+            "inv_aid": 3954798
+        },
+        "20996197": {
+            "invpool": "customer",
+            "invtype": "RH_HW",
+            "invid": "20996197",
+            "inventory_model": "RH40G",
+            "part_item_desc": "40 Gal Rheem H/W Heater",
+            "invsn": "0006804982",
+            "quantity": 1,
+            "inv_aid": 3954800
+        },
+        "21258468": {
+            "invpool": "provider",
+            "invtype": "part",
+            "invid": "21258468",
+            "inventory_model": null,
+            "part_item_desc": "Goodwin Defrost Relay 24V",
+            "invsn": null,
+            "quantity": 15,
+            "inv_aid": null
+        },
+        "21258469": {
+            "invpool": "provider",
+            "invtype": "part",
+            "invid": "21258469",
+            "inventory_model": null,
+            "part_item_desc": "Dakota 24v Relay, Copper Coil",
+            "invsn": null,
+            "quantity": 4,
+            "inv_aid": null
+        },
+        "21258470": {
+            "invpool": "provider",
+            "invtype": "part",
+            "invid": "21258470",
+            "inventory_model": null,
+            "part_item_desc": "Lannex Transformer 460/600V 60Hz",
+            "invsn": null,
+            "quantity": 6,
+            "inv_aid": null
+        },
+        "21258487": {
+            "invpool": "provider",
+            "invtype": "part",
+            "invid": "21258487",
+            "inventory_model": null,
+            "part_item_desc": "Tilson Programmable Thermostat, Green",
+            "invsn": null,
+            "quantity": 5,
+            "inv_aid": null
+        },
+        "21258488": {
+            "invpool": "provider",
+            "invtype": "part",
+            "invid": "21258488",
+            "inventory_model": null,
+            "part_item_desc": "Tilson Programmable Thermostat, Blue",
+            "invsn": null,
+            "quantity": 6,
+            "inv_aid": null
+        },
+        "21258729": {
+            "invpool": "customer",
+            "invtype": "RH_HW",
+            "invid": "21258729",
+            "inventory_model": "RH40G",
+            "part_item_desc": "40 Gal Rheem H/W Heater",
+            "invsn": "SABGVRWPX",
+            "quantity": 1,
+            "inv_aid": 3954799
+        },
+        "21258730": {
+            "invpool": "customer",
+            "invtype": "FILTER",
+            "invid": "21258730",
+            "inventory_model": "AF001",
+            "part_item_desc": "Universal Air Filter 16x25x2",
+            "invsn": null,
+            "quantity": 2,
+            "inv_aid": 3954799
+        },
+        "21258731": {
+            "invpool": "customer",
+            "invtype": "FILTER",
+            "invid": "21258731",
+            "inventory_model": "AF001",
+            "part_item_desc": "Universal Air Filter 16x25x2",
+            "invsn": null,
+            "quantity": 2,
+            "inv_aid": 3954800
+        },
+        "21258732": {
+            "invpool": "customer",
+            "invtype": "RH_HW",
+            "invid": "21258732",
+            "inventory_model": "RH40G",
+            "part_item_desc": "40 Gal Rheem H/W Heater",
+            "invsn": "137165120",
+            "quantity": 1,
+            "inv_aid": 3954888
+        },
+        "21258733": {
+            "invpool": "customer",
+            "invtype": "FILTER",
+            "invid": "21258733",
+            "inventory_model": "AF001",
+            "part_item_desc": "Universal Air Filter 16x25x2",
+            "invsn": null,
+            "quantity": 2,
+            "inv_aid": 3954888
+        },
+        "21258882": {
+            "invpool": "install",
+            "invtype": "part",
+            "invid": "21258882",
+            "inventory_model": null,
+            "part_item_desc": "Goodwin Defrost Relay 24V",
+            "invsn": null,
+            "quantity": 10,
+            "inv_aid": 3954799
+        },
+        "21258884": {
+            "invpool": "install",
+            "invtype": "modem",
+            "invid": "21258884",
+            "inventory_model": null,
+            "part_item_desc": "Modem",
+            "invsn": "001002003",
+            "inv_aid": 3954799
+        },
+        "21258883": {
+            "invpool": "install",
+            "invtype": "part",
+            "invid": "21258883",
+            "inventory_model": null,
+            "part_item_desc": "Goodwin Defrost Relay 24V",
+            "invsn": null,
+            "quantity": 10,
+            "inv_aid": 3954797
+        }
+    },
+    "buttonId": "35182",
+    "securedData": {
+        "test": "less"
+    },
+    "openParams": {},
+    "allowedProcedures": {
+        "openLink": true,
+        "searchParts": true,
+        "searchPartsContinue": true,
+        "getParts": true,
+        "getPartsCatalogsStructure": true,
+        "print": true,
+        "share": true,
+        "updateIconData": true,
+        "updateButtonsIconData": true
+    }
+}
