@@ -30,7 +30,7 @@
   },
   "dependencies": {
     "@ofs-users/plugin": "^1.1.0",
-    "@ofs-users/proxy": "^1.8.3",
+    "@ofs-users/proxy": "^1.9.0",
     "buffer": "^6.0.3"
   }
 }
