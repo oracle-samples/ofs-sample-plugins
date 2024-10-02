@@ -54,10 +54,9 @@ export class CustomPlugin extends OFSPlugin {
             );
             var activityData: OFSCustomActivityResponseDetails =
                 activityResponse.data as OFSCustomActivityResponseDetails;
-            var timeDeliveredStart = activityData.timeDeliveredStart;
-            var timeDeliveredEnd = activityData.timeDeliveredEnd;
-            var startTime = activityData.startTime;
-
+            console.debug(
+                `${this.tag} - ${action}: We are going to process the action`
+            );
             if (action == "UNPIN") {
                 var activityDataToUpdate = {
                     aid: data.activity.aid,
@@ -65,11 +64,25 @@ export class CustomPlugin extends OFSPlugin {
                     timeDeliveredEnd: "",
                     A_APPOINTMENT_TIME: "",
                 };
+                console.debug(
+                    `${
+                        this.tag
+                    } - ${action}: Updating activity with : ${JSON.stringify(
+                        activityDataToUpdate
+                    )}`
+                );
                 var result = await this.proxy.updateActivity(
                     activityData.activityId,
-                    activityData
+                    activityDataToUpdate
                 );
-                console.log("Update result:", result);
+                console.debug(
+                    `${
+                        this.tag
+                    } - ${action}: Updated activity result : ${JSON.stringify(
+                        result
+                    )}`
+                );
+                this.close();
             } else if (action == "PIN") {
                 var appt_time = document.getElementById(
                     "appt-time"
@@ -104,7 +117,7 @@ export class CustomPlugin extends OFSPlugin {
                         console.debug(
                             `${
                                 this.tag
-                            } : Updating activity with : ${JSON.stringify(
+                            } - ${action}: Updating activity with : ${JSON.stringify(
                                 activityDataToUpdate
                             )}`
                         );
@@ -115,7 +128,7 @@ export class CustomPlugin extends OFSPlugin {
                         console.debug(
                             `${
                                 this.tag
-                            } : Updated activity result : ${JSON.stringify(
+                            } - ${action}: Updated activity result : ${JSON.stringify(
                                 result
                             )}`
                         );

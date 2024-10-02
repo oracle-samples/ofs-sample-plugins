@@ -2,7 +2,8 @@
 
 ## Description
 
-This plugin will allos the user to set the Communicated Window Start and End based on an Appointment Value
+This plugin will allow the user to set the Communicated Window Start and End based on an Appointment Value.
+Setting a naroww Communicated Window Start and End is the best way to Lock an activity to an ETA with the current functionality.
 
 ## Parameters
 
@@ -17,7 +18,7 @@ none
 
 **Open Parameters**
 
-action : PIN / UNPIN. It will define if I want to open the PIN activity action or if I want to UNPIN it.
+pinAction : PIN / UNPIN. It will define if I want to open the PIN activity action or if I want to UNPIN it.
 minutesThreshold : number of minutes I want to set between Communicated Window Start and End
 
 **Properties needed**
@@ -27,7 +28,7 @@ none
 ## How to use
 
 Add this plugin as part of the Activity Details Screen
-Make the Unpin option visible only when the value A_APPOINTMENT_TIME is not null
+Make the Unpin option visible only when the value A_APPOINTMENT_TIME is not null and the activity status is pending.
 
 ## For development
 
