@@ -1,12 +1,15 @@
-# TokenExample
+# PinActivity
 
 ## Description
 
-This plugin as an example on how to use applications to access OFS APIs
+This plugin will allos the user to set the Communicated Window Start and End based on an Appointment Value
 
 ## Parameters
 
-none
+A_APPOINTMENT_TIME
+ETA
+length
+date
 
 **Secure Parameters**
 
@@ -14,7 +17,8 @@ none
 
 **Open Parameters**
 
-none
+action : PIN / UNPIN. It will define if I want to open the PIN activity action or if I want to UNPIN it.
+minutesThreshold : number of minutes I want to set between Communicated Window Start and End
 
 **Properties needed**
 
@@ -22,12 +26,8 @@ none
 
 ## How to use
 
-Add this plugin as part of any screen.
-Add an application as part of the plugin configuration.
-Ensure that the application has access to the getSubscriptions API.
-If the application has been properly configured, it will return a popup window with the result of the getSubscriptions API
-If the application is missing, it will return an alert indicating that the proxy has not been created.
-If the application doesn't have the right permission configured, it will show the response in the popup window.
+Add this plugin as part of the Activity Details Screen
+Make the Unpin option visible only when the value A_APPOINTMENT_TIME is not null
 
 ## For development
 
