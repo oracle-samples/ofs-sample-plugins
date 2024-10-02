@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html manifest="manifest.appcache">
+    <head>
+        <meta charset="utf-8" />
+        <title>Base Plugin</title>
+        <script src="plugin.js"></script>
+        <script src="main.js" type="module"></script>
+    </head>
+    <body id="body">
+        <div display="none" id="show-data"></div>
+        <hr />
+        <div display="none" id="appt-data">
+            <label for="appt-time">Choose an appointment time: </label>
+            <input id="appt-time" type="time" name="appt-time" value="13:30" />
+            <hr />
+        </div>
+        <footer style="padding: 10px">
+            <div>
+                <button id="cancel_button" type="reset">Cancel</button>
+                <button id="submit_button" type="submit">Submit</button>
+            </div>
+        </footer>
+    </body>
+</html>
