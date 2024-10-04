@@ -151,13 +151,9 @@ export class CustomPlugin extends OFSPlugin {
 
     // additional function
     generateTimeWindowStart(startTime: string, startDate: string) {
-        console.log(
-            "info",
-            "Generating START SLA { startTime : " +
-                startTime +
-                "},{ startDate :" +
-                startDate +
-                "}"
+        console.debug(
+            `${this.tag} - Generating Communicated Window Start { startTime : ${startTime} },{ startDate : ${startDate}} 
+            `
         );
         var a = startTime.split(":"); // split it at the colons
         // This is not required as the appointment time will be in 24 hours format
@@ -188,15 +184,9 @@ export class CustomPlugin extends OFSPlugin {
         return newSlaStart;
     }
     generateTimeWindowEnd(endTime: string, endDate: string, minutes: number) {
-        console.log(
-            "info",
-            "Generating END SLA { endTime : " +
-                endTime +
-                "},{ endDate :" +
-                endDate +
-                "},{ minutes :" +
-                minutes +
-                "}"
+        console.debug(
+            `${this.tag} - Generating Communicated Window End { endTime : ${endTime} },{ endDate : ${endDate}} , { minutes : ${minutes}}
+            `
         );
         var a = endTime.split(":"); // split it at the colons
         // Get start time and give 15 minutes of margin
@@ -215,14 +205,13 @@ export class CustomPlugin extends OFSPlugin {
                 endHour = endHour - 12;
             }
         }
-        // console.log('info', "HOUR and MINUTES Before" + endHour + ":" + endMinute);
-        var result: number = endMinute + minutes;
+
+        var result: number = +endMinute + +minutes;
         if (result < 60) {
             endMinute = result;
         } else {
             endMinute = result % 60;
             endHour = endHour + Math.floor(result / 60);
-            // console.log('info', "HOUR and MINUTES After" + endHour + ":" + endMinute);
             if (endHour > 23) {
                 endHour = endHour % 24;
                 // TODO : Correct date to date - 1
@@ -243,10 +232,6 @@ export class CustomPlugin extends OFSPlugin {
                 console.log("info", "Date After" + endDate);
             }
         }
-        console.log(
-            "info",
-            "HOUR and MINUTES After" + endHour + ":" + endMinute
-        );
         var newSlaEnd =
             endDate +
             " " +
