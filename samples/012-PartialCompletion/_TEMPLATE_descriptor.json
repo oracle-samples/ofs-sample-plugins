@@ -1,0 +1,13 @@
+{
+    "properties": {
+        "activity": [
+            "aid"
+        ],
+        "provider": []
+    },
+    "securedParams": [
+        {
+            "name": "test02"
+        }
+    ]
+}
