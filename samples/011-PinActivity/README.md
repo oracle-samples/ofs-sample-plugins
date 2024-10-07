@@ -27,7 +27,8 @@ none
 
 ## How to use
 
-Add this plugin as part of the Activity Details Screen
+Include an applicaton with access to OFS Core Activity API in the Plugin.
+Add this plugin as part of the Activity Details Screen.
 Make the Unpin option visible only when the value A_APPOINTMENT_TIME is not null and the activity status is pending.
 
 ## For development
