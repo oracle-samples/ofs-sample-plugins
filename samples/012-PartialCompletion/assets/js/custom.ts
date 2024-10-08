@@ -117,6 +117,7 @@ export class CustomPlugin extends OFSPlugin {
         };
         var dataToSend = {
             activity: activityToUpdate,
+            backScreen: "activity_list",
             //   wakeupNeeded: true,
             //   wakeOnEvents: {
             //       timer: { wakeupDelay: 10, sleepTimeout: 1800 },
