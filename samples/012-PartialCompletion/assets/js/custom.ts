@@ -4,7 +4,7 @@
  */
 
 import { OFSPlugin, OFSMessage, OFSOpenMessage } from "@ofs-users/plugin";
-import { OFS, OFSResponse } from "@ofs-users/proxy";
+//import { OFS, OFSResponse } from "@ofs-users/proxy";
 
 class OFSCustomOpenMessage extends OFSOpenMessage {
     inventoryList: any;
@@ -127,7 +127,7 @@ export class CustomPlugin extends OFSPlugin {
     }
     async make_non_schedule(data: any) {
         // This section is not working so it is not used at this moment
-        let dataToMove = {
+        /* let dataToMove = {
             setDate: {
                 date: null,
             },
@@ -147,12 +147,10 @@ export class CustomPlugin extends OFSPlugin {
         } else {
             console.error(`${this.tag} Proxy is not available`);
         }
-        this.close();
+        this.close(); */
+        throw new Error("Method not implemented.");
     }
-    async wakeup(data: OFSMessage) {
-        console.debug(`${this.tag} : Wake up message`);
-        this.make_non_schedule(data);
-    }
+
     async updateResult(data: OFSOpenMessage) {
         console.debug(`${this.tag} : Action ${globalThis.actionAtReturn}`);
         var plugin = this;
