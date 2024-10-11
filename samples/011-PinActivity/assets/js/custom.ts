@@ -60,8 +60,8 @@ export class CustomPlugin extends OFSPlugin {
             if (action == "UNPIN") {
                 var activityDataToUpdate = {
                     aid: data.activity.aid,
-                    timeDeliveredStart: "",
-                    timeDeliveredEnd: "",
+                    timeDeliveredStart: null,
+                    timeDeliveredEnd: null,
                     A_APPOINTMENT_TIME: "",
                 };
                 console.debug(
