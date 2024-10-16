@@ -10,6 +10,9 @@ import {
     OFSCallProcedureResultMessage,
 } from "@ofs-users/plugin";
 import {
+    OFSTimeslotsResponse,
+    OFSTimeslotsList,
+    OFSTimeslot,
     OFSActivityResponse,
     ActivityResponse,
     OFSSubscriptionResponse,
@@ -27,10 +30,27 @@ class OFSCustomActivityResponseDetails implements ActivityResponse {
     timeDeliveredStart: any = null;
     timeDeliveredEnd: any = null;
     startTime: any = null;
+    date: any = null;
 }
 
 class OFSCustomInitMessage extends OFSMessage {
     applications: any;
+}
+
+enum pinActionValues {
+    PIN = "PIN",
+    UNPIN = "UNPIN",
+}
+
+enum pluginModeValues {
+    BUTTON = "BUTTON",
+    SCREEN = "SCREEN",
+}
+
+enum appointmentOriginValues {
+    A_APPOINTMENT_TIME = "A_APPOINTMENT_TIME",
+    CURRENT = "CURRENT",
+    TIMESLOT = "TIMESLOT",
 }
 export class CustomPlugin extends OFSPlugin {
     async open(data: OFSCustomOpenMessage) {
@@ -41,13 +61,22 @@ export class CustomPlugin extends OFSPlugin {
                 "info",
                 "PIN ACTIVITY " + JSON.stringify(data, undefined, 4)
             );
-            var action = "PIN";
+            var action = pinActionValues.PIN;
+            var minutesThreshold: number = 15;
+            var pluginMode: string = pluginModeValues.SCREEN;
+            var appointmentOrigin: string =
+                appointmentOriginValues.A_APPOINTMENT_TIME;
             if ("pinAction" in data.openParams) {
                 action = data.openParams.pinAction;
             }
-            var minutesThreshold: number = 15;
             if ("minutesThreshold" in data.openParams) {
                 minutesThreshold = data.openParams.minutesThreshold;
+            }
+            if ("pluginMode" in data.openParams) {
+                pluginMode = data.openParams.pluginMode;
+            }
+            if ("appointmentOrigin" in data.openParams) {
+                appointmentOrigin = data.openParams.appointmentOrigin;
             }
             var activityResponse = await this.proxy.getActivityDetails(
                 data.activity.aid
@@ -57,7 +86,7 @@ export class CustomPlugin extends OFSPlugin {
             console.debug(
                 `${this.tag} - ${action}: We are going to process the action`
             );
-            if (action == "UNPIN") {
+            if (action == pinActionValues.UNPIN) {
                 var activityDataToUpdate = {
                     aid: data.activity.aid,
                     timeDeliveredStart: null,
@@ -83,57 +112,115 @@ export class CustomPlugin extends OFSPlugin {
                     )}`
                 );
                 this.close();
-            } else if (action == "PIN") {
-                var appt_time = document.getElementById(
-                    "appt-time"
-                ) as HTMLInputElement;
-                if (appt_time) {
-                    appt_time.value = data.activity.A_APPOINTMENT_TIME;
-                } else {
-                    console.error(
-                        "Element with id 'input_data' is not found or not an HTMLInputElement"
-                    );
-                }
-
-                // Set close button handler
-                const submit_button = document.getElementById("submit_button");
-                if (!!submit_button) {
-                    submit_button.onclick = async () => {
-                        var newWindowStart = this.generateTimeWindowStart(
-                            appt_time.value,
-                            data.activity.date
+            } else if (action == pinActionValues.PIN) {
+                if (pluginMode == pluginModeValues.SCREEN) {
+                    var appt_time = document.getElementById(
+                        "appt-time"
+                    ) as HTMLInputElement;
+                    if (appt_time) {
+                        appt_time.value = data.activity.A_APPOINTMENT_TIME;
+                    } else {
+                        console.error(
+                            "Element with id 'appt-time' is not found or not an HTMLInputElement"
                         );
-                        var newWindowend = this.generateTimeWindowEnd(
-                            appt_time.value,
-                            data.activity.date,
-                            minutesThreshold
-                        );
-                        var activityDataToUpdate = {
-                            aid: data.activity.aid,
-                            timeDeliveredStart: newWindowStart,
-                            timeDeliveredEnd: newWindowend,
-                            A_APPOINTMENT_TIME: appt_time.value,
+                    }
+                    // Set close button handler
+                    const submit_button =
+                        document.getElementById("submit_button");
+                    if (!!submit_button) {
+                        submit_button.onclick = async () => {
+                            this.setCommunicatedWindowByAppValue(
+                                appt_time.value,
+                                activityData,
+                                minutesThreshold
+                            );
+                            this.close();
                         };
-                        console.debug(
-                            `${
-                                this.tag
-                            } - ${action}: Updating activity with : ${JSON.stringify(
-                                activityDataToUpdate
-                            )}`
-                        );
-                        var result = await this.proxy.updateActivity(
-                            activityData.activityId,
-                            activityDataToUpdate
-                        );
-                        console.debug(
-                            `${
-                                this.tag
-                            } - ${action}: Updated activity result : ${JSON.stringify(
-                                result
-                            )}`
+                    }
+                } else if (pluginMode == pluginModeValues.BUTTON) {
+                    var appt_time_value: string = "";
+                    if (
+                        appointmentOrigin ==
+                        appointmentOriginValues.A_APPOINTMENT_TIME
+                    ) {
+                        if ("A_APPOINTMENT_TIME" in data.activity) {
+                            appt_time_value = data.activity.A_APPOINTMENT_TIME;
+                            this.setCommunicatedWindowByAppValue(
+                                appt_time_value,
+                                activityData,
+                                minutesThreshold
+                            );
+                            this.close();
+                        } else {
+                            alert(
+                                "When pluginMode is BUTTON and appointmentOrigin A_APPOINTMENT_TIME, this property is mandatory"
+                            );
+                            this.close();
+                        }
+                    } else if (
+                        appointmentOrigin == appointmentOriginValues.TIMESLOT
+                    ) {
+                        var timeslotResponse: OFSTimeslotsResponse =
+                            await this.proxy.getTimeslots();
+                        if (timeslotResponse.status != 200) {
+                            alert(
+                                `Error getting timeslots ${timeslotResponse.status} ${timeslotResponse.description}`
+                            );
+                            this.close();
+                        } else {
+                            console.debug(
+                                `${
+                                    this.tag
+                                } - : Timeslots response: ${JSON.stringify(
+                                    timeslotResponse
+                                )}`
+                            );
+                        }
+                        var timeslot: OFSTimeslotsList =
+                            timeslotResponse.data as OFSTimeslotsList;
+                        var timeslotList: OFSTimeslot[] = timeslot.items;
+                        if (timeslotList.length == 0) {
+                            alert("No timeslots available");
+                            this.close();
+                        }
+                        var timeslotLabel = data.activity.time_slot_label;
+                        var timeslotFound: OFSTimeslot | undefined =
+                            timeslotList.find(
+                                (timeslot) => timeslot.label == timeslotLabel
+                            );
+                        if (timeslotFound) {
+                            this.setCommunicatedWindowByAppValue(
+                                timeslotFound.timeStart,
+                                activityData,
+                                minutesThreshold
+                            );
+                            this.close();
+                        } else {
+                            alert(`Timeslot ${timeslotLabel} not found`);
+                            this.close();
+                        }
+                    } else if (
+                        appointmentOrigin == appointmentOriginValues.CURRENT
+                    ) {
+                        alert(`pluginMode ${pluginMode} not implemented yet`);
+                        this.close();
+                    } else {
+                        alert(
+                            `appointmentOrigin ${appointmentOrigin} is incorrect. Correct values TIMESLOT, CURRENT,A_APPOINTMENT_TIME`
                         );
                         this.close();
-                    };
+                    }
+                    this.setCommunicatedWindowByAppValue(
+                        appt_time_value,
+                        activityData,
+                        minutesThreshold
+                    );
+                    this.close();
+                } else {
+                    alert(
+                        `pluginMode ${pluginMode} is incorrect. Correct values ${pluginModeValues.SCREEN},${pluginModeValues.BUTTON}`
+                    );
+                    this.close();
                 }
             } else {
                 alert(
@@ -148,7 +235,51 @@ export class CustomPlugin extends OFSPlugin {
             this.close();
         }
     }
-
+    async updateCommunicatedWindow(
+        aid: number,
+        newWindowStart: string,
+        newWindowEnd: string,
+        appt_time_value: string
+    ) {
+        var activityDataToUpdate = {
+            aid: aid,
+            timeDeliveredStart: newWindowStart,
+            timeDeliveredEnd: newWindowEnd,
+            A_APPOINTMENT_TIME: appt_time_value,
+        };
+        console.debug(
+            `${this.tag} - : Updating activity with : ${JSON.stringify(
+                activityDataToUpdate
+            )}`
+        );
+        var result = await this.proxy.updateActivity(aid, activityDataToUpdate);
+        console.debug(
+            `${this.tag} - : Updated activity result : ${JSON.stringify(
+                result
+            )}`
+        );
+    }
+    setCommunicatedWindowByAppValue(
+        appt_time_value: string,
+        activity: OFSCustomActivityResponseDetails,
+        minutesThreshold: number
+    ) {
+        var newWindowStart = this.generateTimeWindowStart(
+            appt_time_value,
+            activity.date
+        );
+        var newWindowEnd = this.generateTimeWindowEnd(
+            appt_time_value,
+            activity.date,
+            minutesThreshold
+        );
+        this.updateCommunicatedWindow(
+            activity.activityId,
+            newWindowStart,
+            newWindowEnd,
+            appt_time_value
+        );
+    }
     // additional function
     generateTimeWindowStart(startTime: string, startDate: string) {
         console.debug(
