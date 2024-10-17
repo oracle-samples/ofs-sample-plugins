@@ -1,0 +1,2 @@
+deploy:
+    pluginmgr upload LockActivityETA --credentials $HOME/.ssh/credentials.json --descriptor plugin_descriptor.json

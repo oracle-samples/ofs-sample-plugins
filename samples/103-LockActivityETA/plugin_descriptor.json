@@ -1,0 +1,14 @@
+{
+    "id": "LockActivityETA",
+    "src_files": [
+        "web/index.html",
+        "web/index.js",
+        "web/bundle.js",
+        "web/main.js",
+        "web/styles/app.css"
+    ],
+    "properties": {
+        "activity": []
+    },
+    "securedParams": []
+}
