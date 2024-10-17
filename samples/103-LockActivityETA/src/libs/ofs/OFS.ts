@@ -3,7 +3,6 @@
  * Licensed under the Universal Permissive License (UPL), Version 1.0  as shown at https://oss.oracle.com/licenses/upl/
  */
 
-import { PathLike, readFileSync } from "fs";
 import {
     OFSActivityResponse,
     OFSCredentials,
@@ -519,25 +518,6 @@ export class OFS {
     async getUserDetails(uname: string): Promise<OFSResponse> {
         const partialURL = `/rest/ofscCore/v1/users/${uname}`;
         return this._get(partialURL);
-    }
-
-    // Metadata: Plugin Management
-    async importPlugins(file?: PathLike, data?: string): Promise<OFSResponse> {
-        const partialURL =
-            "/rest/ofscMetadata/v1/plugins/custom-actions/import";
-        var formData = new FormData();
-        if (file) {
-            var blob = new Blob([readFileSync(file)], { type: "text/xml" });
-
-            formData.append("pluginFile", blob, file.toString());
-        } else if (data) {
-            var blob = new Blob([data], { type: "text/xml" });
-            formData.append("pluginFile", blob, "plugin.xml");
-        } else {
-            throw "Must provide file or data";
-        }
-
-        return this._postMultiPart(partialURL, formData);
     }
 
     //Meta: Property Management

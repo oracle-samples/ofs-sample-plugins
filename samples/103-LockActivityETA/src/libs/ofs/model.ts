@@ -3,6 +3,8 @@
  * Licensed under the Universal Permissive License (UPL), Version 1.0  as shown at https://oss.oracle.com/licenses/upl/
  */
 
+import { off } from "process";
+
 export type OFSCredentials = {
     instance?: string;
     clientId?: string;

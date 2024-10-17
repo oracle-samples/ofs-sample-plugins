@@ -9,12 +9,13 @@ import { createContext } from "preact";
 import { useState, useContext } from "preact/hooks";
 import "oj-c/button";
 import { OFSOpenMessage, OFSPlugin } from "../libs/ofs/main";
-
 import {
     OFSTimeslotsResponse,
     OFSTimeslotsList,
     OFSTimeslot,
+    OFSActivityResponse,
     ActivityResponse,
+    OFSSubscriptionResponse,
 } from "../libs/ofs/OFS";
 
 class OFSCustomOpenMessage extends OFSOpenMessage {
@@ -56,10 +57,6 @@ export class CustomPlugin extends OFSPlugin {
         console.debug(`${this.tag} : OPEN: ${JSON.stringify(data)}`);
         var plugin = this;
         if (this.proxy) {
-            console.log(
-                "info",
-                "PIN ACTIVITY " + JSON.stringify(data, undefined, 4)
-            );
             var action = pinActionValues.PIN;
             var minutesThreshold: number = 15;
             var pluginMode: string = pluginModeValues.SCREEN;
@@ -83,7 +80,7 @@ export class CustomPlugin extends OFSPlugin {
             var activityData: OFSCustomActivityResponseDetails =
                 activityResponse.data as OFSCustomActivityResponseDetails;
             console.debug(
-                `${this.tag} - ${action}: We are going to process the action`
+                `${this.tag} We are going to process the action ${action} in mode  ${pluginMode} and appointmentOrigin ${appointmentOrigin}`
             );
             if (action == pinActionValues.UNPIN) {
                 var activityDataToUpdate = {
@@ -166,14 +163,6 @@ export class CustomPlugin extends OFSPlugin {
                                 `Error getting timeslots ${timeslotResponse.status} ${timeslotResponse.description}`
                             );
                             this.close();
-                        } else {
-                            console.debug(
-                                `${
-                                    this.tag
-                                } - : Timeslots response: ${JSON.stringify(
-                                    timeslotResponse
-                                )}`
-                            );
                         }
                         var timeslot: OFSTimeslotsList =
                             timeslotResponse.data as OFSTimeslotsList;
@@ -209,12 +198,6 @@ export class CustomPlugin extends OFSPlugin {
                         );
                         this.close();
                     }
-                    this.setCommunicatedWindowByAppValue(
-                        appt_time_value,
-                        activityData,
-                        minutesThreshold
-                    );
-                    this.close();
                 } else {
                     alert(
                         `pluginMode ${pluginMode} is incorrect. Correct values ${pluginModeValues.SCREEN},${pluginModeValues.BUTTON}`
