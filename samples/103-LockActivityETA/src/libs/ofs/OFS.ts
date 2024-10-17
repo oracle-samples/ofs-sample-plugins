@@ -3,6 +3,7 @@
  * Licensed under the Universal Permissive License (UPL), Version 1.0  as shown at https://oss.oracle.com/licenses/upl/
  */
 
+import { PathLike, readFileSync } from "fs";
 import {
     OFSActivityResponse,
     OFSCredentials,
@@ -12,8 +13,7 @@ import {
     OFSPropertyDetails,
     OFSPropertyListResponse,
     OFSGetPropertiesParams,
-    OFSGetCapacityAreasParams,
-    OFSGetQuotaParams,
+    OFSTimeslotsResponse,
 } from "./model";
 
 export * from "./model";
@@ -29,9 +29,13 @@ export class OFS {
     public set credentials(v: OFSCredentials) {
         this._credentials = v;
         this._hash = OFS.authenticateUser(v);
-        this._baseURL = new URL(
-            `https://${this.instance}.${OFS.DEFAULT_DOMAIN}`
-        );
+        if ("baseURL" in v && v.baseURL != "") {
+            this._baseURL = new URL(v.baseURL!);
+        } else {
+            this._baseURL = new URL(
+                `https://${this.instance}.${OFS.DEFAULT_DOMAIN}`
+            );
+        }
     }
 
     public get authorization(): string {
@@ -43,20 +47,24 @@ export class OFS {
     }
 
     public get instance(): string {
-        return this.credentials.instance;
+        return this.credentials.instance || "";
     }
-
+    public get baseURL(): string {
+        return this.credentials.baseURL || "";
+    }
     private static authenticateUser(credentials: OFSCredentials): string {
-        var token =
-            credentials.clientId +
-            "@" +
-            credentials.instance +
-            ":" +
-            credentials.clientSecret;
-        var encoder = new TextEncoder();
-        var data = Array.from(encoder.encode(token)); // Convert Uint8Array to array
-        var base64 = btoa(String.fromCharCode.apply(null, data));
-        return "Basic " + base64;
+        if ("token" in credentials && credentials.token != "") {
+            return "Bearer " + credentials.token;
+        } else {
+            var token =
+                credentials.clientId +
+                "@" +
+                credentials.instance +
+                ":" +
+                credentials.clientSecret;
+            var hash = Buffer.from(token).toString("base64");
+            return "Basic " + hash;
+        }
     }
 
     private _get(
@@ -65,7 +73,6 @@ export class OFS {
         extraHeaders: Headers = new Headers()
     ): Promise<OFSResponse> {
         var theURL = new URL(partialURL, this._baseURL);
-        console.log(`hello: showing the URL`, theURL, params, extraHeaders);
         if (params != undefined) {
             const urlSearchParams = new URLSearchParams(params);
             theURL.search = urlSearchParams.toString();
@@ -364,7 +371,47 @@ export class OFS {
         const partialURL = `/rest/ofscCore/v1/activities/${aid}`;
         return this._patch(partialURL, data);
     }
-
+    async moveActivity(aid: number, data: any): Promise<OFSResponse> {
+        return this._executeActivityAction(aid, data, "move");
+    }
+    async delayActivity(aid: number, data: any): Promise<OFSResponse> {
+        return this._executeActivityAction(aid, data, "delay");
+    }
+    async reopenActivity(aid: number, data: any): Promise<OFSResponse> {
+        return this._executeActivityAction(aid, data, "reopen");
+    }
+    async startActivity(aid: number, data: any): Promise<OFSResponse> {
+        return this._executeActivityAction(aid, data, "start");
+    }
+    async suspendActivity(aid: number, data: any): Promise<OFSResponse> {
+        return this._executeActivityAction(aid, data, "suspend");
+    }
+    async completeActivity(aid: number, data: any): Promise<OFSResponse> {
+        return this._executeActivityAction(aid, data, "complete");
+    }
+    async stopTravel(aid: number, data: any): Promise<OFSResponse> {
+        return this._executeActivityAction(aid, data, "stopTravel");
+    }
+    async cancelActivity(aid: number, data: any): Promise<OFSResponse> {
+        return this._executeActivityAction(aid, data, "cancel");
+    }
+    async startPrework(aid: number, data: any): Promise<OFSResponse> {
+        return this._executeActivityAction(aid, data, "startPrework");
+    }
+    async enrouteActivity(aid: number, data: any): Promise<OFSResponse> {
+        return this._executeActivityAction(aid, data, "enroute");
+    }
+    async notDoneActivity(aid: number, data: any): Promise<OFSResponse> {
+        return this._executeActivityAction(aid, data, "notDone");
+    }
+    private async _executeActivityAction(
+        aid: number,
+        data: any,
+        action: any
+    ): Promise<OFSResponse> {
+        const partialURL = `/rest/ofscCore/v1/activities/${aid}/custom-actions/${action}`;
+        return this._post(partialURL, data);
+    }
     async getActivityFilePropertyContent(
         aid: number,
         propertyLabel: string,
@@ -474,6 +521,25 @@ export class OFS {
         return this._get(partialURL);
     }
 
+    // Metadata: Plugin Management
+    async importPlugins(file?: PathLike, data?: string): Promise<OFSResponse> {
+        const partialURL =
+            "/rest/ofscMetadata/v1/plugins/custom-actions/import";
+        var formData = new FormData();
+        if (file) {
+            var blob = new Blob([readFileSync(file)], { type: "text/xml" });
+
+            formData.append("pluginFile", blob, file.toString());
+        } else if (data) {
+            var blob = new Blob([data], { type: "text/xml" });
+            formData.append("pluginFile", blob, "plugin.xml");
+        } else {
+            throw "Must provide file or data";
+        }
+
+        return this._postMultiPart(partialURL, formData);
+    }
+
     //Meta: Property Management
 
     async getProperties(
@@ -502,17 +568,9 @@ export class OFS {
         return this._patch(partialURL, data);
     }
 
-    // Meta: Capacity Areas
-    async getCapacityAreas(
-        params: OFSGetCapacityAreasParams = {}
-    ): Promise<OFSResponse> {
-        const partialURL = "/rest/ofscMetadata/v1/capacityAreas";
-        return this._get(partialURL, params);
-    }
-
-    // Capacity: Quota Management
-    async getQuota(params: OFSGetQuotaParams): Promise<OFSResponse> {
-        const partialURL = "/rest/ofscCapacity/v2/quota";
-        return this._get(partialURL, params);
+    //Meta: Timeslots
+    async getTimeslots(): Promise<OFSTimeslotsResponse> {
+        const partialURL = `/rest/ofscMetadata/v1/timeSlots`;
+        return this._get(partialURL);
     }
 }

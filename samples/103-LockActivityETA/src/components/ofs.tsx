@@ -9,18 +9,13 @@ import { createContext } from "preact";
 import { useState, useContext } from "preact/hooks";
 import "oj-c/button";
 import { OFSOpenMessage, OFSPlugin } from "../libs/ofs/main";
-import {
-    OFSMessage,
-    OFSCallProcedureResultMessage,
-} from "@ofs-users/plugin";
+
 import {
     OFSTimeslotsResponse,
     OFSTimeslotsList,
     OFSTimeslot,
-    OFSActivityResponse,
     ActivityResponse,
-    OFSSubscriptionResponse,
-} from "@ofs-users/proxy";
+} from "../libs/ofs/OFS";
 
 class OFSCustomOpenMessage extends OFSOpenMessage {
     activity: any;
@@ -35,10 +30,6 @@ class OFSCustomActivityResponseDetails implements ActivityResponse {
     timeDeliveredEnd: any = null;
     startTime: any = null;
     date: any = null;
-}
-
-class OFSCustomInitMessage extends OFSMessage {
-    applications: any;
 }
 
 enum pinActionValues {
@@ -388,7 +379,7 @@ export class CustomPlugin extends OFSPlugin {
     }
 }
 
-export const pluginContext = createContext(new CustomPlugin());
+export const pluginContext = createContext(new CustomPlugin("LockActivityETA"));
 
 export function OfsProxy() {
     const ofsPlugin = useContext(pluginContext);
@@ -397,7 +388,6 @@ export function OfsProxy() {
 
     return (
         <div>
-            <p>Hello world. Greetings from {data.user.uname}</p>
             <oj-c-button
                 id="close_button"
                 label="Close"

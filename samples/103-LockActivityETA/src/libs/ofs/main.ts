@@ -3,11 +3,11 @@
  * Licensed under the Universal Permissive License (UPL), Version 1.0  as shown at https://oss.oracle.com/licenses/upl/
  */
 
-import { OFS } from "./OFS";
+import { OFS, OFSCredentials } from "./OFS";
 
 export class OFSMessage {
     apiVersion: number = -1;
-    method: string = "noMethod";
+    method: string = "no method";
     securedData?: any;
     sendInitData?: boolean;
 
@@ -17,11 +17,8 @@ export class OFSMessage {
                 new OFSMessage(),
                 JSON.parse(str)
             ) as OFSMessage;
-        } catch (e) {
-            console.warn("Error parsing message", e);
-            var m = new OFSMessage();
-            m.method = "discard";
-            return m;
+        } catch (error) {
+            return new OFSMessage();
         }
     }
 }
@@ -34,18 +31,24 @@ export enum Method {
     Init = "init",
     Ready = "ready",
     InitEnd = "initEnd",
+    CallProcedureResult = "callProcedureResult",
+    CallProcedure = "callProcedure",
 }
 
-export class OFSUser {
-    uname: string = "";
-}
 export class OFSOpenMessage extends OFSMessage {
     entity: string | undefined;
-    user: OFSUser = new OFSUser();
-    activity?: any;
-    securedData?: any;
-    openParams?: any;
-    allowedProcedures?: any;
+}
+
+export class OFSInitMessage extends OFSMessage {
+    applications: any | undefined;
+}
+export class OFSInitMessage_applications {
+    type: string | undefined;
+    resourceUrl: string | undefined;
+}
+export class OFSCallProcedureResultMessage extends OFSMessage {
+    callId: string | undefined;
+    resultData: any | undefined;
 }
 
 export class OFSCloseMessage extends OFSMessage {
@@ -53,6 +56,10 @@ export class OFSCloseMessage extends OFSMessage {
     activity?: any;
 }
 
+declare global {
+    var callId: string;
+    var waitForProxy: boolean;
+}
 export abstract class OFSPlugin {
     private _proxy!: OFS;
     private _tag: string;
@@ -78,20 +85,44 @@ export abstract class OFSPlugin {
      * @param message Message received
      * @returns
      */
-    private _getWebMessage(message: MessageEvent): boolean {
+    private async _getWebMessage(message: MessageEvent): Promise<boolean> {
         console.log(`${this._tag}: Message received:`, message.data);
         console.log(`${this._tag}: Coming from ${message.origin}`);
+        // Validate that it is a valid OFS message
         var parsed_message = OFSMessage.parse(message.data);
-        this._storeCredentials(parsed_message);
+
         switch (parsed_message.method) {
             case "init":
+                this._storeInitData(parsed_message as OFSInitMessage);
                 this._init(parsed_message);
                 break;
             case "open":
+                globalThis.waitForProxy = false;
+                this._createProxy(parsed_message);
+                var iteration: number = 0;
+                while (globalThis.waitForProxy) {
+                    // I need to wait for the Proxy creation
+                    console.debug(
+                        `${this._tag}: Waiting for the Proxy creation`
+                    );
+                    await this._sleep(100);
+                    console.log("Slept for 100 ms");
+                    iteration++;
+                    if (iteration > 30) {
+                        console.error(`${this._tag}: Proxy creation problem`);
+                        globalThis.waitForProxy = false;
+                        break;
+                    }
+                }
                 this.open(parsed_message as OFSOpenMessage);
                 break;
             case "updateResult":
                 this.updateResult(parsed_message);
+                break;
+            case "callProcedureResult":
+                this._callProcedureResult(
+                    parsed_message as OFSCallProcedureResultMessage
+                );
                 break;
             case "wakeUp":
                 this.wakeup(parsed_message);
@@ -99,8 +130,8 @@ export abstract class OFSPlugin {
             case "error":
                 this.error(parsed_message);
                 break;
-            case "discard":
-                console.warn(parsed_message);
+            case "no method":
+                console.warn(`${this._tag}: Message discarded`);
                 break;
 
             default:
@@ -111,7 +142,6 @@ export abstract class OFSPlugin {
     }
 
     private async _init(message: OFSMessage) {
-        // Processing securedData variables
         this.init(message);
         var messageData: OFSMessage = {
             apiVersion: 1,
@@ -119,8 +149,54 @@ export abstract class OFSPlugin {
         };
         this._sendWebMessage(messageData);
     }
+    private _sleep(ms: number): Promise<void> {
+        return new Promise((resolve) => setTimeout(resolve, ms));
+    }
 
-    private _storeCredentials(message: OFSMessage) {
+    private _generateCallId(): string {
+        const characters =
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        let result = "";
+        const charactersLength = characters.length;
+        for (let i = 0; i < charactersLength; i++) {
+            result += characters.charAt(
+                Math.floor(Math.random() * charactersLength)
+            );
+        }
+        return result;
+    }
+    private _createProxy(message: OFSMessage) {
+        var applications = this.getInitProperty("applications");
+
+        if (applications != null) {
+            applications = JSON.parse(applications);
+            for (const [key, value] of Object.entries(applications)) {
+                var applicationKey: string = key;
+                var application: any = value as OFSInitMessage_applications;
+                if (application.type == "ofs") {
+                    this.storeInitProperty("baseURL", application.resourceUrl);
+                    var callId = this._generateCallId();
+                    globalThis.callId = callId;
+                    var callProcedureData = {
+                        callId: callId,
+                        procedure: "getAccessToken",
+                        params: {
+                            applicationKey: applicationKey,
+                        },
+                    };
+                    console.debug(
+                        `${
+                            this.tag
+                        }. I will request the Token forthe application ${applicationKey} with this message ${JSON.stringify(
+                            callProcedureData
+                        )}`
+                    );
+                    this.callProcedure(callProcedureData);
+                    globalThis.waitForProxy = true;
+                    return;
+                }
+            }
+        }
         if (message.securedData) {
             console.log(`${this._tag}: Processing`, message.securedData);
             // STEP 1: are we going to create a proxy?
@@ -137,7 +213,23 @@ export abstract class OFSPlugin {
             }
         }
     }
+    private _storeInitData(message: OFSInitMessage) {
+        if (message.applications) {
+            this.storeInitProperty(
+                "applications",
+                JSON.stringify(message.applications)
+            );
+        }
+    }
+    public storeInitProperty(property: string, data: any) {
+        console.debug(`${this.tag}.${property}: Storing ${property}`, data);
+        window.localStorage.setItem(`${this.tag}.${property}`, data);
+    }
 
+    public getInitProperty(property: string): any {
+        var data = window.localStorage.getItem(`${this.tag}.${property}`);
+        return data;
+    }
     private static _getOriginURL(url: string) {
         if (url != "") {
             if (url.indexOf("://") > -1) {
@@ -199,7 +291,9 @@ export abstract class OFSPlugin {
     public close(data?: any): void {
         this.sendMessage(Method.Close, data);
     }
-
+    public callProcedure(data?: any): void {
+        this.sendMessage(Method.CallProcedure, data);
+    }
     public update(data?: any): void {
         this.sendMessage(Method.Update, data);
     }
@@ -212,5 +306,51 @@ export abstract class OFSPlugin {
     }
     updateResult(parsed_message: OFSMessage) {
         throw new Error("UPDATERESULT Method not implemented.");
+    }
+    callProcedureResult(parsed_message: OFSCallProcedureResultMessage) {
+        throw new Error("CALLPROCEDURERESULT Method not implemented.");
+    }
+    private _callProcedureResult(
+        parsed_message: OFSCallProcedureResultMessage
+    ) {
+        if ((parsed_message.callId = globalThis.callId)) {
+            var baseURLOFS = this.getInitProperty("baseURL");
+            if ("resultData" in parsed_message) {
+                if (
+                    "status" in parsed_message.resultData &&
+                    parsed_message.resultData.status == "success"
+                ) {
+                    var OFSCredentials: OFSCredentials = {
+                        baseURL: baseURLOFS,
+                        token: parsed_message.resultData.token,
+                    };
+                    console.debug(
+                        `${
+                            this.tag
+                        }. I will create the proxy with this data ${JSON.stringify(
+                            OFSCredentials
+                        )}`
+                    );
+                    this._proxy = new OFS(OFSCredentials);
+                    globalThis.waitForProxy = false;
+                    return;
+                }
+            } else {
+                console.error(
+                    `${
+                        this.tag
+                    }. Problems processing the Token Response ${JSON.stringify(
+                        parsed_message
+                    )}`
+                );
+            }
+        } else {
+            console.debug(
+                `${this.tag}. CallId is not the one generated for getting the token '${globalThis.callId}' vs '${parsed_message.callId}'`
+            );
+            this.callProcedureResult(
+                parsed_message as OFSCallProcedureResultMessage
+            );
+        }
     }
 }

@@ -4,9 +4,11 @@
  */
 
 export type OFSCredentials = {
-    instance: string;
-    clientId: string;
-    clientSecret: string;
+    instance?: string;
+    clientId?: string;
+    clientSecret?: string;
+    token?: string;
+    baseURL?: string;
 };
 
 export interface OFSResponseInterface {
@@ -105,13 +107,26 @@ export interface OFSGetPropertiesParams {
     offset?: number;
     type?: number;
 }
-class OFSPropertyList {
+export class OFSPropertyList {
     items: OFSPropertyDetails[] = [];
     limit: number = 0;
     offset: number = 0;
     totalResults: number = 0;
 }
-
+export class OFSTimeslot {
+    active: boolean = false;
+    isAllDay: boolean = false;
+    timeEnd: string = "";
+    timeStart: string = "";
+    label: string = "";
+    name: string = "";
+}
+export class OFSTimeslotsList {
+    items: OFSTimeslot[] = [];
+    limit: number = 0;
+    offset: number = 0;
+    totalResults: number = 0;
+}
 export class OFSSubscriptionResponse extends OFSResponse {
     data: SubscriptionListResponse = {
         totalResults: 0,
@@ -143,20 +158,6 @@ export class OFSPropertyListResponse extends OFSResponse {
     data: OFSPropertyList = new OFSPropertyList();
 }
 
-export interface OFSGetCapacityAreasParams {
-    expand?: string;
-    fields?: string;
-    status?: string;
-    type?: string;
-}
-
-export interface OFSGetQuotaParams {
-    aggregateResults?: boolean;
-    areas?: string;
-    categories?: string;
-    categoryLevel?: boolean;
-    dates: string;
-    intervalLevel?: boolean;
-    returnStatuses?: boolean;
-    timeSlotLevel?: boolean;
+export class OFSTimeslotsResponse extends OFSResponse {
+    data: OFSTimeslotsList = new OFSTimeslotsList();
 }
