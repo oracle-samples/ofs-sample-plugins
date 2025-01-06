@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<!--
+ Copyright (c) 2014, 2025, Oracle and/or its affiliates.
+ Licensed under The Universal Permissive License (UPL), Version 1.0
+ as shown at https://oss.oracle.com/licenses/upl/
+ -->
+<!-- ************************ IMPORTANT INFORMATION ************************************
+  This web basic template is provided as an example of how to configure
+  a JET web application.  It contains the Oracle JET framework and a default
+  requireJS configuration file to show how JET can be setup in a common application.
+  This project template can be used in conjunction with demo code from the JET
+  website to test JET component behavior and interactions.
+  Any CSS styling with the prefix "demo-" is for demonstration only and is not
+  provided as part of the JET framework.
+  Please see the demos under Cookbook/Patterns/App Shell: Web and the CSS documentation
+  under Support/API Docs/Non-Component Styling on the JET website for more information on how to use
+  the best practice patterns shown in this template.
+  Aria Landmark role attributes are added to the different sections of the application
+  for accessibility compliance. If you change the type of content for a specific
+  section from what is defined, you should also change the role value for that
+  section to represent the appropriate content type.
+  ***************************** IMPORTANT INFORMATION ************************************ -->
+<html lang="en-us">
+  <head>
+    <title>Oracle JET - MVVM</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="viewport-fit=cover, width=device-width, initial-scale=1">
+    <link rel="icon" href="css/images/JET-Favicon-Red-32x32.png" type="image/x-icon" />
+
+    <!-- This is the main css file for the default theme -->
+		<!-- injector:theme -->
+		<!-- endinjector -->
+
+    <!-- This contains icon fonts used by the starter template -->
+    <link rel="stylesheet" id="uxiconFont" href="https://static.oracle.com/cdn/fnd/gallery/2404.0.0/images/iconfont/ojuxIconFont.min.css">
+
+    <!-- This is where you would add any app specific styling -->
+    <link rel="stylesheet" href="css/app.css" type="text/css"/>
+
+  </head>
+  <body class="oj-web-applayout-body">
+    <div id="globalBody" class="oj-web-applayout-page">
+      <!--
+         ** Oracle JET V17.1.0 web application header pattern.
+         ** Please see the demos under Cookbook/Patterns/App Shell: Web
+         ** and the CSS documentation under Support/API Docs/Non-Component Styling
+         ** on the JET website for more information on how to use this pattern.
+      -->
+      <header role="banner" class="oj-web-applayout-header">
+        <div class="oj-web-applayout-max-width oj-flex-bar oj-sm-align-items-center">
+          <div class="oj-flex-bar-middle oj-sm-align-items-baseline">
+            <span role="img" class="oj-icon demo-oracle-icon" title="Oracle Logo" alt="Oracle Logo"></span>
+            <h1 class="oj-sm-only-hide oj-web-applayout-header-title" title="Application Name"><oj-bind-text value="[[appName]]"></oj-bind-text></h1>
+          </div>
+          <div class="oj-flex-bar-end">
+            </oj-bind-text>
+            <oj-toolbar>
+              <oj-bind-if test="[[loggingEnabled()]]">  
+                <oj-c-menu-button id="userMenu" label="[[oj.Translations.getTranslatedString('Logs')]]" items="[[logMenuItems]]" display="[[smScreen() ? 'icons' : 'all']]" chroming="outlined" on-oj-menu-action="[[logMenuHandler]]">
+                  <span slot="endIcon" class="oj-ux-ico-log"></span>
+                </oj-c-menu-button>
+              </oj-bind-if>
+            </oj-toolbar>
+          </div>
+        </div>
+      </header>
+      <div role="main" class="oj-web-applayout-max-width oj-web-applayout-content">
+        <div class="oj-typography-title-5">Sample Level 5 Heading</div>
+        <div class="oj-typography-body-md">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut vel justo orci. Mauris id mauris venenatis, pharetra erat eget, consequat lorem. Sed consequat nulla at ex varius, nec cursus ante pharetra. Nulla congue quis diam ac auctor. Sed lobortis sodales ornare. Phasellus facilisis id est varius blandit. Praesent eleifend dictum facilisis. Morbi nibh lacus, iaculis ac nunc vel, sagittis scelerisque erat.</div>
+      </div>
+      <footer class="oj-web-applayout-footer" role="contentinfo">
+        <div class="oj-web-applayout-footer-item oj-web-applayout-max-width">
+          
+        </div>
+        <div class="oj-web-applayout-footer-item oj-web-applayout-max-width oj-text-color-secondary oj-typography-body-sm">
+          Copyright © 2014, 2025 Oracle and/or its affiliates All rights reserved.
+        </div>
+      </footer>
+    </div>
+
+    <!-- Dialogs and other popup conponents below -->
+
+    <!-- Toast Message to show confirmatino, error or warnings etc. -->
+    <oj-c-message-toast
+      id="toastBanner"
+      position="bottom"
+      data="[[messageDP]]"
+      icon-template-value="[[getIconTemplate]]"
+      on-oj-close="[[closeMessage]]">
+      <template slot="inProgress">
+        <oj-c-progress-circle size="sm" value="[[$current.data.progressValue]]"></oj-c-progress-circle>
+      </template>
+    </oj-c-message-toast>
+
+    <!-- View Logs Dialog -->
+    <oj-dialog 
+      id="viewLogsDialog"
+      cancel-behavior="icon"
+      modality="modal"
+      class="oj-lg-width-2/5">
+      <div slot="header">
+        <div class="oj-flex oj-flex-item oj-sm-width-full oj-sm-align-items-center">
+          <span class="oj-ux-ico-content-item-detail oj-typography-title-1"></span>
+          <span class="oj-typography-title-5 oj-sm-padding-2x-start"><oj-bind-text value="[[oj.Translations.getTranslatedString('ViewLogs')]]"></oj-bind-text></span>
+        </div>
+      </div>
+      <div slot="body">
+        <oj-c-list-view id="logsListView" data="[[logsDP]]" aria-label="View Logs" gridlines.item="visible">
+          <template slot="itemTemplate" data-oj-as="item">
+            <oj-c-list-item-layout>
+              <span class="oj-typography-body-md oj-text-color-primary">
+                <oj-bind-text value="[[item.item.data.Message]]"></oj-bind-text>
+              </span>
+              <span slot="overline" class="oj-typography-body-sm oj-text-color-secondary">
+                <oj-bind-text value="[[getLocalDate(item.item.data.Id)]]"></oj-bind-text>
+              </span>
+            </oj-c-list-item-layout>
+          </template>
+        </oj-c-list-view>
+      </div>
+      <div slot="footer"></div>
+    </oj-dialog>
+
+    <!-- General Confirmation Dialog -->
+    <oj-dialog
+      id="confirmDialog"
+      cancel-behavior="none"
+      modality="modal"
+      class="oj-lg-width-2/5"
+      data-dialog-action="no"
+      >
+      <div slot="header">
+        <div class="oj-flex oj-flex-item oj-sm-width-full oj-sm-align-items-center">
+          <span class="oj-ux-ico-warning oj-typography-title-1"></span>
+          <span class="oj-typography-title-5 oj-sm-padding-2x-start"><oj-bind-text value="[[oj.Translations.getTranslatedString('ConfirmHeading')]]"></oj-bind-text></span>
+        </div>
+      </div>
+      <div slot="body">
+        <oj-bind-text value="[[oj.Translations.getTranslatedString('ConfirmMessage')]]">
+        </oj-bind-text>
+      </div>
+      <div slot="footer" class="oj-sm-justify-content-space-between">
+        <div>
+          <!-- empty div. a simpler hack to align the next div with buttons to right. TODO: user proper styling -->
+        </div>
+        <div>
+          <oj-c-button id="btnCancel" :aria-label="[[oj.Translations.getTranslatedString('No')]]" label="[[oj.Translations.getTranslatedString('No')]]" class="oj-sm-margin-2x-start" data-button="no">
+            <span slot="startIcon" class="oj-ux-ico-cancel"></span>
+          </oj-c-button>
+          <oj-c-button id="btnConfirm" :aria-label="[[oj.Translations.getTranslatedString('Yes')]]" label="[[oj.Translations.getTranslatedString('Yes')]]" class="oj-sm-margin-2x-start" data-button="yes">
+            <span slot="startIcon" class="oj-ux-ico-success"></span>
+          </oj-c-button>
+        </div>
+      </div>
+    </oj-dialog>
+
+    <!-- This injects script tags for the main javascript files -->
+		<!-- injector:scripts -->
+		<!-- endinjector -->
+     
+  </body>
+</html>
