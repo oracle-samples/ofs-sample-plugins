@@ -1,0 +1,19 @@
+{
+    "properties": {
+        "activity": [
+            "aid",
+            "A_ORIGINAL_WORK_TYPE_LABEL",
+            "A_ORIGINAL_WORK_TYPE_DESC",
+            "aworktype",
+            "date",
+            "astatus"
+        ],
+        "provider": []
+    },
+    "securedParams": [
+        {
+            "name": "partialCompletionActivityType",
+            "value": "Partial_completion"
+        }
+    ]
+}

@@ -1,0 +1,12 @@
+{
+  "properties": {
+    "activity": [
+      "aid",
+      "A_APPOINTMENT_TIME",
+      "length",
+      "ETA",
+      "date",
+      "time_slot"
+    ]
+  }
+}

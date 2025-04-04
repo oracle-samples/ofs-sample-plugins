@@ -1,0 +1,27 @@
+{
+  "properties": {
+    "activity": [
+      "aid",
+      "astatus",
+      "A_SERVICE_REQUEST",
+      "A_WF_STEP_01",
+      "A_WF_STEP_02",
+      "A_WF_STEP_03",
+      "A_WF_STEP_04"
+    ]
+  },
+  "securedParams": [
+    {
+      "name": "master_activity_id_property",
+      "value": "A_SERVICE_REQUEST"
+    },
+    {
+      "name": "workflow_steps_properties",
+      "value": "A_WF_STEP_01,A_WF_STEP_02,A_WF_STEP_03,A_WF_STEP_04"
+    },
+    {
+      "name": "max_days_to_check",
+      "value": "7"
+    }
+  ]
+}
