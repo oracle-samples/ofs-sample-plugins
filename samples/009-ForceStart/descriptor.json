@@ -1,0 +1,6 @@
+{
+  "properties": {
+    "activity": ["aid", "position_in_route", "astatus"],
+    "provider": []
+  }
+}

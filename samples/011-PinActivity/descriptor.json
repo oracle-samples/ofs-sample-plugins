@@ -1,0 +1,32 @@
+{
+  "properties": {
+    "activity": [
+      "aid",
+      "A_APPOINTMENT_TIME",
+      "length",
+      "ETA",
+      "date",
+      "time_slot",
+      "xa_sro_info",
+      "xa_jeopardy_code",
+      "xa_jeopardy_reason",
+      "xa_suspend_code",
+      "xa_suspend_comments",
+      "astatus"
+    ]
+  },
+  "securedParams": [
+    {
+      "suspend_xa_jeopardy_code": "000"
+    },
+    {
+      "suspend_xa_jeopardy_reason": "Additional materials/equipment required"
+    },
+    {
+      "suspend_xa_suspend_code": "OTHER"
+    },
+    {
+      "suspend_xa_suspend_comments": "SRO Suspension"
+    }
+  ]
+}

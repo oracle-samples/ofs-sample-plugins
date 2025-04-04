@@ -1,0 +1,9 @@
+{
+  "properties": {
+    "inventory": [
+      "inv_pid",
+      "invid",
+      "quantity"
+    ]
+  }
+}
