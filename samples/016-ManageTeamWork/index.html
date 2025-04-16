@@ -7,23 +7,8 @@
             content="width=device-width, initial-scale=1.0, shrink-to-fit=no"
         />
         <title>Labor Lines</title>
-        <style>
-            #form-section {
-                display: none;
-                margin-top: 20px;
-            }
-            table {
-                width: 100%;
-                border-collapse: collapse;
-            }
-            th,
-            td {
-                padding: 10px;
-                text-align: left;
-            }
-        </style>
     </head>
-
+    <link rel="stylesheet" href="styles.css" />
     <body>
         <div>
             <header>
@@ -34,9 +19,11 @@
                     <thead>
                         <tr>
                             <th>Technician Name</th>
+                            <th>External Id</th>
                             <th>Start Time</th>
                             <th>End Time</th>
                             <th>Labor Type</th>
+                            <th>Labor Type Id</th>
                             <th>Description</th>
                             <th>Actions</th>
                         </tr>
@@ -45,8 +32,18 @@
                         <!-- Rows will be dynamically added here -->
                     </tbody>
                 </table>
-                <button class="btn btn-primary" id="add-button">ADD</button>
-
+                <div style="display: flex; gap: 10px">
+                    <button class="btn btn-primary" id="add-button">ADD</button>
+                    <button class="btn btn-primary" id="debrief-button">
+                        DEBRIEF
+                    </button>
+                    <button class="btn btn-danger" id="cancel-button">
+                        CANCEL
+                    </button>
+                    <button class="btn btn-secondary" id="save-button">
+                        SAVE
+                    </button>
+                </div>
                 <div id="form-section">
                     <h2 id="form-title">Add Labor Line</h2>
                     <form id="labor-form">
@@ -79,14 +76,11 @@
                         />
 
                         <label for="labor-type">Labor Type:</label>
-                        <select id="labor-type" name="labor-type" required>
-                            <option value="" disabled selected>
-                                Select labor type
-                            </option>
-                            <option value="Regular">Regular</option>
-                            <option value="Overtime">Overtime</option>
-                            <option value="Emergency">Emergency</option>
-                        </select>
+                        <select
+                            id="labor-type"
+                            name="labor-type"
+                            required
+                        ></select>
 
                         <label for="description">Description:</label>
                         <textarea

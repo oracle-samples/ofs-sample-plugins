@@ -17,6 +17,13 @@
         "provider": [
             "pid",
             "pname"
+        ],
+        "inventory": [
+            "invpool",
+            "inv_aid",
+            "labor_item_desc",
+            "labor_item_number",
+            "I_TECHNICIAN_NAME"
         ]
     },
     "securedParams": [

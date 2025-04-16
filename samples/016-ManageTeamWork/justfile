@@ -5,7 +5,7 @@ dist-clean:
 	-@rm -rf dist/
 	-@mkdir dist
 	@cp index.html dist/
-
+	@cp styles.css dist/
 pack: dist-clean
 	webpack --mode=production
 
@@ -13,10 +13,10 @@ dev-pack: dist-clean
 	webpack --mode=development
 
 zip: pack
-	cd dist; zip plugin.zip index.html main.js
+	cd dist; zip plugin.zip index.html main.js styles.css
 
 dev-zip: dev-pack
-	cd dist; zip plugin.zip index.html main.js
+	cd dist; zip plugin.zip index.html main.js styles.css
 
 upload:
 	pluginmgr --filename dist/plugin.zip upload ManageTeamWork
