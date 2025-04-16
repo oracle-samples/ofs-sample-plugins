@@ -1,0 +1,27 @@
+{
+    "properties": {
+        "activity": [
+            "appt_number",
+            "length",
+            "ETA",
+            "astatus",
+            "date",
+            "caddress",
+            "ccity",
+            "ccompany",
+            "cname",
+            "cstate",
+            "appt_number",
+            "czip"
+        ],
+        "provider": [
+            "pid",
+            "pname"
+        ]
+    },
+    "securedParams": [
+        {
+            "name": "test02"
+        }
+    ]
+}

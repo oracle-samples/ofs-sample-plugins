@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0, shrink-to-fit=no"
+        />
+        <title>Labor Lines</title>
+        <style>
+            #form-section {
+                display: none;
+                margin-top: 20px;
+            }
+            table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+            th,
+            td {
+                padding: 10px;
+                text-align: left;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div>
+            <header>
+                <h1>Labor Lines</h1>
+            </header>
+            <main>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Technician Name</th>
+                            <th>Start Time</th>
+                            <th>End Time</th>
+                            <th>Labor Type</th>
+                            <th>Description</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="labor-lines">
+                        <!-- Rows will be dynamically added here -->
+                    </tbody>
+                </table>
+                <button class="btn btn-primary" id="add-button">ADD</button>
+
+                <div id="form-section">
+                    <h2 id="form-title">Add Labor Line</h2>
+                    <form id="labor-form">
+                        <label for="technician-name">Technician Name:</label>
+                        <select
+                            id="technician-name"
+                            name="technician-name"
+                            required
+                        >
+                            <option value="" disabled selected>
+                                Select a technician
+                            </option>
+                            <!-- Add technician options dynamically -->
+                        </select>
+
+                        <label for="start-time">Start Time:</label>
+                        <input
+                            type="time"
+                            id="start-time"
+                            name="start-time"
+                            required
+                        />
+
+                        <label for="end-time">End Time:</label>
+                        <input
+                            type="time"
+                            id="end-time"
+                            name="end-time"
+                            required
+                        />
+
+                        <label for="labor-type">Labor Type:</label>
+                        <select id="labor-type" name="labor-type" required>
+                            <option value="" disabled selected>
+                                Select labor type
+                            </option>
+                            <option value="Regular">Regular</option>
+                            <option value="Overtime">Overtime</option>
+                            <option value="Emergency">Emergency</option>
+                        </select>
+
+                        <label for="description">Description:</label>
+                        <textarea
+                            id="description"
+                            name="description"
+                            required
+                        ></textarea>
+
+                        <div>
+                            <button
+                                type="submit"
+                                class="btn btn-primary"
+                                id="confirm-button"
+                            >
+                                Confirm
+                            </button>
+                            <button
+                                type="button"
+                                class="btn btn-secondary"
+                                id="hide-button"
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </main>
+        </div>
+
+        <script src="./main.js" type="module"></script>
+    </body>
+</html>
