@@ -1,6 +1,7 @@
 export interface InventoryItem {
     inv_aid?: number | null;
     invid: any;
+    inv_pid?: number | null;
     quantity: any;
     inventory_model: any;
     invtype: any;
@@ -15,6 +16,7 @@ export interface InventoryItem {
 export class InventoryItemElement implements InventoryItem {
     inv_aid?: number | null | undefined;
     invid: any;
+    inv_pid?: number | null;
     quantity: any;
     inventory_model: any;
     invtype: any;
@@ -26,28 +28,32 @@ export class InventoryItemElement implements InventoryItem {
     labor_item_description: string | undefined;
     labor_service_activity: string | undefined;
 
-    constructor(
-        invtype: string,
-        inv_aid?: number,
-        invpool?: string,
-        inventory_model?: any,
-        invsn?: string,
-        labor_start_time?: string,
-        labor_end_time?: string,
-        labor_item_number?: string,
-        labor_item_description?: string,
-        labor_service_activity?: string
-    ) {
-        this.inv_aid = inv_aid;
-        this.invtype = invtype;
-        this.inventory_model = inventory_model;
-        this.invpool = invpool;
-        this.invsn = invsn;
-        this.labor_start_time = labor_start_time;
-        this.labor_end_time = labor_end_time;
-        this.labor_item_number = labor_item_number;
-        this.labor_item_description = labor_item_description;
-        this.labor_service_activity = labor_service_activity;
+    constructor(config: {
+        invtype: string;
+        inv_aid?: number;
+        inv_pid?: number | null;
+        quantity?: number;
+        invpool?: string;
+        inventory_model?: any;
+        invsn?: string;
+        labor_start_time?: string;
+        labor_end_time?: string;
+        labor_item_number?: string;
+        labor_item_description?: string;
+        labor_service_activity?: string;
+    }) {
+        this.inv_aid = config.inv_aid;
+        this.invtype = config.invtype;
+        this.inv_pid = config.inv_pid;
+        this.quantity = config.quantity;
+        this.inventory_model = config.inventory_model;
+        this.invpool = config.invpool;
+        this.invsn = config.invsn;
+        this.labor_start_time = config.labor_start_time;
+        this.labor_end_time = config.labor_end_time;
+        this.labor_item_number = config.labor_item_number;
+        this.labor_item_description = config.labor_item_description;
+        this.labor_service_activity = config.labor_service_activity;
     }
 }
 
@@ -85,47 +91,50 @@ export class Inventory {
         return data;
     }
 
-    find_like(item: InventoryItem, pool?: string) {
-        console.debug(
-            item,
-            `looking for items with ${item.invtype} and ${item.inventory_model}`
-        );
+    find_like(item: InventoryItem) {
         return this._data.filter((row) => {
-            const matchesPool = pool == null || row.invpool === pool;
-            const matchesTypeAndModel =
-                item.invtype === row.invtype &&
-                item.inventory_model === row.inventory_model;
-            return matchesPool && matchesTypeAndModel;
+            return Object.keys(item).every((key) => {
+                if (item[key as keyof InventoryItem] !== undefined) {
+                    return (
+                        item[key as keyof InventoryItem] ==
+                        row[key as keyof InventoryItem]
+                    );
+                }
+                return true;
+            });
         });
     }
-    generateActionsJson(inventoryElements: InventoryItemElement[]) {
+    generateActionsJson(
+        inventoryElements: InventoryItemElement[],
+        action: string = "create"
+    ) {
         // Generates the json for the inventory
         console.log(
             `${this.constructor.name} - generateActionsJson`,
             JSON.stringify(inventoryElements, null, 2)
         );
         let actions: any = [];
-        inventoryElements.forEach((element) => {
-            actions.push({
-                entity: "inventory",
-                action: "create",
-                invid: element.invid,
-                quantity: element.quantity,
-                inventory_model: element.inventory_model,
-                inv_pid: element.inv_aid,
-                invtype: element.invtype,
-                invpool: element.invpool,
-                invsn: element.invsn,
-                inv_aid: element.inv_aid,
-                properties: {
-                    labor_start_time: element.labor_start_time,
-                    labor_end_time: element.labor_end_time,
-                    labor_item_number: element.labor_item_number,
-                    labor_item_description: element.labor_item_description,
-                    labor_service_activity: element.labor_service_activity,
-                },
+        if (action === "create") {
+            inventoryElements.forEach((element) => {
+                actions.push({
+                    entity: "inventory",
+                    action: action,
+                    invid: element.invid,
+                    inv_pid: element.inv_pid,
+                    invtype: element.invtype,
+                    invpool: element.invpool,
+                    invsn: element.invsn,
+                    inv_aid: element.inv_aid,
+                    properties: {
+                        labor_start_time: element.labor_start_time,
+                        labor_end_time: element.labor_end_time,
+                        labor_item_number: element.labor_item_number,
+                        labor_item_desc: element.labor_item_description,
+                        labor_service_activity: element.labor_service_activity,
+                    },
+                });
             });
-        });
+        }
         return actions;
     }
     constructor(inventoryData: any) {

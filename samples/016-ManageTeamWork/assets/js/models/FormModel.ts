@@ -15,10 +15,11 @@ export class LaborFormModel {
     private invtype: string;
     private activity: any;
     private team: any;
+    private resource: any;
     private invpool: string = "install"; // Removed duplicate declaration and ensured consistent usage
     private quantity: string = "1";
     private laborServiceActivity: string = "Labor";
-    private inventoryItemElement: InventoryItemElement[] = [];
+    private inventoryItemElements: InventoryItemElement[] = [];
     readonly status_new = "new";
     readonly status_current = "current";
     readonly status_changed = "changed";
@@ -65,36 +66,41 @@ export class LaborFormModel {
             editable: { edit: false, load: false },
         },
     };
-    constructor(
-        laborLines: HTMLTableElement,
-        laborForm: HTMLFormElement,
-        formSection: HTMLElement,
-        formTitle: HTMLElement,
-        technicianSelect: HTMLSelectElement,
-        laborTypeSelect: HTMLSelectElement,
-        laborItemDesc: any,
-        laborItemNumber: any,
-        activityStartTimeDate: Date,
-        activityEndTimeDate: Date,
-        invtype: string,
-        activity: any,
-        team: any,
-        laborServiceActivity: string
-    ) {
-        this.invtype = invtype;
-        this.activity = activity;
-        this.team = team;
-        this.laborLines = laborLines;
-        this.laborForm = laborForm;
-        this.formSection = formSection;
-        this.formTitle = formTitle;
-        this.technicianSelect = technicianSelect;
-        this.laborTypeSelect = laborTypeSelect;
-        this.laborItemDesc = laborItemDesc;
-        this.laborItemNumber = laborItemNumber;
-        this.activityStartTimeDate = activityStartTimeDate;
-        this.activityEndTimeDate = activityEndTimeDate;
-        this.laborServiceActivity = laborServiceActivity;
+    constructor(config: {
+        laborLines: HTMLTableElement;
+        laborForm: HTMLFormElement;
+        formSection: HTMLElement;
+        formTitle: HTMLElement;
+        technicianSelect: HTMLSelectElement;
+        laborTypeSelect: HTMLSelectElement;
+        laborItemDesc: any;
+        laborItemNumber: any;
+        activityStartTimeDate: Date;
+        activityEndTimeDate: Date;
+        invtype: string;
+        activity: any;
+        team: any;
+        resource: any;
+        laborServiceActivity: string;
+        inventoryItemElements: InventoryItemElement[];
+    }) {
+        this.invtype = config.invtype;
+        this.activity = config.activity;
+        this.team = config.team;
+        this.resource = config.resource;
+        this.laborLines = config.laborLines;
+        this.laborForm = config.laborForm;
+        this.formSection = config.formSection;
+        this.formTitle = config.formTitle;
+        this.technicianSelect = config.technicianSelect;
+        this.laborTypeSelect = config.laborTypeSelect;
+        this.laborItemDesc = config.laborItemDesc;
+        this.laborItemNumber = config.laborItemNumber;
+        this.activityStartTimeDate = config.activityStartTimeDate;
+        this.activityEndTimeDate = config.activityEndTimeDate;
+        this.laborServiceActivity = config.laborServiceActivity;
+        this.inventoryItemElements = config.inventoryItemElements;
+        this.loadForm();
     }
 
     // Reset the form to its initial state
@@ -128,7 +134,7 @@ export class LaborFormModel {
         console.log(`Current inventory pool: ${this.invpool}`); // Example usage of invpool
     }
     // Populate the technician dropdown
-    populateTechnicianDropdown(): void {
+    private populateTechnicianDropdown(): void {
         this.trackStep("POPULATE TECHNICIANS", "START");
         Object.entries(this.team).forEach(([key, member]: [string, any]) => {
             const option = document.createElement("option");
@@ -138,7 +144,11 @@ export class LaborFormModel {
         });
         this.trackStep("POPULATE TECHNICIANS", "END");
     }
-    trackStep(action: string, step: string, additionalInfo: string = ""): void {
+    private trackStep(
+        action: string,
+        step: string,
+        additionalInfo: string = ""
+    ): void {
         console.debug(
             `LaborFormModel - ${action} of Form ${
                 this.thisFormRow !== null
@@ -148,7 +158,7 @@ export class LaborFormModel {
         );
     }
     // Populate the labor type dropdown
-    populateLaborTypeDropdown(): void {
+    private populateLaborTypeDropdown(): void {
         const laborTypeOptions = Object.entries(this.laborItemDesc.enum).filter(
             ([key, value]: [string, any]) => !value.inactive
         );
@@ -353,7 +363,13 @@ export class LaborFormModel {
         this.hideForm();
         this.trackStep("CONFIRM", "END");
     };
-
+    loadForm = (): void => {
+        this.trackStep("LOAD", "START");
+        this.resetForm();
+        this.populateTechnicianDropdown();
+        this.populateLaborTypeDropdown();
+        this.loadLaborLines();
+    };
     createButton = (
         text: string,
         className: string,
@@ -366,22 +382,30 @@ export class LaborFormModel {
         return button;
     };
 
-    loadLaborLines = (): void => {
+    private loadLaborLines = (): void => {
         // Use inventoryItemElement to fill the laborLines table
-        this.trackStep("LOAD LABOR LINES", "START");
-        this.inventoryItemElement.forEach((inventoryItem: any) => {
+        this.trackStep(
+            "LOAD LABOR LINES",
+            "START",
+            `I need to load ${this.inventoryItemElements.length} lines`
+        );
+        this.inventoryItemElements.forEach((inventoryItem: any) => {
             //inv_aid?: number | null;
             //inventory_model: any;
             //invsn: any;
 
             const row = this.laborLines.insertRow();
             const cells = [
-                this.team[inventoryItem.invsn].pname,
-                inventoryItem.invsn,
-                this.formatTime(inventoryItem.start_time),
-                this.formatTime(inventoryItem.end_time),
-                this.laborItemDesc.enum[inventoryItem.inventory_model].text,
-                inventoryItem.inventory_model,
+                inventoryItem.invsn ? this.team[inventoryItem.invsn].pname : "",
+                inventoryItem.invsn || "",
+                inventoryItem.start_time
+                    ? this.formatTime(inventoryItem.start_time)
+                    : "",
+                inventoryItem.end_time
+                    ? this.formatTime(inventoryItem.end_time)
+                    : "",
+                this.laborItemDesc.enum[inventoryItem.labor_item_desc].text,
+                inventoryItem.labor_item_desc,
                 inventoryItem.description,
                 this.status_current,
                 inventoryItem.invid,
@@ -439,25 +463,27 @@ export class LaborFormModel {
                 row.cells[this.formCellsMapping["status-label"].index]
                     .textContent || "not-valid";
             if (validStatuses.includes(status)) {
-                const technicianId = this.getRowValue("technician-name", row);
-                const laborType = this.getRowValue("labor-type", row);
+                const technicianId = this.getRowValue("technician-id", row);
+                const laborTypeId = this.getRowValue("labor-type-id", row);
                 const invid = this.getRowValue("invid-label", row);
                 const start_time = this.getRowValue("start-time", row);
                 const end_time = this.getRowValue("end-time", row);
                 const inventoryItem: InventoryItemElement = {
-                    invtype: this.invtype,
-                    inv_aid: this.activity.aid,
-                    inventory_model: laborType || "unknown",
-                    invpool: this.invpool,
+                    invtype: this.invtype || "",
+                    inv_aid: this.activity.aid || "",
+                    inventory_model: laborTypeId || "",
+                    invpool: this.invpool || "",
                     quantity: "1",
-                    invsn: technicianId,
-                    invid: invid || null,
-                    labor_start_time: start_time ?? undefined,
-                    labor_end_time: end_time ?? undefined,
-                    labor_item_number: laborType ?? undefined,
-                    labor_item_description: laborType ?? undefined,
-                    labor_service_activity:
-                        this.laborServiceActivity ?? undefined,
+                    inv_pid: this.resource.pid || "",
+                    invsn: technicianId || "",
+                    invid: invid || "",
+                    labor_start_time: start_time
+                        ? `T${start_time || ""}:00`
+                        : "",
+                    labor_end_time: end_time ? `T${end_time || ""}:00` : "",
+                    labor_item_number: laborTypeId || "",
+                    labor_item_description: laborTypeId || "",
+                    labor_service_activity: this.laborServiceActivity || "",
                 };
                 inventoryItems.push(inventoryItem);
             }

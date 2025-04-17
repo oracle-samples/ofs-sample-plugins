@@ -21,9 +21,16 @@
         "inventory": [
             "invpool",
             "inv_aid",
+            "inventory_model",
+            "inv_pid",
+            "invtype",
+            "invpool",
+            "invsn",
+            "invid",
             "labor_item_desc",
             "labor_item_number",
-            "I_TECHNICIAN_NAME"
+            "labor_start_time",
+            "labor_end_time"
         ]
     },
     "securedParams": [

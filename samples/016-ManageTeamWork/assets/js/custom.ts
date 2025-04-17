@@ -71,7 +71,8 @@ export class CustomPlugin extends OFSPlugin {
             } else if (param == "invtype") {
                 globalThis.invtype = _data.securedData.invtype;
             } else if (param == "laborServiceActivity") {
-                globalThis.laborServiceActivity = _data.securedData.invtype;
+                globalThis.laborServiceActivity =
+                    _data.securedData.laborServiceActivity;
             }
         }
         // Calculate default start and end time
@@ -206,30 +207,45 @@ export class CustomPlugin extends OFSPlugin {
                     laborItemNumber.enum[key] !== undefined
             )
         );
+        const inventoryData = new Inventory(_data.inventoryList);
         const { activityStartTimeDate, activityEndTimeDate } =
             getActivityTimeDatein24(_data);
-        const laborFormModel = new LaborFormModel(
-            laborLines,
-            laborForm,
-            formSection,
-            formTitle,
-            technicianSelect,
-            laborTypeSelect,
-            laborItemDesc,
-            laborItemNumber,
-            activityStartTimeDate,
-            activityEndTimeDate,
-            globalThis.invtype,
-            _data.activity,
-            teamList,
-            globalThis.laborServiceActivity
+        var inventoryElements: InventoryItem[] = inventoryData.find_like(
+            new InventoryItemElement({
+                invtype: globalThis.invtype,
+                invpool: "install",
+                inv_aid: _data.activity.aid as number,
+            })
         );
-
-        const inventoryData = new Inventory(_data.inventoryList);
-        // Example usage
-        laborFormModel.resetForm();
-        laborFormModel.populateTechnicianDropdown();
-        laborFormModel.populateLaborTypeDropdown();
+        console.debug(
+            `${this.tag} : Inventory elements for ${
+                globalThis.invtype
+            } and activity ${
+                _data.activity.aid
+            } found in the install pool : [${JSON.stringify(
+                inventoryElements
+            )} compared to the total inventory elements ${
+                inventoryData.data().length
+            }`
+        );
+        const laborFormModel = new LaborFormModel({
+            laborLines: laborLines,
+            laborForm: laborForm,
+            formSection: formSection,
+            formTitle: formTitle,
+            technicianSelect: technicianSelect,
+            laborTypeSelect: laborTypeSelect,
+            laborItemDesc: laborItemDesc,
+            laborItemNumber: laborItemNumber,
+            activityStartTimeDate: activityStartTimeDate,
+            activityEndTimeDate: activityEndTimeDate,
+            invtype: globalThis.invtype,
+            activity: _data.activity,
+            team: teamList,
+            resource: _data.resource,
+            laborServiceActivity: globalThis.laborServiceActivity,
+            inventoryItemElements: inventoryElements,
+        });
 
         // Assign the right functions to the buttons in the form
         document.getElementById("add-button")!.onclick = () => {
@@ -242,19 +258,31 @@ export class CustomPlugin extends OFSPlugin {
             // console.log that I have clicked on confirm button
             laborFormModel.confirmForm();
         };
-
+        const executeAndReturnElements = (): {
+            inventoryElementsToCreate: InventoryItemElement[];
+            inventoryElementsToUpdate: InventoryItemElement[];
+            inventoryElementsToDelete: InventoryItemElement[];
+        } => {
+            return {
+                inventoryElementsToCreate:
+                    laborFormModel.getInventoryElementsToCreate(),
+                inventoryElementsToUpdate:
+                    laborFormModel.getInventoryElementsToUpdate(),
+                inventoryElementsToDelete:
+                    laborFormModel.getInventoryElementsToDelete(),
+            };
+        };
         document.getElementById("debrief-button")!.onclick = () => {
-            const inventoryElementsToCreate: InventoryItemElement[] =
-                laborFormModel.getInventoryElementsToCreate();
-            const inventoryElementsToUpdate: InventoryItemElement[] =
-                laborFormModel.getInventoryElementsToUpdate();
-            const inventoryElementsToDelete: InventoryItemElement[] =
-                laborFormModel.getInventoryElementsToDelete();
+            const {
+                inventoryElementsToCreate,
+                inventoryElementsToUpdate,
+                inventoryElementsToDelete,
+            } = executeAndReturnElements();
             if (inventoryElementsToUpdate.length > 0) {
                 const elementsToUpdate = inventoryData.generateActionsJson(
                     inventoryElementsToUpdate
                 );
-                console.log(
+                console.debug(
                     `${
                         this.tag
                     } : Inventory elements to update: ${inventoryElementsToUpdate}  (stringified): ${JSON.stringify(
@@ -287,7 +315,21 @@ export class CustomPlugin extends OFSPlugin {
             }
         };
         document.getElementById("save-button")!.onclick = () => {
-            this.close();
+            const {
+                inventoryElementsToCreate,
+                inventoryElementsToUpdate,
+                inventoryElementsToDelete,
+            } = executeAndReturnElements();
+            if (inventoryElementsToCreate.length > 0) {
+                inventoryData.generateActionsJson(inventoryElementsToCreate);
+                let dataToSend = {
+                    activity: _data.activity,
+                    actions: inventoryData.generateActionsJson(
+                        inventoryElementsToCreate
+                    ),
+                };
+                this.close(dataToSend);
+            }
         };
         document.getElementById("cancel-button")!.onclick = () => {
             this.close();
