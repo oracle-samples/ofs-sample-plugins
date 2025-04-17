@@ -117,7 +117,10 @@ export class LaborFormModel {
         );
         // Using all elements in formCellsMapping, make ALL of them editable
         Object.entries(this.formCellsMapping).forEach(([id, config]) => {
-            if (config.type in ["select-option", "input"]) {
+            if (["select-option", "input"].includes(config.type)) {
+                if (config.type === "select-option") {
+                    id = "from_select" in config ? config.from_select : "";
+                }
                 if ("editable" in config && config.editable.load === false) {
                     this.makeElementReadOnly(id);
                 } else {
@@ -187,10 +190,20 @@ export class LaborFormModel {
         this.trackStep("HIDE", "END");
     };
     updateStatusLabel = (): void => {
+        this.trackStep(
+            "UPDATE STATUS",
+            "START",
+            `Form status: ${this.getInputValue("status-label")}`
+        );
         let currentStatus = this.getInputValue("status-label");
         if (currentStatus === this.status_current) {
             this.setInputValue("status-label", this.status_changed);
         }
+        this.trackStep(
+            "UPDATE STATUS",
+            "START",
+            `Form status: ${this.getInputValue("status-label")}`
+        );
     };
     showForm = (
         action: "add" | "edit",
@@ -209,18 +222,29 @@ export class LaborFormModel {
             const row = this.laborLines.rows[rowNumber - 1];
 
             this.thisFormRow = rowNumber - 1;
-            Array.from(row.cells).forEach((cell, index) => {
-                console.log(
-                    `Cell Index: ${index},  Content: ${cell.textContent}`
-                );
-            });
             Object.entries(this.formCellsMapping).forEach(([id, config]) => {
-                console.log(`Config: ${JSON.stringify(config)}`);
-                const cellValue = row.cells[config.index].textContent || "";
-                if (config.type in ["select-input", "input"]) {
+                console.debug(
+                    `Validating config for id ${id} and ${JSON.stringify(
+                        config.type
+                    )}`
+                );
+                if (["select-option", "input"].includes(config.type)) {
+                    if (config.type === "select-option") {
+                        id = "from_select" in config ? config.from_select : "";
+                    }
+                    console.debug(
+                        `Form element: ${id},  Content Before: ${this.getInputValue(
+                            id
+                        )} `
+                    );
                     this.setInputValue(
                         id,
                         row.cells[config.index].textContent || ""
+                    );
+                    console.debug(
+                        `Form element: ${id},  Content After: ${this.getInputValue(
+                            id
+                        )}`
                     );
                     if (
                         "editable" in config &&
@@ -238,11 +262,7 @@ export class LaborFormModel {
     };
     // Get the selected value and description from a dropdown
     getSelectedElement(id: string): { value: string; description: string } {
-        console.debug(`LaborFormModel - getSelectedElement for ${id} `);
         const selectElement = document.getElementById(id) as HTMLSelectElement;
-        console.debug(
-            `LaborFormModel - getSelectedElement for ${id} in previously selected ${selectElement.selectedIndex}`
-        );
         const selectedOption =
             selectElement.options[selectElement.selectedIndex];
         return {
@@ -258,6 +278,13 @@ export class LaborFormModel {
             ":" +
             ("0" + inputDate.getMinutes()).slice(-2)
         );
+    }
+    // Format a Date object to a time string (HH:mm)
+    private formatTimeToRow(inputDate: string): string {
+        // String in format THH.mm:ss
+        // I want just digit HH:MM
+        const time = inputDate.split("T")[1];
+        return time ? time.slice(0, 5) : "";
     }
     makeElementReadOnly = (id: string): void => {
         const element = document.getElementById(id);
@@ -311,7 +338,7 @@ export class LaborFormModel {
                             "uniqueKey" in config && config.uniqueKey
                     )
                     .every(([id, config]) => {
-                        if (config.type in ["select-option", "input"]) {
+                        if (["select-option", "input"].includes(config.type)) {
                             if (config.type === "select-option") {
                                 return (
                                     row.cells[config.index].textContent ===
@@ -398,11 +425,11 @@ export class LaborFormModel {
             const cells = [
                 inventoryItem.invsn ? this.team[inventoryItem.invsn].pname : "",
                 inventoryItem.invsn || "",
-                inventoryItem.start_time
-                    ? this.formatTime(inventoryItem.start_time)
+                inventoryItem.labor_start_time
+                    ? this.formatTimeToRow(inventoryItem.labor_start_time)
                     : "",
-                inventoryItem.end_time
-                    ? this.formatTime(inventoryItem.end_time)
+                inventoryItem.labor_end_time
+                    ? this.formatTimeToRow(inventoryItem.labor_end_time)
                     : "",
                 this.laborItemDesc.enum[inventoryItem.labor_item_desc].text,
                 inventoryItem.labor_item_desc,

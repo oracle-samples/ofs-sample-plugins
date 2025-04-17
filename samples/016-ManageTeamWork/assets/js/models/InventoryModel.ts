@@ -123,9 +123,9 @@ export class Inventory {
                     inv_pid: element.inv_pid,
                     invtype: element.invtype,
                     invpool: element.invpool,
-                    invsn: element.invsn,
                     inv_aid: element.inv_aid,
                     properties: {
+                        invsn: element.invsn,
                         labor_start_time: element.labor_start_time,
                         labor_end_time: element.labor_end_time,
                         labor_item_number: element.labor_item_number,

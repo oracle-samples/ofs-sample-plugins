@@ -214,7 +214,6 @@ export class CustomPlugin extends OFSPlugin {
             new InventoryItemElement({
                 invtype: globalThis.invtype,
                 invpool: "install",
-                inv_aid: _data.activity.aid as number,
             })
         );
         console.debug(
@@ -224,6 +223,23 @@ export class CustomPlugin extends OFSPlugin {
                 _data.activity.aid
             } found in the install pool : [${JSON.stringify(
                 inventoryElements
+            )} compared to the total inventory elements ${
+                inventoryData.data().length
+            }`
+        );
+        // Eliminate elements which inv_aid is not the same as activity.aid
+        let inventoryElementsCleaned: InventoryItem[] =
+            inventoryElements.filter(
+                (element: InventoryItem) =>
+                    element.inv_aid == _data.activity.aid
+            );
+        console.debug(
+            `${this.tag} : Inventory elements for ${
+                globalThis.invtype
+            } and activity ${
+                _data.activity.aid
+            } found in the install pool after filtering by aid : [${JSON.stringify(
+                inventoryElementsCleaned
             )} compared to the total inventory elements ${
                 inventoryData.data().length
             }`
