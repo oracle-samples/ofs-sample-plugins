@@ -28,7 +28,16 @@
     },
     "securedParams": [
         {
-            "name": "test02"
+            "name": "invtype",
+            "value": "labor"
+        },
+        {
+            "name": "laborServiceActivity",
+            "value": "Labor"
+        },
+        {
+            "name": "debriefPluginLabel",
+            "value": "debriefing"
         }
     ]
 }

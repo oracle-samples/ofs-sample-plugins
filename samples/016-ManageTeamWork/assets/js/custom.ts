@@ -4,18 +4,51 @@
  */
 
 import { OFSPlugin, OFSOpenMessage, OFSInitMessage } from "@ofs-users/plugin";
-import { LaborFormModel } from "./FormModel";
+import { LaborFormModel } from "./models/FormModel";
+import {
+    Inventory,
+    InventoryItem,
+    InventoryItemElement,
+} from "./models/InventoryModel";
 // Create OFSOpenMessageCustom to extend OFSOpenMessage and include team
 interface OFSOpenMessageCustom extends OFSOpenMessage {
     team: any;
     resource: any;
     activity: any;
+    inventoryList: any;
+    openParams: any;
 }
 // Create OFSInitMessageCustom to extend OFSInitMessage and include additional properties
 interface OFSInitMessageCustom extends OFSInitMessage {
     attributeDescription: any;
 }
+
+declare global {
+    var actionAtReturn: any;
+    var activityToManage: string;
+    var debriefPluginLabel: string;
+    var invtype: string;
+    var laborServiceActivity: string;
+}
+
 export class CustomPlugin extends OFSPlugin {
+    updateResult(data: OFSOpenMessageCustom) {
+        var plugin = this;
+        if (globalThis.actionAtReturn == null) {
+            globalThis.actionAtReturn = "NOT_VALID";
+        }
+        if (globalThis.actionAtReturn == "DEBRIEF") {
+            let dataToSend = {
+                backScreen: "plugin_by_label",
+                backPluginLabel: globalThis.debriefPluginLabel,
+            };
+            this.close(dataToSend);
+        } else {
+            console.log(
+                `${plugin.tag} Global Action value ${globalThis.actionAtReturn} is not valid `
+            );
+        }
+    }
     init(message: OFSInitMessageCustom) {
         console.info(`${this.tag} :  INIT`);
         this.storeInitProperty(
@@ -31,7 +64,16 @@ export class CustomPlugin extends OFSPlugin {
     open(_data: OFSOpenMessageCustom) {
         console.info(`${this.tag} :  OPEN`);
         // The list of possible technicians is based on team members
-
+        for (var param in _data.securedData) {
+            if (param == "debriefPluginLabel") {
+                globalThis.debriefPluginLabel =
+                    _data.securedData.debriefPluginLabel;
+            } else if (param == "invtype") {
+                globalThis.invtype = _data.securedData.invtype;
+            } else if (param == "laborServiceActivity") {
+                globalThis.laborServiceActivity = _data.securedData.invtype;
+            }
+        }
         // Calculate default start and end time
         const getActivityTimeDatein24 = (
             _data: OFSOpenMessageCustom
@@ -84,6 +126,17 @@ export class CustomPlugin extends OFSPlugin {
                 ":00"
             );
         };
+        const getTeam = (): any => {
+            let teamMembers = _data.team?.teamMembers || {};
+            const resource = _data.resource;
+
+            if (resource) {
+                teamMembers[resource.pid] = { pname: resource.pname };
+            }
+
+            return teamMembers;
+        };
+
         const getElements = (): {
             laborLines: HTMLTableElement;
             formSection: HTMLElement;
@@ -93,6 +146,7 @@ export class CustomPlugin extends OFSPlugin {
             laborTypeSelect: HTMLSelectElement;
             laborItemDesc: any;
             laborItemNumber: any;
+            teamList: any;
         } => {
             return {
                 laborLines: document.getElementById(
@@ -117,6 +171,7 @@ export class CustomPlugin extends OFSPlugin {
                 laborTypeSelect: document.getElementById(
                     "labor-type"
                 ) as HTMLSelectElement,
+                teamList: getTeam(),
             };
         };
         const {
@@ -128,6 +183,7 @@ export class CustomPlugin extends OFSPlugin {
             laborTypeSelect,
             laborItemDesc,
             laborItemNumber,
+            teamList,
         } = getElements();
 
         if (
@@ -162,15 +218,17 @@ export class CustomPlugin extends OFSPlugin {
             laborItemDesc,
             laborItemNumber,
             activityStartTimeDate,
-            activityEndTimeDate
+            activityEndTimeDate,
+            globalThis.invtype,
+            _data.activity,
+            teamList,
+            globalThis.laborServiceActivity
         );
 
+        const inventoryData = new Inventory(_data.inventoryList);
         // Example usage
         laborFormModel.resetForm();
-        laborFormModel.populateTechnicianDropdown(
-            _data.team?.teamMembers,
-            _data.resource
-        );
+        laborFormModel.populateTechnicianDropdown();
         laborFormModel.populateLaborTypeDropdown();
 
         // Assign the right functions to the buttons in the form
@@ -186,7 +244,47 @@ export class CustomPlugin extends OFSPlugin {
         };
 
         document.getElementById("debrief-button")!.onclick = () => {
-            this.close();
+            const inventoryElementsToCreate: InventoryItemElement[] =
+                laborFormModel.getInventoryElementsToCreate();
+            const inventoryElementsToUpdate: InventoryItemElement[] =
+                laborFormModel.getInventoryElementsToUpdate();
+            const inventoryElementsToDelete: InventoryItemElement[] =
+                laborFormModel.getInventoryElementsToDelete();
+            if (inventoryElementsToUpdate.length > 0) {
+                const elementsToUpdate = inventoryData.generateActionsJson(
+                    inventoryElementsToUpdate
+                );
+                console.log(
+                    `${
+                        this.tag
+                    } : Inventory elements to update: ${inventoryElementsToUpdate}  (stringified): ${JSON.stringify(
+                        elementsToUpdate
+                    )}`
+                );
+            } else if (inventoryElementsToCreate.length > 0) {
+                inventoryData.generateActionsJson(inventoryElementsToCreate);
+                let dataToSend = {
+                    activity: _data.activity,
+                    actions: inventoryData.generateActionsJson(
+                        inventoryElementsToCreate
+                    ),
+                    backScreen: "plugin_by_label",
+                    backPluginLabel: debriefPluginLabel,
+                };
+                this.close(dataToSend);
+            }
+            if (inventoryElementsToDelete.length > 0) {
+                const elementsToDelete = inventoryData.generateActionsJson(
+                    inventoryElementsToDelete
+                );
+                console.log(
+                    `${
+                        this.tag
+                    } : Inventory elements to update: ${inventoryElementsToDelete}  (stringified): ${JSON.stringify(
+                        elementsToDelete
+                    )}`
+                );
+            }
         };
         document.getElementById("save-button")!.onclick = () => {
             this.close();
@@ -194,5 +292,66 @@ export class CustomPlugin extends OFSPlugin {
         document.getElementById("cancel-button")!.onclick = () => {
             this.close();
         };
+    }
+    save(_data: OFSOpenMessageCustom) {
+        // Removed unused variable declaration
+        LaborFormModel;
+        //var etaFormated: string = this.convertTime12to24(data.activity.ETA);
+
+        /*
+        let startTimestampDate = new Date(
+            `${_data.activity.date} ${etaFormated}`.replace(" ", "T")
+        );
+
+        let startTimeTxt =
+            "T" +
+            ("0" + startTimestampDate.getHours()).slice(-2) +
+            ":" +
+            ("0" + startTimestampDate.getMinutes()).slice(-2) +
+            ":00";
+
+        if (laborItems.length > 0) {
+            let activityToUpdate = {
+            aid: _data.activity.aid,
+            };
+            let inventoryListObject: any = {};
+            let inventoryItem: any = laborItems[0];
+            (inventoryItem["labor_start_time"] = startTimeTxt),
+            (inventoryItem["labor_end_time"] = endTimeTxt);
+            inventoryListObject[laborItems[0]["invid"]] = inventoryItem;
+            var dataToSend = {
+            activity: activityToUpdate,
+            inventoryList: inventoryListObject,
+            };
+            globalThis.actionAtReturn = "DEBRIEF";
+            this.update(dataToSend);
+        } else {
+            var actions: any = [
+            {
+                entity: "inventory",
+                action: "create",
+                inv_pid: _data.resource.pid,
+                inv_aid: _data.activity.aid,
+                invtype: laborInvType,
+                invpool: "install",
+                properties: {
+                I_DEFAULT_VALUE: "1",
+                labor_start_time: startTimeTxt,
+                labor_end_time: endTimeTxt,
+                labor_item_number: laborItemNumber,
+                labor_item_description: laborItemDesc,
+                labor_service_activity: laborServActivity,
+                },
+            },
+            ];
+            let dataToSend = {
+            activity: _data.activity,
+            actions: actions,
+            backScreen: "plugin_by_label",
+            backPluginLabel: debriefPluginLabel,
+            };
+            this.close(dataToSend);
+        }
+        */
     }
 }
