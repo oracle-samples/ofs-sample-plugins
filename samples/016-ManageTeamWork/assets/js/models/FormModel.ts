@@ -223,28 +223,13 @@ export class LaborFormModel {
 
             this.thisFormRow = rowNumber - 1;
             Object.entries(this.formCellsMapping).forEach(([id, config]) => {
-                console.debug(
-                    `Validating config for id ${id} and ${JSON.stringify(
-                        config.type
-                    )}`
-                );
                 if (["select-option", "input"].includes(config.type)) {
                     if (config.type === "select-option") {
                         id = "from_select" in config ? config.from_select : "";
                     }
-                    console.debug(
-                        `Form element: ${id},  Content Before: ${this.getInputValue(
-                            id
-                        )} `
-                    );
                     this.setInputValue(
                         id,
                         row.cells[config.index].textContent || ""
-                    );
-                    console.debug(
-                        `Form element: ${id},  Content After: ${this.getInputValue(
-                            id
-                        )}`
                     );
                     if (
                         "editable" in config &&
