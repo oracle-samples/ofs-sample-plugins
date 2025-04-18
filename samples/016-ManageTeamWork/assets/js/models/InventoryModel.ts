@@ -134,16 +134,11 @@ export class Inventory {
     }
     getActions(inventoryElements: InventoryItemElement[], action: string) {
         // Generates the json for the inventory
-        console.log(
-            `${this.constructor.name} - generateActionsJson`,
-            JSON.stringify(inventoryElements, null, 2)
-        );
         let actions: any = [];
-        if (action === "create") {
-            inventoryElements.forEach((element) => {
-                actions.push(this.generateJson(element, action));
-            });
-        }
+        inventoryElements.forEach((element) => {
+            actions.push(this.generateJson(element, action));
+        });
+
         return actions;
     }
     constructor(inventoryData: any) {
@@ -155,5 +150,4 @@ export class Inventory {
         }
         // TODO: Check if installed inv is only for the current activity
     }
-    
 }

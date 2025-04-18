@@ -377,6 +377,7 @@ export class LaborFormModel {
     };
     loadForm = (): void => {
         this.trackStep("LOAD", "START");
+        this.cleanLaborLines();
         this.resetForm();
         this.populateTechnicianDropdown();
         this.populateLaborTypeDropdown();
@@ -463,7 +464,13 @@ export class LaborFormModel {
             }
         }
     }
-
+    private cleanLaborLines = (): void => {
+        this.trackStep("CLEAN LABOR LINES", "START");
+        while (this.laborLines.rows.length > 0) {
+            this.laborLines.deleteRow(0);
+        }
+        this.trackStep("CLEAN LABOR LINES", "END");
+    };
     private getInventoryElements = (
         validStatuses: string[]
     ): InventoryItemElement[] => {

@@ -24,6 +24,7 @@ interface OFSInitMessageCustom extends OFSInitMessage {
 }
 
 declare global {
+    var pluginProcessId: number;
     var pluginActionAfterUpdate: PluginActions;
     var activityToManage: string;
     var debriefPluginLabel: string;
@@ -47,26 +48,31 @@ type PluginActions = (typeof PLUGIN_ACTIONS)[keyof typeof PLUGIN_ACTIONS];
 export class CustomPlugin extends OFSPlugin {
     updateResult(_data: OFSOpenMessageCustom) {
         console.info(`${this.tag} :  UPDATE RESULT`);
+        globalThis.pluginProcessId = globalThis.pluginProcessId + 1;
         var plugin = this;
         const inventoryData = new Inventory(_data.inventoryList);
-        var nextAction: PluginActions = PLUGIN_ACTIONS.CREATE_DELETE;
+        var currentAction: PluginActions = PLUGIN_ACTIONS.CREATE_DELETE;
         // Handle all possible values of globalThis.pluginActionAfterUpdate
-        switch (globalThis.pluginActionAfterUpdate) {
-            case PLUGIN_ACTIONS.STOP:
-                nextAction = PLUGIN_ACTIONS.NONE;
-                break;
+        if (globalThis.pluginActionAfterUpdate != PLUGIN_ACTIONS.STOP) {
+            this.sendNextInventoryMessage(
+                _data,
+                inventoryData,
+                inventoryElementsToCreate,
+                [],
+                inventoryElementsToDelete,
+                currentAction,
+                globalThis.pluginActionAfterUpdate
+            );
         }
-
-        this.sendNextInventoryMessage(
-            _data,
-            inventoryData,
-            inventoryElementsToCreate,
-            [],
-            inventoryElementsToDelete,
-            nextAction,
-            globalThis.pluginActionAfterUpdate
-        );
+        // sleep
+        setTimeout(() => {
+            console.debug(
+                `${this.tag} : messagesThread_${globalThis.pluginProcessId} : updateResult - closing`
+            );
+            this.open(_data);
+        }, 1000);
     }
+
     init(message: OFSInitMessageCustom) {
         console.info(`${this.tag} :  INIT`);
         this.storeInitProperty(
@@ -273,6 +279,7 @@ export class CustomPlugin extends OFSPlugin {
         };
 
         document.getElementById("debrief-button")!.onclick = () => {
+            globalThis.pluginProcessId = Math.floor(Math.random() * 1000000);
             const {
                 inventoryElementsToCreate,
                 inventoryElementsToUpdate,
@@ -291,6 +298,7 @@ export class CustomPlugin extends OFSPlugin {
             );
         };
         document.getElementById("save-button")!.onclick = () => {
+            globalThis.pluginProcessId = Math.floor(Math.random() * 1000000);
             const {
                 inventoryElementsToCreate,
                 inventoryElementsToUpdate,
@@ -322,6 +330,9 @@ export class CustomPlugin extends OFSPlugin {
         actionAfterUpdate: PluginActions
     ) {
         // Switch for all possible values of currentAction
+        console.debug(
+            `${this.tag} : messagesThread_${globalThis.pluginProcessId} : ${currentAction} actionAfterUpdate ${actionAfterUpdate} with ${inventoryElementsToCreate.length} elements to create, ${inventoryElementsToUpdate.length} elements to update and ${inventoryElementsToDelete.length} elements to delete`
+        );
         switch (currentAction) {
             case PLUGIN_ACTIONS.UPDATE:
                 if (inventoryElementsToUpdate.length > 0) {
@@ -335,27 +346,48 @@ export class CustomPlugin extends OFSPlugin {
                         ),
                     };
                     globalThis.pluginActionAfterUpdate = actionAfterUpdate;
+                    console.debug(
+                        `${this.tag} : messagesThread_${globalThis.pluginProcessId} : sendNextInventoryMessage ${currentAction} actionAfterUpdate ${actionAfterUpdate} - updating and stopping`
+                    );
                     this.update(dataToSend);
+                    return;
+                } else {
+                    this.sendNextInventoryMessage(
+                        _data,
+                        inventoryData,
+                        inventoryElementsToCreate,
+                        inventoryElementsToUpdate,
+                        inventoryElementsToDelete,
+                        PLUGIN_ACTIONS.CREATE_DELETE,
+                        actionAfterUpdate
+                    );
                 }
                 break;
             case PLUGIN_ACTIONS.CREATE_DELETE:
-                let actions: any = {};
+                let actions: any[] = [];
                 if (inventoryElementsToCreate.length > 0) {
-                    actions = inventoryData.getActions(
-                        inventoryElementsToCreate,
-                        "create"
+                    actions.push(
+                        ...inventoryData.getActions(
+                            inventoryElementsToCreate,
+                            "create"
+                        )
                     );
                 }
                 if (inventoryElementsToDelete.length > 0) {
-                    // add inventoryData.getActions(inventoryElementsToDelete, "delete") to actions
-                    actions = {
-                        ...actions,
+                    actions.push(
                         ...inventoryData.getActions(
                             inventoryElementsToDelete,
                             "delete"
-                        ),
-                    };
+                        )
+                    );
                 }
+                console.debug(
+                    `${this.tag} : messagesThread_${
+                        globalThis.pluginProcessId
+                    } :  ${currentAction} actionAfterUpdate ${actionAfterUpdate} - actions to Execute ${JSON.stringify(
+                        actions
+                    )}`
+                );
                 let dataToSend: any = {
                     activity: _data.activity,
                     actions: actions,
@@ -363,90 +395,50 @@ export class CustomPlugin extends OFSPlugin {
                 if (actionAfterUpdate === PLUGIN_ACTIONS.DEBRIEF) {
                     dataToSend.backScreen = "plugin_by_label";
                     dataToSend.backPluginLabel = globalThis.debriefPluginLabel;
+                    console.debug(
+                        `${this.tag} : messagesThread_${globalThis.pluginProcessId} :  ${currentAction} actionAfterUpdate ${actionAfterUpdate} - closing with redirect`
+                    );
                     this.close(dataToSend);
+                    return;
                 } else if (actionAfterUpdate === PLUGIN_ACTIONS.CLOSE) {
+                    console.debug(
+                        `${this.tag} : messagesThread_${globalThis.pluginProcessId} : ${currentAction} actionAfterUpdate ${actionAfterUpdate} - closing without redirect`
+                    );
                     this.close(dataToSend);
+                    return;
                 } else if (actionAfterUpdate === PLUGIN_ACTIONS.NONE) {
                     globalThis.pluginActionAfterUpdate = PLUGIN_ACTIONS.STOP;
+                    console.debug(
+                        `${this.tag} : messagesThread_${globalThis.pluginProcessId} : ${currentAction} actionAfterUpdate ${actionAfterUpdate} - creating through update and stopping`
+                    );
                     this.update(dataToSend);
+                    return;
+                } else {
+                    console.error(
+                        `${this.tag} : messagesThread_${globalThis.pluginProcessId} : Unknown action ${currentAction}`
+                    );
                 }
 
                 break;
             case PLUGIN_ACTIONS.DEBRIEF:
                 console.error(
-                    `${this.tag} : DEBRIEF is not a valid current action`
+                    `${this.tag} : messagesThread_${globalThis.pluginProcessId} : sendNextInventoryMessage ${currentAction} actionAfterUpdate ${actionAfterUpdate} - DEBRIEF as current action is not valid`
                 );
                 break;
             case PLUGIN_ACTIONS.CLOSE:
-                console.log(
-                    `${this.tag} : CLOSE is not a valid current action`
+                console.error(
+                    `${this.tag} : messagesThread_${globalThis.pluginProcessId} : sendNextInventoryMessage ${currentAction} actionAfterUpdate ${actionAfterUpdate} - DEBRIEF as current action is not valid`
                 );
                 break;
             case PLUGIN_ACTIONS.NONE:
+                console.debug(
+                    `${this.tag} : messagesThread_${globalThis.pluginProcessId} : sendNextInventoryMessage ${currentAction} actionAfterUpdate ${actionAfterUpdate} - Finishing. Nothing else to do`
+                );
                 break;
             default:
-                console.error(`${this.tag} : Unknown action ${currentAction}`);
+                console.error(
+                    `${this.tag} : messagesThread_${globalThis.pluginProcessId} : Unknown action ${currentAction}`
+                );
         }
-    }
-    save(_data: OFSOpenMessageCustom) {
-        // Removed unused variable declaration
-        LaborFormModel;
-        //var etaFormated: string = this.convertTime12to24(data.activity.ETA);
-
-        /*
-        let startTimestampDate = new Date(
-            `${_data.activity.date} ${etaFormated}`.replace(" ", "T")
-        );
-
-        let startTimeTxt =
-            "T" +
-            ("0" + startTimestampDate.getHours()).slice(-2) +
-            ":" +
-            ("0" + startTimestampDate.getMinutes()).slice(-2) +
-            ":00";
-
-        if (laborItems.length > 0) {
-            let activityToUpdate = {
-            aid: _data.activity.aid,
-            };
-            let inventoryListObject: any = {};
-            let inventoryItem: any = laborItems[0];
-            (inventoryItem["labor_start_time"] = startTimeTxt),
-            (inventoryItem["labor_end_time"] = endTimeTxt);
-            inventoryListObject[laborItems[0]["invid"]] = inventoryItem;
-            var dataToSend = {
-            activity: activityToUpdate,
-            inventoryList: inventoryListObject,
-            };
-            globalThis.actionAtReturn = "DEBRIEF";
-            this.update(dataToSend);
-        } else {
-            var actions: any = [
-            {
-                entity: "inventory",
-                action: "create",
-                inv_pid: _data.resource.pid,
-                inv_aid: _data.activity.aid,
-                invtype: laborInvType,
-                invpool: "install",
-                properties: {
-                I_DEFAULT_VALUE: "1",
-                labor_start_time: startTimeTxt,
-                labor_end_time: endTimeTxt,
-                labor_item_number: laborItemNumber,
-                labor_item_description: laborItemDesc,
-                labor_service_activity: laborServActivity,
-                },
-            },
-            ];
-            let dataToSend = {
-            activity: _data.activity,
-            actions: actions,
-            backScreen: "plugin_by_label",
-            backPluginLabel: debriefPluginLabel,
-            };
-            this.close(dataToSend);
-        }
-        */
     }
 }
