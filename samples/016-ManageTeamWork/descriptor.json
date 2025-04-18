@@ -1,0 +1,50 @@
+{
+    "properties": {
+        "activity": [
+            "appt_number",
+            "length",
+            "ETA",
+            "astatus",
+            "date",
+            "caddress",
+            "ccity",
+            "ccompany",
+            "cname",
+            "cstate",
+            "appt_number",
+            "czip"
+        ],
+        "provider": [
+            "pid",
+            "pname"
+        ],
+        "inventory": [
+            "invpool",
+            "inv_aid",
+            "inventory_model",
+            "inv_pid",
+            "invtype",
+            "invpool",
+            "invsn",
+            "invid",
+            "labor_item_desc",
+            "labor_item_number",
+            "labor_start_time",
+            "labor_end_time"
+        ]
+    },
+    "securedParams": [
+        {
+            "name": "invtype",
+            "value": "labor"
+        },
+        {
+            "name": "laborServiceActivity",
+            "value": "Labor"
+        },
+        {
+            "name": "debriefPluginLabel",
+            "value": "debriefing"
+        }
+    ]
+}
