@@ -104,10 +104,35 @@ export class Inventory {
             });
         });
     }
-    generateActionsJson(
-        inventoryElements: InventoryItemElement[],
-        action: string = "create"
-    ) {
+    private generateJson(element: InventoryItemElement, action?: string) {
+        return {
+            entity: "inventory",
+            action: action || "",
+            invid: element.invid,
+            inv_pid: element.inv_pid,
+            invtype: element.invtype,
+            invpool: element.invpool,
+            inv_aid: element.inv_aid,
+            properties: {
+                invsn: element.invsn || undefined,
+                labor_start_time: element.labor_start_time || undefined,
+                labor_end_time: element.labor_end_time || undefined,
+                labor_item_number: element.labor_item_number || undefined,
+                labor_item_desc: element.labor_item_description || undefined,
+                labor_service_activity:
+                    element.labor_service_activity || undefined,
+            },
+        };
+    }
+    getInventoryListToUpdate(inventoryElements: InventoryItemElement[]) {
+        let inventoryList: any = {};
+        inventoryElements.forEach((element) => {
+            inventoryList[element.invid] = this.generateJson(element);
+        });
+
+        return inventoryList;
+    }
+    getActions(inventoryElements: InventoryItemElement[], action: string) {
         // Generates the json for the inventory
         console.log(
             `${this.constructor.name} - generateActionsJson`,
@@ -116,23 +141,7 @@ export class Inventory {
         let actions: any = [];
         if (action === "create") {
             inventoryElements.forEach((element) => {
-                actions.push({
-                    entity: "inventory",
-                    action: action,
-                    invid: element.invid,
-                    inv_pid: element.inv_pid,
-                    invtype: element.invtype,
-                    invpool: element.invpool,
-                    inv_aid: element.inv_aid,
-                    properties: {
-                        invsn: element.invsn,
-                        labor_start_time: element.labor_start_time,
-                        labor_end_time: element.labor_end_time,
-                        labor_item_number: element.labor_item_number,
-                        labor_item_desc: element.labor_item_description,
-                        labor_service_activity: element.labor_service_activity,
-                    },
-                });
+                actions.push(this.generateJson(element, action));
             });
         }
         return actions;
@@ -146,4 +155,5 @@ export class Inventory {
         }
         // TODO: Check if installed inv is only for the current activity
     }
+    
 }

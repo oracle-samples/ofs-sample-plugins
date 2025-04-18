@@ -1,0 +1,38 @@
+{
+    "properties": {
+        "activity": [
+            "appt_number",
+            "length",
+            "ETA",
+            "astatus",
+            "date",
+            "caddress",
+            "ccity",
+            "ccompany",
+            "cname",
+            "cstate",
+            "appt_number",
+            "czip",
+            "A_TEAM_PROPERTIES_pname_1",
+            "A_TEAM_PROPERTIES_pid_1",
+            "A_TEAM_PROPERTIES_pname_2",
+            "A_TEAM_PROPERTIES_pid_2",
+            "A_TEAM_PROPERTIES_pname_3",
+            "A_TEAM_PROPERTIES_pid_3",
+            "A_TEAM_PROPERTIES_pname_4",
+            "A_TEAM_PROPERTIES_pid_4",
+            "A_TEAM_PROPERTIES_pname_5",
+            "A_TEAM_PROPERTIES_pid_5"
+        ],
+        "provider": [
+            "pid",
+            "pname"
+        ]
+    },
+    "securedParams": [
+        {
+            "name": "propertiesPrefix",
+            "value": "A_TEAM_PROPERTIES_"
+        }
+    ]
+}

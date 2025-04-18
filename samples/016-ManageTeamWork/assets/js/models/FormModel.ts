@@ -35,7 +35,7 @@ export class LaborFormModel {
             type: "select-option",
             from_select: "technician-name",
             index: 1,
-            editable: { edit: false, load: false },
+            editable: { edit: false, load: true },
             uniqueKey: true,
         },
         "start-time": { type: "input", index: 2 },
@@ -49,7 +49,7 @@ export class LaborFormModel {
             type: "select-option",
             from_select: "labor-type",
             index: 5,
-            editable: { edit: false, load: false },
+            editable: { edit: false, load: true },
             uniqueKey: true,
         },
         "text-description": { type: "input", index: 6 },
@@ -368,7 +368,7 @@ export class LaborFormModel {
             );
             actionsCell.appendChild(
                 this.createButton("Delete", "btn btn-danger", () =>
-                    this.laborLines.deleteRow(row.rowIndex - 1)
+                    this.deleteRow(row.rowIndex)
                 )
             );
         }
@@ -431,18 +431,18 @@ export class LaborFormModel {
             );
             actionsCell.appendChild(
                 this.createButton("Delete", "btn btn-danger", () =>
-                    this.laborLines.deleteRow(row.rowIndex - 1)
+                    this.deleteRow(row.rowIndex)
                 )
             );
         });
     };
-    getInventoryElementsToUpdate = (): InventoryItemElement[] => {
+    private getInventoryElementsToUpdate = (): InventoryItemElement[] => {
         return this.getInventoryElements([this.status_changed]);
     };
-    getInventoryElementsToCreate = (): InventoryItemElement[] => {
+    private getInventoryElementsToCreate = (): InventoryItemElement[] => {
         return this.getInventoryElements([this.status_new]);
     };
-    getInventoryElementsToDelete = (): InventoryItemElement[] => {
+    private getInventoryElementsToDelete = (): InventoryItemElement[] => {
         return this.getInventoryElements([this.status_removed]);
     };
     getRowValue(
@@ -467,7 +467,11 @@ export class LaborFormModel {
     private getInventoryElements = (
         validStatuses: string[]
     ): InventoryItemElement[] => {
-        this.trackStep("CREATE INVENTORY ITEMS", "START");
+        this.trackStep(
+            "GET INVENTORY ELEMENTS",
+            "START",
+            `Valid statuses: ${validStatuses.join(", ")}`
+        );
         const inventoryItems: InventoryItemElement[] = [];
         // For all labor lines, create inventory elements for those with status-label in tatus_changed
         Array.from(this.laborLines.rows).forEach((row, index) => {
@@ -500,6 +504,13 @@ export class LaborFormModel {
                 inventoryItems.push(inventoryItem);
             }
         });
+        this.trackStep(
+            "GET INVENTORY ELEMENTS",
+            "START",
+            `Valid statuses: ${validStatuses.join(", ")} returned ${
+                inventoryItems.length
+            } elements`
+        );
         return inventoryItems;
     };
     deleteRow(rowIndex: number): void {
@@ -524,4 +535,15 @@ export class LaborFormModel {
             this.laborLines.deleteRow(row.rowIndex - 1);
         }
     }
+    getAllInventoryElements = (): {
+        inventoryElementsToCreate: InventoryItemElement[];
+        inventoryElementsToUpdate: InventoryItemElement[];
+        inventoryElementsToDelete: InventoryItemElement[];
+    } => {
+        return {
+            inventoryElementsToCreate: this.getInventoryElementsToCreate(),
+            inventoryElementsToUpdate: this.getInventoryElementsToUpdate(),
+            inventoryElementsToDelete: this.getInventoryElementsToDelete(),
+        };
+    };
 }

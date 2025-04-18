@@ -24,30 +24,48 @@ interface OFSInitMessageCustom extends OFSInitMessage {
 }
 
 declare global {
-    var actionAtReturn: any;
+    var pluginActionAfterUpdate: PluginActions;
     var activityToManage: string;
     var debriefPluginLabel: string;
     var invtype: string;
     var laborServiceActivity: string;
+    var inventoryElementsToCreate: InventoryItemElement[];
+    var inventoryElementsToDelete: InventoryItemElement[];
 }
+// Declare a constant to define list of possible actionsAtReturn DEBRIEF, CLOSE, NONE
+const PLUGIN_ACTIONS = {
+    CREATE_DELETE: "CREATE_DELETE",
+    UPDATE: "UPDATE",
+    DEBRIEF: "DEBRIEF",
+    CLOSE: "CLOSE",
+    NONE: "NONE",
+    STOP: "STOP",
+} as const;
+
+type PluginActions = (typeof PLUGIN_ACTIONS)[keyof typeof PLUGIN_ACTIONS];
 
 export class CustomPlugin extends OFSPlugin {
-    updateResult(data: OFSOpenMessageCustom) {
+    updateResult(_data: OFSOpenMessageCustom) {
+        console.info(`${this.tag} :  UPDATE RESULT`);
         var plugin = this;
-        if (globalThis.actionAtReturn == null) {
-            globalThis.actionAtReturn = "NOT_VALID";
+        const inventoryData = new Inventory(_data.inventoryList);
+        var nextAction: PluginActions = PLUGIN_ACTIONS.CREATE_DELETE;
+        // Handle all possible values of globalThis.pluginActionAfterUpdate
+        switch (globalThis.pluginActionAfterUpdate) {
+            case PLUGIN_ACTIONS.STOP:
+                nextAction = PLUGIN_ACTIONS.NONE;
+                break;
         }
-        if (globalThis.actionAtReturn == "DEBRIEF") {
-            let dataToSend = {
-                backScreen: "plugin_by_label",
-                backPluginLabel: globalThis.debriefPluginLabel,
-            };
-            this.close(dataToSend);
-        } else {
-            console.log(
-                `${plugin.tag} Global Action value ${globalThis.actionAtReturn} is not valid `
-            );
-        }
+
+        this.sendNextInventoryMessage(
+            _data,
+            inventoryData,
+            inventoryElementsToCreate,
+            [],
+            inventoryElementsToDelete,
+            nextAction,
+            globalThis.pluginActionAfterUpdate
+        );
     }
     init(message: OFSInitMessageCustom) {
         console.info(`${this.tag} :  INIT`);
@@ -106,27 +124,6 @@ export class CustomPlugin extends OFSPlugin {
             return `${hours}:${minutes}:00`;
         };
 
-        const convertTime24to12 = (time24h: string): string => {
-            let [hours, minutes] = time24h.split(":").map(Number);
-            const modifier = hours >= 12 ? "PM" : "AM";
-
-            hours = hours % 12 || 12; // Convert 0 to 12 for 12-hour format
-            return `${hours}:${minutes
-                .toString()
-                .padStart(2, "0")} ${modifier}`;
-        };
-        const gettimeinformat = (
-            inputDate: Date,
-            timeSeparator: " " | "T" = " "
-        ): string => {
-            return (
-                timeSeparator +
-                ("0" + inputDate.getHours()).slice(-2) +
-                ":" +
-                ("0" + inputDate.getMinutes()).slice(-2) +
-                ":00"
-            );
-        };
         const getTeam = (): any => {
             let teamMembers = _data.team?.teamMembers || {};
             const resource = _data.resource;
@@ -274,82 +271,122 @@ export class CustomPlugin extends OFSPlugin {
             // console.log that I have clicked on confirm button
             laborFormModel.confirmForm();
         };
-        const executeAndReturnElements = (): {
-            inventoryElementsToCreate: InventoryItemElement[];
-            inventoryElementsToUpdate: InventoryItemElement[];
-            inventoryElementsToDelete: InventoryItemElement[];
-        } => {
-            return {
-                inventoryElementsToCreate:
-                    laborFormModel.getInventoryElementsToCreate(),
-                inventoryElementsToUpdate:
-                    laborFormModel.getInventoryElementsToUpdate(),
-                inventoryElementsToDelete:
-                    laborFormModel.getInventoryElementsToDelete(),
-            };
-        };
+
         document.getElementById("debrief-button")!.onclick = () => {
             const {
                 inventoryElementsToCreate,
                 inventoryElementsToUpdate,
                 inventoryElementsToDelete,
-            } = executeAndReturnElements();
-            if (inventoryElementsToUpdate.length > 0) {
-                const elementsToUpdate = inventoryData.generateActionsJson(
-                    inventoryElementsToUpdate
-                );
-                console.debug(
-                    `${
-                        this.tag
-                    } : Inventory elements to update: ${inventoryElementsToUpdate}  (stringified): ${JSON.stringify(
-                        elementsToUpdate
-                    )}`
-                );
-            } else if (inventoryElementsToCreate.length > 0) {
-                inventoryData.generateActionsJson(inventoryElementsToCreate);
-                let dataToSend = {
-                    activity: _data.activity,
-                    actions: inventoryData.generateActionsJson(
-                        inventoryElementsToCreate
-                    ),
-                    backScreen: "plugin_by_label",
-                    backPluginLabel: debriefPluginLabel,
-                };
-                this.close(dataToSend);
-            }
-            if (inventoryElementsToDelete.length > 0) {
-                const elementsToDelete = inventoryData.generateActionsJson(
-                    inventoryElementsToDelete
-                );
-                console.log(
-                    `${
-                        this.tag
-                    } : Inventory elements to update: ${inventoryElementsToDelete}  (stringified): ${JSON.stringify(
-                        elementsToDelete
-                    )}`
-                );
-            }
+            } = laborFormModel.getAllInventoryElements();
+            globalThis.inventoryElementsToCreate = inventoryElementsToCreate;
+            globalThis.inventoryElementsToDelete = inventoryElementsToDelete;
+            this.sendNextInventoryMessage(
+                _data,
+                inventoryData,
+                inventoryElementsToCreate,
+                inventoryElementsToUpdate,
+                inventoryElementsToDelete,
+                PLUGIN_ACTIONS.UPDATE,
+                PLUGIN_ACTIONS.DEBRIEF
+            );
         };
         document.getElementById("save-button")!.onclick = () => {
             const {
                 inventoryElementsToCreate,
                 inventoryElementsToUpdate,
                 inventoryElementsToDelete,
-            } = executeAndReturnElements();
-            if (inventoryElementsToCreate.length > 0) {
-                inventoryData.generateActionsJson(inventoryElementsToCreate);
-                let dataToSend = {
-                    activity: _data.activity,
-                    actions: inventoryData.generateActionsJson(
-                        inventoryElementsToCreate
-                    ),
-                };
-                this.close(dataToSend);
-            }
+            } = laborFormModel.getAllInventoryElements();
+            globalThis.inventoryElementsToCreate = inventoryElementsToCreate;
+            globalThis.inventoryElementsToDelete = inventoryElementsToDelete;
+            this.sendNextInventoryMessage(
+                _data,
+                inventoryData,
+                inventoryElementsToCreate,
+                inventoryElementsToUpdate,
+                inventoryElementsToDelete,
+                PLUGIN_ACTIONS.UPDATE,
+                PLUGIN_ACTIONS.NONE
+            );
         };
         document.getElementById("cancel-button")!.onclick = () => {
             this.close();
         };
+    }
+    sendNextInventoryMessage(
+        _data: OFSOpenMessageCustom,
+        inventoryData: Inventory,
+        inventoryElementsToCreate: InventoryItemElement[],
+        inventoryElementsToUpdate: InventoryItemElement[],
+        inventoryElementsToDelete: InventoryItemElement[],
+        currentAction: PluginActions,
+        actionAfterUpdate: PluginActions
+    ) {
+        // Switch for all possible values of currentAction
+        switch (currentAction) {
+            case PLUGIN_ACTIONS.UPDATE:
+                if (inventoryElementsToUpdate.length > 0) {
+                    let activityToUpdate = {
+                        aid: _data.activity.aid,
+                    };
+                    let dataToSend: any = {
+                        activity: activityToUpdate,
+                        inventoryList: inventoryData.getInventoryListToUpdate(
+                            inventoryElementsToUpdate
+                        ),
+                    };
+                    globalThis.pluginActionAfterUpdate = actionAfterUpdate;
+                    this.update(dataToSend);
+                }
+                break;
+            case PLUGIN_ACTIONS.CREATE_DELETE:
+                let actions: any = {};
+                if (inventoryElementsToCreate.length > 0) {
+                    actions = inventoryData.getActions(
+                        inventoryElementsToCreate,
+                        "create"
+                    );
+                }
+                if (inventoryElementsToDelete.length > 0) {
+                    // add inventoryData.getActions(inventoryElementsToDelete, "delete") to actions
+                    actions = {
+                        ...actions,
+                        ...inventoryData.getActions(
+                            inventoryElementsToDelete,
+                            "delete"
+                        ),
+                    };
+                }
+                let dataToSend: any = {
+                    activity: _data.activity,
+                    actions: actions,
+                };
+                if (actionAfterUpdate === PLUGIN_ACTIONS.DEBRIEF) {
+                    dataToSend.backScreen = "plugin_by_label";
+                    dataToSend.backPluginLabel = globalThis.debriefPluginLabel;
+                    this.close(dataToSend);
+                } else if (actionAfterUpdate === PLUGIN_ACTIONS.CLOSE) {
+                    this.close(dataToSend);
+                } else if (actionAfterUpdate === PLUGIN_ACTIONS.NONE) {
+                    globalThis.pluginActionAfterUpdate = PLUGIN_ACTIONS.STOP;
+                    this.update(dataToSend);
+                }
+
+                break;
+            case PLUGIN_ACTIONS.DEBRIEF:
+                console.error(
+                    `${this.tag} : DEBRIEF is not a valid current action`
+                );
+                break;
+            case PLUGIN_ACTIONS.CLOSE:
+                console.log(
+                    `${this.tag} : CLOSE is not a valid current action`
+                );
+                break;
+            case PLUGIN_ACTIONS.NONE:
+                break;
+            default:
+                console.error(`${this.tag} : Unknown action ${currentAction}`);
+        }
     }
     save(_data: OFSOpenMessageCustom) {
         // Removed unused variable declaration
