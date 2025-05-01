@@ -147,6 +147,14 @@ export class LaborFormModel {
         });
         this.trackStep("POPULATE TECHNICIANS", "END");
     }
+    private cleanTechnicianDropdown(): void {
+        this.trackStep("CLEAN TECHNICIANS", "START");
+        // Remove all options ( to prevent re-loading of same options)
+        while (this.technicianSelect.options.length > 0) {
+            this.technicianSelect.remove(0);
+        }
+        this.trackStep("CLEAN TECHNICIANS", "END");
+    }
     private trackStep(
         action: string,
         step: string,
@@ -172,7 +180,12 @@ export class LaborFormModel {
             this.laborTypeSelect.appendChild(option);
         });
     }
-
+    private cleanLaborTypeDropdown(): void {
+        // Clean this.laborTypeSelect
+        while (this.laborTypeSelect.options.length > 0) {
+            this.laborTypeSelect.remove(0);
+        }
+    }
     // Get the value of an input field
     getInputValue(id: string): string {
         return (document.getElementById(id) as HTMLInputElement).value;
@@ -378,6 +391,8 @@ export class LaborFormModel {
     loadForm = (): void => {
         this.trackStep("LOAD", "START");
         this.cleanLaborLines();
+        this.cleanLaborTypeDropdown();
+        this.cleanTechnicianDropdown();
         this.resetForm();
         this.populateTechnicianDropdown();
         this.populateLaborTypeDropdown();
