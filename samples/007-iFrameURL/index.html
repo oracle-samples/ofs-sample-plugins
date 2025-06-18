@@ -9,55 +9,218 @@ Licensed under the Universal Permissive License (UPL), Version 1.0  as shown at 
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
-    <title>plugin-template</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css">
+    <title>URL Redirect Plugin</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+            color: #212529;
+            line-height: 1.5;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .text-center {
+            text-align: center;
+        }
+        
+        h3 {
+            margin-bottom: 1.5rem;
+            color: #495057;
+        }
+        
+        .alert {
+            padding: 12px 20px;
+            margin-bottom: 20px;
+            border: 1px solid transparent;
+            border-radius: 6px;
+        }
+        
+        .alert-info {
+            color: #0c5460;
+            background-color: #d1ecf1;
+            border-color: #bee5eb;
+        }
+        
+        .alert-success {
+            color: #0f5132;
+            background-color: #d1e7dd;
+            border-color: #badbcc;
+        }
+        
+        .alert-danger {
+            color: #842029;
+            background-color: #f8d7da;
+            border-color: #f5c2c7;
+        }
+        
+        .alert-warning {
+            color: #664d03;
+            background-color: #fff3cd;
+            border-color: #ffecb5;
+        }
+        
+        .accordion {
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+        
+        .accordion-header {
+            margin: 0;
+        }
+        
+        .accordion-button {
+            width: 100%;
+            padding: 12px 20px;
+            background-color: #f8f9fa;
+            border: none;
+            text-align: left;
+            cursor: pointer;
+            border-bottom: 1px solid #dee2e6;
+            font-weight: 500;
+        }
+        
+        .accordion-button:hover {
+            background-color: #e9ecef;
+        }
+        
+        .accordion-body {
+            padding: 20px;
+            background-color: white;
+        }
+        
+        .accordion-collapse {
+            display: none;
+        }
+        
+        .accordion-collapse.show {
+            display: block;
+        }
+        
+        pre {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 12px;
+            border: 1px solid #dee2e6;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 8px 16px;
+            margin: 4px;
+            border: 1px solid transparent;
+            border-radius: 6px;
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            text-align: center;
+        }
+        
+        .btn-primary {
+            color: white;
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+        }
+        
+        .btn-primary:hover {
+            background-color: #0b5ed7;
+            border-color: #0a58ca;
+        }
+        
+        .btn-lg {
+            padding: 12px 24px;
+            font-size: 18px;
+        }
+        
+        .footer {
+            margin-top: auto;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #dee2e6;
+            background-color: white;
+        }
+        
+        .url-display {
+            background-color: white;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .url-link {
+            color: #0d6efd;
+            text-decoration: underline;
+            cursor: pointer;
+            word-break: break-all;
+        }
+        
+        .url-link:hover {
+            color: #0b5ed7;
+        }
+    </style>
 </head>
 
 <body>
-    <div class="accordion" role="tablist" id="accordion-1">
-        <div class="accordion-item">
-            <h2 class="accordion-header" role="tab"><button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#accordion-1 .item-1" aria-expanded="true" aria-controls="accordion-1 .item-1">Accordion Item</button></h2>
-            <div class="accordion-collapse collapse show item-1" role="tabpanel" data-bs-parent="#accordion-1">
-                <div class="accordion-body">
-                    <p class="mb-0">Nullam id dolor id nibh ultricies vehicula ut id elit. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Donec id elit non mi porta gravida at eget metus.</p>
-                </div>
-            </div>
+    <div class="container">
+        <h3 class="text-center">URL Redirect Plugin</h3>
+        <div id="status_message">
+            <div class="alert alert-info">Waiting for URL parameters...</div>
         </div>
-        <div class="accordion-item">
-            <h2 class="accordion-header" role="tab"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#accordion-1 .item-2" aria-expanded="false" aria-controls="accordion-1 .item-2">Accordion Item 1</button></h2>
-            <div class="accordion-collapse collapse item-2" role="tabpanel" data-bs-parent="#accordion-1">
-                <div class="accordion-body">
-                    <p class="mb-0">Nullam id dolor id nibh ultricies vehicula ut id elit. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Donec id elit non mi porta gravida at eget metus.</p>
-                </div>
-            </div>
+        
+        <div id="url_display" class="url-display" style="display: none;">
+            <strong>URL to open:</strong><br>
+            <span id="url_link" class="url-link"></span>
+            <button id="copy_btn" class="btn" style="margin-left: 10px;">Copy URL</button>
         </div>
-        <div class="accordion-item">
-            <h2 class="accordion-header" role="tab"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#accordion-1 .item-3" aria-expanded="false" aria-controls="accordion-1 .item-3">Accordion Item 2</button></h2>
-            <div class="accordion-collapse collapse item-3" role="tabpanel" data-bs-parent="#accordion-1">
-                <div class="accordion-body">
-                    <p class="mb-0">Nullam id dolor id nibh ultricies vehicula ut id elit. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Donec id elit non mi porta gravida at eget metus.</p>
-                </div>
+        
+        <div class="accordion">
+            <div class="accordion-header">
+                <button id="debug-toggle" class="accordion-button" type="button">
+                    DEBUG: View Input Data
+                </button>
             </div>
-        </div>
-        <div class="accordion-item">
-            <h2 class="accordion-header" role="tab"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#accordion-1 .item-4" aria-expanded="false" aria-controls="accordion-1 .item-4">DEBUG ONLY: INPUT DATA</button></h2>
-            <div class="accordion-collapse collapse item-4" role="tabpanel" data-bs-parent="#accordion-1">
+            <div id="debug-content" class="accordion-collapse">
                 <div class="accordion-body">
-                    <div id="input_data"></div>
+                    <pre id="input_data"></pre>
                 </div>
             </div>
         </div>
     </div>
-    <footer class="mt-auto" style="padding: 10px;">
-        <div class="row">
-            <div class="col d-xxl-flex align-items-xxl-center"><button class="btn btn-primary btn-lg" type="reset">Cancelar</button></div>
-            <div class="col d-flex justify-content-center" style="font-size: 10px;">
-                <p style="margin: 20px;">VERSION</p>
-            </div>
-            <div class="col d-flex justify-content-end"><button class="btn btn-primary btn-lg" id="submit_button" type="submit">OK</button></div>
-        </div>
-    </footer>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <div class="footer">
+        <button class="btn btn-primary btn-lg" type="reset">Cancelar</button>
+        <p style="font-size: 10px; margin: 0;">VERSION</p>
+        <button class="btn btn-primary btn-lg" id="submit_button" type="submit">OK</button>
+    </div>
+    
+    <script>
+        // Simple accordion toggle
+        document.getElementById('debug-toggle').addEventListener('click', function() {
+            const content = document.getElementById('debug-content');
+            if (content.classList.contains('show')) {
+                content.classList.remove('show');
+            } else {
+                content.classList.add('show');
+            }
+        });
+    </script>
     <script src="./main.js" type="module"></script>
 </body>
 

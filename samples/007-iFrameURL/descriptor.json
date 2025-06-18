@@ -1,43 +1,7 @@
 {
     "properties": {
         "activity": [
-            "A_",
-            "ETA",
-            "end_time",
-            "A_TEAM_PROPERTIES_pname_1",
-            "A_TEAM_PROPERTIES_pid_1",
-            "A_TEAM_PROPERTIES_ETA_1",
-            "A_TEAM_PROPERTIES_end_time_1",
-            "A_TEAM_PROPERTIES_pname_2",
-            "A_TEAM_PROPERTIES_pid_2",
-            "A_TEAM_PROPERTIES_ETA_2",
-            "A_TEAM_PROPERTIES_end_time_2",
-            "A_TEAM_PROPERTIES_pname_3",
-            "A_TEAM_PROPERTIES_pid_3",
-            "A_TEAM_PROPERTIES_ETA_3",
-            "A_TEAM_PROPERTIES_end_time_3",
-            "A_TEAM_PROPERTIES_pname_4",
-            "A_TEAM_PROPERTIES_pid_4",
-            "A_TEAM_PROPERTIES_ETA_4",
-            "A_TEAM_PROPERTIES_end_time_4",
-            "A_TEAM_PROPERTIES_pname_5",
-            "A_TEAM_PROPERTIES_pid_5",
-            "A_TEAM_PROPERTIES_ETA_5",
-            "A_TEAM_PROPERTIES_end_time_5"
-        ],
-        "provider": [
-            "pid",
-            "pname"
+            "A_CUSTOM_URL"
         ]
-    },
-    "securedParams": [
-        {
-            "name": "propertiesPrefix",
-            "value": "A_TEAM_PROPERTIES_"
-        },
-        {
-            "name": "maxNumberOfassistants",
-            "value": "5"
-        }
-    ]
+    }
 }
