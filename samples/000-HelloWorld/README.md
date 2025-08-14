@@ -32,9 +32,17 @@ Add the plugin to a button and call the plugin with the parameters. It does not 
 
 2. Build and compress the plugin
 
-    `webpack --mode=production` 
+    `webpack --mode=production`
 
-3. Create the zip file that can be uploaded to OFS
+   you might also need to use this command instead, if the webpack folder is not added to the PATH list
+
+   `./node_modules/.bin/webpack --mode=production`
+
+3. Copy index.html from the project root folder to the dist folder
+
+    `cp index.html dist/`
+
+4. Create the zip file that can be uploaded to OFS
 
     `cd dist; zip plugin.zip index.html main.js` 
 
