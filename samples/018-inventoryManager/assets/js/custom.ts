@@ -67,7 +67,7 @@ export class CustomPlugin extends OFSPlugin {
 
         // Get field order from secured parameters with fallback
         const securedData = data.securedData || {};
-        const fieldOrderString = securedData.INV_FIELD_ORDER || "invtype,part_item_number,part_item_revision,quantity";
+        const fieldOrderString = securedData.INV_FIELD_ORDER || "invtype,invsn,part_item_number,part_item_revision,quantity";
         this.fieldOrder = this.getFieldOrder(fieldOrderString);
         this.activityAid = data.activity?.aid || "";
 

@@ -366,7 +366,8 @@
     },
     "buttonId": "35182",
     "securedData": {
-        "test": "less"
+        "test": "less",
+        "INV_FIELD_ORDER": "invtype,invsn,part_item_number,part_item_revision,quantity"
     },
     "openParams": {},
     "allowedProcedures": {
