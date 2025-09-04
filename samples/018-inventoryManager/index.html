@@ -1,0 +1,46 @@
+<!--
+Copyright © 2022, 2023, Oracle and/or its affiliates. 
+Licensed under the Universal Permissive License (UPL), Version 1.0  as shown at https://oss.oracle.com/licenses/upl/
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>plugin-template</title>
+</head>
+
+<body>
+    <div class="container">
+        <div class="section">
+            <h2 class="section-header" onclick="toggleSection('inventory-section')">Provider Inventory Manager</h2>
+            <div class="section-content" id="inventory-section">
+                <div class="section-intro">
+                    <h3>Available Provider Inventory</h3>
+                    <p>Select quantities for inventory items to install. Use the filter boxes below each column header to search for specific items.</p>
+                </div>
+                <div id="inventory-table-container">
+                    <!-- Inventory table will be dynamically generated here -->
+                </div>
+            </div>
+        </div>
+        <div class="section">
+            <h2 class="section-header" onclick="toggleSection('debug-section')">DEBUG ONLY: INPUT DATA</h2>
+            <div class="section-content hidden" id="debug-section">
+                <div id="input_data"></div>
+            </div>
+        </div>
+    </div>
+    <footer class="footer">
+        <div class="footer-actions">
+            <button class="btn btn-cancel" type="reset">Cancelar</button>
+            <div class="version">VERSION</div>
+            <button class="btn btn-primary" id="submit_button" type="submit">OK</button>
+        </div>
+    </footer>
+    <script src="./main.js" type="module"></script>
+</body>
+
+</html>

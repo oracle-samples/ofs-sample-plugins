@@ -1,0 +1,40 @@
+{
+    "properties": {
+        "activity": [
+            "aid",
+            "appt_number"
+        ],
+        "provider": [
+            "pid",
+            "pname"
+        ],
+        "inventory": [
+            "invid",
+            "invpool",
+            "invtype",
+            "inv_pid",
+            "quantity",
+            "part_item_number",
+            "part_item_revision",
+            "part_item_number_rev",
+            "part_item_desc",
+            "labor_item_number",
+            "labor_item_desc",
+            "invsn",
+            "part_uom_code",
+            "part_disposition_code",
+            "inventory_model",
+            "I_TECHNICIAN_NAME",
+            "expense_amount",
+            "expense_currency_code",
+            "expense_item_number",
+            "expense_item_desc"
+        ]
+    },
+    "securedParams": [
+        {
+            "name": "INV_FIELD_ORDER",
+            "value": "invtype,part_item_number,part_item_revision,quantity"
+        }
+    ]
+}
