@@ -2,6 +2,8 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+
+
 ## Project Overview
 
 This is an Oracle Field Service (OFS/OFSC) plugin called "inventoryManager" - a sample plugin template for developing OFS customizations. The project follows the standard OFS plugin architecture with TypeScript, Webpack bundling, and a web-based interface.

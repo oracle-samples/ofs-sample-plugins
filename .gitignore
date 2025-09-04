@@ -7,3 +7,5 @@ credentials*.json
 **/build
 **/coverage
 **/temp
+samples/018-inventoryManager/CLAUDE.md
+samples/018-inventoryManager/docs/prompt.md

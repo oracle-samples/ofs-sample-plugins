@@ -671,3 +671,5 @@ Once you click on the submit button, you should invoke an inventory install acti
 Including ALL the fields received in the input message, except inv_pid, and including the data.activity.aid as the inv_aid.
 
 If you have any design questions, please ask me before proceeding. You can use any of the plugins available in /samples/0xx as examples , don't use the ones available at samples/1xx as they use a different framework. 
+
+
