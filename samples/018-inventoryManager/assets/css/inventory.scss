@@ -1,0 +1,258 @@
+/*
+ * Copyright © 2022, 2023, Oracle and/or its affiliates.
+ * Licensed under the Universal Permissive License (UPL), Version 1.0  as shown at https://oss.oracle.com/licenses/upl/
+ */
+
+/* Base Styles */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+  margin: 0;
+  padding: 0 0 80px 0; /* Add bottom padding for fixed footer */
+  background-color: #f8f9fa;
+  color: #333;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Section Styles */
+.section {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+.section-header {
+  background: #007bff;
+  color: white;
+  margin: 0;
+  padding: 15px 20px;
+  cursor: pointer;
+  user-select: none;
+  
+  &:hover {
+    background: #0056b3;
+  }
+}
+
+.section-content {
+  padding: 20px;
+  
+  &.hidden {
+    display: none;
+  }
+}
+
+.section-intro {
+  margin-bottom: 20px;
+  
+  h3 {
+    margin: 0 0 10px 0;
+    color: #495057;
+  }
+  
+  p {
+    margin: 0;
+    color: #6c757d;
+    font-size: 14px;
+  }
+}
+
+/* Table Styles */
+.table-responsive {
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  overflow: auto;
+  max-height: 600px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0;
+  background: white;
+  
+  th, td {
+    padding: 12px 8px;
+    text-align: left;
+    border-bottom: 1px solid #dee2e6;
+    font-size: 14px;
+  }
+  
+  th {
+    background: #f8f9fa;
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  
+  tbody tr:hover {
+    background-color: #f5f5f5;
+  }
+  
+  tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+  
+  tbody tr:nth-child(even):hover {
+    background-color: #f5f5f5;
+  }
+}
+
+/* Input Styles */
+.filter-input, .quantity-input {
+  padding: 6px 8px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 13px;
+  width: 100%;
+  
+  &:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+  }
+}
+
+.quantity-input {
+  max-width: 100px;
+  
+  &.is-invalid {
+    border-color: #dc3545;
+    background-color: #fff5f5;
+    animation: shake 0.5s;
+  }
+}
+
+.form-text {
+  font-size: 11px;
+  color: #6c757d;
+  margin-top: 2px;
+}
+
+/* Button Styles */
+.btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+  
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.btn-primary {
+  background-color: #007bff;
+  color: white;
+  
+  &:hover:not(:disabled) {
+    background-color: #0056b3;
+  }
+}
+
+.btn-cancel {
+  background-color: #6c757d;
+  color: white;
+  
+  &:hover:not(:disabled) {
+    background-color: #545b62;
+  }
+}
+
+/* Footer Styles */
+.footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  border-top: 1px solid #dee2e6;
+  padding: 15px 20px;
+}
+
+.footer-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.version {
+  font-size: 12px;
+  color: #6c757d;
+}
+
+/* Alert Styles */
+.alert {
+  padding: 12px 16px;
+  border-radius: 6px;
+  margin: 20px 0;
+  
+  &.alert-warning {
+    background-color: #fff3cd;
+    border: 1px solid #ffecb5;
+    color: #856404;
+  }
+  
+  &.alert-info {
+    background-color: #d1ecf1;
+    border: 1px solid #bee5eb;
+    color: #0c5460;
+  }
+}
+
+/* Animations */
+@keyframes shake {
+  0%, 20%, 40%, 60%, 80% {
+    transform: translateX(0);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: translateX(-2px);
+  }
+}
+
+/* JSON Viewer Styles (minimal) */
+.json-container {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  padding: 10px;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  max-height: 400px;
+  overflow: auto;
+}
+
+.json-key {
+  color: #d73a49;
+  font-weight: bold;
+}
+
+.json-value {
+  color: #005cc5;
+}
+
+.caret-icon {
+  cursor: pointer;
+  user-select: none;
+}
+
+.hidden {
+  display: none;
+}

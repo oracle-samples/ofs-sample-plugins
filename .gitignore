@@ -7,3 +7,5 @@ credentials*.json
 **/build
 **/coverage
 **/temp
+**/.claude/**
+**/CLAUDE.md
