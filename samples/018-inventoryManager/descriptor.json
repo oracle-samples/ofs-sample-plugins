@@ -34,7 +34,7 @@
     "securedParams": [
         {
             "name": "INV_FIELD_ORDER",
-            "value": "invtype,part_item_number,part_item_revision,quantity"
+            "value": "invtype,invsn,part_item_number,part_item_revision,quantity"
         }
     ]
 }
