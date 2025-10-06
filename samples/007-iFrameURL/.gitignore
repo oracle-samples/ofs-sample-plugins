@@ -1,0 +1,11 @@
+credentials*.json
+**/credentials.json
+.DS_Store
+**/.DS_Store
+**/node_modules
+**/dist
+**/build
+**/coverage
+**/temp
+**/.claude/**
+**/CLAUDE.md
