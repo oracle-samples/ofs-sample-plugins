@@ -29,7 +29,7 @@
     "webpack-cli": "^5.0.1"
   },
   "dependencies": {
-    "@ofs-users/plugin": "^1.5.1",
+    "@ofs-users/plugin": "^1.5.2",
     "@ofs-users/proxy": "^1.20.1",
     "buffer": "^6.0.3"
   }
