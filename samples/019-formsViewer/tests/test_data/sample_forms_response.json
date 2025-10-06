@@ -1,0 +1,110 @@
+{
+    "hasMore": false,
+    "totalResults": 5,
+    "offset": 0,
+    "limit": 100,
+    "items": [
+        {
+            "time": "2025-10-06 14:53:48",
+            "user": "admin",
+            "formIdentifier": {
+                "formSubmitId": "63",
+                "formLabel": "Service Notes"
+            },
+            "formDetails": {
+                "SITE_NOTE_DETAILS": "According to the last note, I reviewed Turbine 2-east status, and it was working fine",
+                "SITE_NOTE_TITLE": "Turbine working fine"
+            }
+        },
+        {
+            "time": "2025-10-06 14:53:12",
+            "user": "admin",
+            "formIdentifier": {
+                "formSubmitId": "62",
+                "formLabel": "Service Notes"
+            },
+            "formDetails": {
+                "SITE_NOTE_DETAILS": "Identified problem on Turbine 2-East . Corrected after restart, but please review in next visit.",
+                "SITE_NOTE_TITLE": "Problems on turbine"
+            }
+        },
+        {
+            "time": "2025-08-13 19:03:59",
+            "user": "admin",
+            "formIdentifier": {
+                "formSubmitId": "50",
+                "formLabel": "SAFETY_CHECKLIST"
+            },
+            "formDetails": {
+                "form_element#5": "yes_power",
+                "form_element#3": "no_environment",
+                "form_element#2": "yes_equipment"
+            },
+            "activityDetails": {
+                "activityId": 3954799,
+                "XA_ACKNOWLEDGEMENT": 1,
+                "XA_SAFETY_SIG": {
+                    "filename": "signature.png, 5KB",
+                    "href": "https://sunrise0701.fs.ocs.oraclecloud.com/rest/ofscCore/v1/forms/50/activityFiles/XA_SAFETY_SIG"
+                },
+                "apptNumber": "137165209",
+                "activityType": "03"
+            }
+        },
+        {
+            "time": "2025-07-09 18:59:19",
+            "user": "admin",
+            "formIdentifier": {
+                "formSubmitId": "49",
+                "formLabel": "Report Team Labor"
+            },
+            "activityDetails": {
+                "activityId": 3954799,
+                "startTime": "12:55 PM",
+                "endTime": "02:00 PM",
+                "resourceId": "33001",
+                "resourceInternalId": 3000001,
+                "resourceTimeZone": "Eastern",
+                "resourceTimeZoneIANA": "America/New_York",
+                "resourceTimeZoneDiff": -52
+            },
+            "resourceDetails": {
+                "resourceInternalId": 3000001,
+                "name": "ARNDT, William"
+            }
+        },
+        {
+            "time": "2025-05-29 16:43:02",
+            "user": "william.arndt",
+            "formIdentifier": {
+                "formSubmitId": "35",
+                "formLabel": "SAFETY_CHECKLIST"
+            },
+            "formDetails": {
+                "form_element#5": "no_power",
+                "form_element#3": "no_environment",
+                "form_element#2": "yes_equipment"
+            },
+            "activityDetails": {
+                "activityId": 3954799,
+                "XA_ACKNOWLEDGEMENT": 1,
+                "XA_SAFETY_SIG": {
+                    "filename": "signature.png, 5KB",
+                    "href": "https://sunrise0701.fs.ocs.oraclecloud.com/rest/ofscCore/v1/forms/35/activityFiles/XA_SAFETY_SIG"
+                },
+                "apptNumber": "137165209",
+                "activityType": "03"
+            }
+        }
+    ],
+    "links": [
+        {
+            "rel": "canonical",
+            "href": "https://sunrise0701.fs.ocs.oraclecloud.com/rest/ofscCore/v1/activities/3954799/submittedForms"
+        },
+        {
+            "rel": "describedby",
+            "href": "https://sunrise0701.fs.ocs.oraclecloud.com/rest/ofscCore/v1/metadata-catalog/activities#definitions/submittedForms"
+        }
+    ]
+}

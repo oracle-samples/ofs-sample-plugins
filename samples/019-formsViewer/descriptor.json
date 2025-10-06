@@ -1,0 +1,18 @@
+{
+    "properties": {
+        "activity": [
+            "aid",
+            "appt_number"
+        ]
+    },
+    "securedParams": [
+        {
+            "name": "FORM_LABEL",
+            "comment": "Service Notes"
+        },
+        {
+            "name": "COLUMN_ORDER",
+            "comment": "formSubmitId, time, user, formLabel,SITE_NOTE_TITLE, SITE_NOTE_DETAILS"
+        }
+    ]
+}
