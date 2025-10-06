@@ -56,9 +56,11 @@ When both are provided, `openParams` values override `securedParams` values.
   - `formDetails` - Expands to show each form field as a separate column
   - `activityDetails` - Expands to show each activity field as a separate column
   - `resourceDetails` - Expands to show each resource field as a separate column
-- **Example**: `time,user,formLabel,formDetails`
+  - **Specific field names** - You can also specify individual field names (e.g., `SITE_NOTE_TITLE`, `SITE_NOTE_DETAILS`)
+- **Example (generic)**: `time,user,formLabel,formDetails`
+- **Example (specific fields)**: `formSubmitId,time,user,formLabel,SITE_NOTE_TITLE,SITE_NOTE_DETAILS`
 - **Default**: `time,user,formLabel,formDetails`
-- **Note**: When you specify `formDetails`, `activityDetails`, or `resourceDetails`, the plugin automatically creates a column for each field found in the data. For example, if your forms have `SITE_NOTE_TITLE` and `SITE_NOTE_DETAILS` fields, specifying `formDetails` will create two columns with those names.
+- **Note**: When you specify `formDetails`, `activityDetails`, or `resourceDetails`, the plugin automatically creates a column for each field found in the data. Alternatively, you can specify individual field names directly to control exactly which fields appear and in what order.
 
 ### Example Configurations
 
@@ -67,37 +69,48 @@ When both are provided, `openParams` values override `securedParams` values.
 ```json
 {
     "properties": {
-        "activity": ["aid", "appt_number"],
-        "provider": []
+        "activity": ["aid", "appt_number"]
     },
     "securedParams": [
         {
             "name": "FORM_LABEL",
-            "value": "Service Notes"
+            "comment": "Service Notes"
         },
         {
             "name": "COLUMN_ORDER",
-            "value": "time,user,formDetails"
+            "comment": "formSubmitId,time,user,formLabel,SITE_NOTE_TITLE,SITE_NOTE_DETAILS"
         }
     ]
 }
 ```
+
+This configuration will:
+- Filter to show only "Service Notes" forms
+- Display columns in this specific order: Submit ID, Time, User, Form Label, Site Note Title, and Site Note Details
 
 #### Using openParams (Dynamic Configuration)
 
 When opening the plugin programmatically, you can pass parameters dynamically:
 
 ```javascript
-// Open plugin with specific form filter
+// Open plugin with specific form filter and specific fields
 openPlugin({
     plugin: "formsViewer",
     openParams: {
         FORM_LABEL: "Service Notes",
-        COLUMN_ORDER: "time,user,formDetails"
+        COLUMN_ORDER: "formSubmitId,time,user,formLabel,SITE_NOTE_TITLE,SITE_NOTE_DETAILS"
     }
 });
 
-// Open plugin showing all forms with different columns
+// Open plugin showing all forms with generic formDetails expansion
+openPlugin({
+    plugin: "formsViewer",
+    openParams: {
+        COLUMN_ORDER: "time,user,formLabel,formDetails"
+    }
+});
+
+// Open plugin showing all forms with activityDetails fields
 openPlugin({
     plugin: "formsViewer",
     openParams: {
@@ -129,19 +142,26 @@ The plugin can be opened from:
 
 ### Form Details Display
 
-The plugin dynamically creates columns based on the actual fields present in the submitted forms:
+The plugin supports two approaches for displaying form fields:
 
-- **Dynamic Columns**: When you include `formDetails` in `COLUMN_ORDER`, the plugin scans all forms and creates a column for each unique field found
+#### 1. Generic Keywords (Dynamic Discovery)
+When you include `formDetails`, `activityDetails`, or `resourceDetails` in `COLUMN_ORDER`, the plugin scans all forms and creates a column for each unique field found.
+
+**Example**: `COLUMN_ORDER: "time,user,formLabel,formDetails"`
+- The plugin will automatically discover and display all fields found in formDetails across all forms
+
+#### 2. Specific Field Names (Explicit Control)
+You can specify individual field names directly in `COLUMN_ORDER` to control exactly which fields appear and in what order.
+
+**Example**: `COLUMN_ORDER: "formSubmitId,time,user,formLabel,SITE_NOTE_TITLE,SITE_NOTE_DETAILS"`
+- Only the specified fields will be displayed, in the exact order given
+
+#### Field Display Characteristics:
 - **Field Values**: Each form field value is displayed in its own column
 - **Simple Fields**: Text and numeric values displayed directly
 - **File References**: Shows filename for file attachments (e.g., signatures, photos)
 - **Missing Fields**: Shows "-" when a form doesn't have a particular field
-- **Sortable**: All dynamically created columns are sortable
-
-**Example**: If you filter by "Service Notes" forms that have `SITE_NOTE_TITLE` and `SITE_NOTE_DETAILS` fields, the table will display:
-- Time | User | Form Label | SITE_NOTE_TITLE | SITE_NOTE_DETAILS
-
-The same applies to `activityDetails` and `resourceDetails` - each field becomes its own column.
+- **Sortable**: All columns are sortable
 
 ## Use Cases
 

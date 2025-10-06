@@ -304,6 +304,30 @@ export class CustomPlugin extends OFSPlugin {
                         });
                     });
                     break;
+                default:
+                    // Check if it's a specific field name from formDetails, activityDetails, or resourceDetails
+                    if (formDetailsFields.has(columnKey)) {
+                        columns.push({
+                            key: `formDetails.${columnKey}`,
+                            label: columnKey,
+                            sortable: true,
+                            isFormDetail: true
+                        });
+                    } else if (activityDetailsFields.has(columnKey)) {
+                        columns.push({
+                            key: `activityDetails.${columnKey}`,
+                            label: columnKey,
+                            sortable: true
+                        });
+                    } else if (resourceDetailsFields.has(columnKey)) {
+                        columns.push({
+                            key: `resourceDetails.${columnKey}`,
+                            label: columnKey,
+                            sortable: true
+                        });
+                    }
+                    // If not found in any collection, silently skip this column
+                    break;
             }
         });
 

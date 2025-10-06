@@ -8,11 +8,11 @@
     "securedParams": [
         {
             "name": "FORM_LABEL",
-            "comment": "Service Notes"
+            "value": "Service Notes"
         },
         {
             "name": "COLUMN_ORDER",
-            "comment": "formSubmitId, time, user, formLabel,SITE_NOTE_TITLE, SITE_NOTE_DETAILS"
+            "value": "formSubmitId, time, user, formLabel, SITE_NOTE_TITLE, SITE_NOTE_DETAILS"
         }
     ]
 }
