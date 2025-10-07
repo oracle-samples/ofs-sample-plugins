@@ -3,9 +3,9 @@
     "Copyright © 2022, 2023, Oracle and/or its affiliates.",
     "Licensed under the Universal Permissive License (UPL), Version 1.0  as shown at https://oss.oracle.com/licenses/upl/"
   ],
-  "name": "TokenExample",
-  "version": "1.1.0",
-  "description": "Template for Oracle Field Service plugins",
+  "name": "ofs-forms-viewer",
+  "version": "1.0.0",
+  "description": "Oracle Field Service plugin to view submitted forms for activities",
   "main": "index.js",
   "scripts": {
     "test": "jest",
@@ -16,13 +16,11 @@
     "ofs",
     "ofsc"
   ],
-  "author": "miguel.gall@oracle.com",
+  "author": "miquelgall@oracle.com",
   "license": "UPL-1.0",
   "devDependencies": {
     "@types/jest": "^29.4.0",
     "css-loader": "^6.7.3",
-    "sass": "^1.57.1",
-    "sass-loader": "^13.2.0",
     "style-loader": "^3.3.1",
     "ts-jest": "^29.0.5",
     "ts-loader": "^9.4.2",
@@ -31,8 +29,8 @@
     "webpack-cli": "^5.0.1"
   },
   "dependencies": {
-    "@ofs-users/plugin": "^1.5.0",
-    "@ofs-users/proxy": "^1.20.0",
+    "@ofs-users/plugin": "^1.5.2",
+    "@ofs-users/proxy": "^1.20.1",
     "buffer": "^6.0.3"
   }
 }
