@@ -1,0 +1,64 @@
+<!--
+Copyright © 2022, 2023, Oracle and/or its affiliates.
+Licensed under the Universal Permissive License (UPL), Version 1.0  as shown at https://oss.oracle.com/licenses/upl/
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>Init Data Loading</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            padding: 15px;
+            padding-bottom: 80px;
+        }
+        .header {
+            margin-bottom: 20px;
+        }
+        footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 1px solid #dee2e6;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <h4>Bucket Data Viewer</h4>
+        <p class="text-muted small">Data retrieved from OFS buckets during initialization</p>
+    </div>
+
+    <div id="bucket-data-container">
+        <div class="alert alert-secondary">
+            <strong>Loading...</strong><br>
+            Checking for stored bucket data.
+        </div>
+    </div>
+
+    <footer class="p-3">
+        <div class="row">
+            <div class="col">
+                <button class="btn btn-secondary" type="button" id="cancel_button">Cancel</button>
+            </div>
+            <div class="col text-center">
+                <small class="text-muted">v1.0.0</small>
+            </div>
+            <div class="col text-end">
+                <button class="btn btn-primary" id="submit_button" type="button">OK</button>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="./main.js" type="module"></script>
+</body>
+
+</html>

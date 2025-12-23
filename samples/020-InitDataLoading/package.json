@@ -1,0 +1,38 @@
+{
+  "//": [
+    "Copyright © 2022, 2023, Oracle and/or its affiliates.",
+    "Licensed under the Universal Permissive License (UPL), Version 1.0  as shown at https://oss.oracle.com/licenses/upl/"
+  ],
+  "name": "ofs-init-data-loading",
+  "version": "1.0.0",
+  "description": "Oracle Field Service plugin to retrieve and display bucket data during initialization",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "build": "webpack --mode production",
+    "dev": "webpack --mode development"
+  },
+  "keywords": [
+    "ofs",
+    "ofsc",
+    "bucket",
+    "init"
+  ],
+  "author": "miquelgall@oracle.com",
+  "license": "UPL-1.0",
+  "devDependencies": {
+    "@types/jest": "^29.4.0",
+    "css-loader": "^6.7.3",
+    "style-loader": "^3.3.1",
+    "ts-jest": "^29.0.5",
+    "ts-loader": "^9.4.2",
+    "typescript": "^4.9.4",
+    "webpack": "^5.75.0",
+    "webpack-cli": "^5.0.1"
+  },
+  "dependencies": {
+    "@ofs-users/plugin": "^1.5.2",
+    "@ofs-users/proxy": "^1.20.1",
+    "buffer": "^6.0.3"
+  }
+}
