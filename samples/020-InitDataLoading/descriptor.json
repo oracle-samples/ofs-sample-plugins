@@ -1,0 +1,18 @@
+{
+    "properties": {
+        "activity": [
+            "aid"
+        ],
+        "provider": []
+    },
+    "securedParams": [
+        {
+            "name": "DATA_TO_RETRIEVE",
+            "value": "[{\"bucket_name\": \"my_data_bucket\", \"properties_to_fetch\": [\"Data_property_1\", \"Data_property_2\"]}]"
+        },
+        {
+            "name": "WAKEUP_DELAY",
+            "value": "5"
+        }
+    ]
+}
