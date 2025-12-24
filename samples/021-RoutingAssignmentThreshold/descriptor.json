@@ -1,0 +1,26 @@
+{
+    "properties": {
+        "activity": [
+            "aid",
+            "routingAssignTrack",
+            "xa_total_reassignments",
+            "xa_recent_reassignments",
+            "xa_pin_allowed"
+        ],
+        "provider": []
+    },
+    "openParams": [
+        {
+            "name": "reassigments_total_quantity",
+            "value": "10"
+        },
+        {
+            "name": "reassigments_recent_quantity",
+            "value": "3"
+        },
+        {
+            "name": "minutes_threshold",
+            "value": "60"
+        }
+    ]
+}
