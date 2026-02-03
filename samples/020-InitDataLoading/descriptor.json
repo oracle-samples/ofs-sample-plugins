@@ -8,11 +8,11 @@
     "securedParams": [
         {
             "name": "DATA_TO_RETRIEVE",
-            "value": "[{\"bucket_name\": \"my_data_bucket\", \"properties_to_fetch\": [\"Data_property_1\", \"Data_property_2\"]}]"
+            "value": "[{\"bucket_name\": \"my_data_bucket\", \"properties_to_fetch\": [\"PA_DATA_01\", \"PA_DATA_02\"]}]"
         },
         {
             "name": "WAKEUP_DELAY",
-            "value": "5"
+            "value": "10"
         }
     ]
 }
