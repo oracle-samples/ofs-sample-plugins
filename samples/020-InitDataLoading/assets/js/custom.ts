@@ -50,6 +50,9 @@ export class CustomPlugin extends OFSPlugin {
     private customProxy: OFS | null = null;
     private securedData: any = {};
     private proxyResolve: ((value: OFS | null) => void) | null = null;
+    private proxyCallId: string | null = null;
+    private baseURL: string | null = null;
+
     constructor(tag?: string) {
         super(tag || "InitDataLoading");
     }
@@ -105,11 +108,24 @@ export class CustomPlugin extends OFSPlugin {
 
     // Get wakeup delay from config
     private getWakeupDelay(): number {
-        const delay = parseInt(this.securedData?.WAKEUP_DELAY) || 5;
+        const delay = parseInt(this.securedData?.WAKEUP_DELAY) || 30;
         return delay;
     }
 
-    // Create proxy from stored applications
+    // Generate unique call ID for tracking callProcedure responses
+    private generateCallId(): string {
+        const characters =
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        let result = "";
+        for (let i = 0; i < 32; i++) {
+            result += characters.charAt(
+                Math.floor(Math.random() * characters.length)
+            );
+        }
+        return result;
+    }
+
+    // Create proxy from stored applications (follows geowatch pattern)
     private async createProxy(): Promise<OFS | null> {
         const applications = this.getData<any>(STORAGE_KEYS.APPLICATIONS);
         if (!applications) {
@@ -119,51 +135,97 @@ export class CustomPlugin extends OFSPlugin {
 
         return new Promise((resolve) => {
             this.proxyResolve = resolve;
-            this.sendMessage("callProcedure" as any, {
-                apiVersion: 1,
-                method: "callProcedure",
-                procedure: "getAccessToken",
-                params: {},
-            });
 
-            // Timeout after 10 seconds
-            setTimeout(() => {
-                if (this.proxyResolve) {
-                    this.log("warn", "Proxy creation timed out");
-                    this.proxyResolve(null);
-                    this.proxyResolve = null;
+            // Find the OFS application and extract applicationKey dynamically
+            const parsedApplications =
+                typeof applications === "string"
+                    ? JSON.parse(applications)
+                    : applications;
+
+            for (const [key, value] of Object.entries(parsedApplications)) {
+                const applicationKey: string = key;
+                const application: any = value;
+
+                if (application.type === "ofs") {
+                    this.baseURL = application.resourceUrl;
+                    this.proxyCallId = this.generateCallId();
+
+                    this.log(
+                        "debug",
+                        `Requesting token for applicationKey: ${applicationKey}, callId: ${this.proxyCallId}`
+                    );
+
+                    // Use callProcedure method from base class
+                    this.callProcedure({
+                        callId: this.proxyCallId,
+                        procedure: "getAccessToken",
+                        params: {
+                            applicationKey: applicationKey,
+                        },
+                    });
+
+                    // Timeout after 10 seconds
+                    setTimeout(() => {
+                        if (this.proxyResolve) {
+                            this.log("warn", "Proxy creation timed out");
+                            this.proxyResolve(null);
+                            this.proxyResolve = null;
+                            this.proxyCallId = null;
+                        }
+                    }, 10000);
+
+                    return;
                 }
-            }, 10000);
+            }
+
+            // No OFS application found
+            this.log("error", "No OFS application found in applications data");
+            resolve(null);
         });
     }
 
-    // Handle callProcedureResult for proxy creation
+    // Handle callProcedureResult for proxy creation (follows geowatch pattern)
     callProcedureResult(message: OFSCallProcedureResultMessage): void {
         this.log("debug", `callProcedureResult: ${JSON.stringify(message)}`);
 
-        if (message.resultData?.accessToken && this.proxyResolve) {
-            const applications = this.getData<any>(STORAGE_KEYS.APPLICATIONS);
-            if (applications) {
-                try {
-                    this.customProxy = new OFS({
-                        instance: applications.instance,
-                        token: message.resultData.accessToken,
-                    });
-                    this.log("log", "Proxy created successfully");
-                    this.proxyResolve(this.customProxy);
-                } catch (error) {
-                    this.log("error", `Failed to create proxy: ${error}`);
-                    this.proxyResolve(null);
-                }
-            } else {
+        // Check if this response matches our callId
+        if ((message as any).callId !== this.proxyCallId) {
+            this.log("debug", "CallId mismatch, ignoring response");
+            return;
+        }
+
+        if (!this.proxyResolve) {
+            this.log("warn", "No pending proxy resolve, ignoring response");
+            return;
+        }
+
+        const resultData = message.resultData as any;
+
+        if (resultData?.status === "success" && resultData?.token) {
+            try {
+                this.customProxy = new OFS({
+                    baseURL: this.baseURL!,
+                    token: resultData.token,
+                });
+                this.log("log", "Proxy created successfully");
+                this.proxyResolve(this.customProxy);
+            } catch (error) {
+                this.log("error", `Failed to create proxy: ${error}`);
                 this.proxyResolve(null);
             }
-            this.proxyResolve = null;
+        } else {
+            this.log(
+                "error",
+                `Token request failed: ${JSON.stringify(resultData)}`
+            );
+            this.proxyResolve(null);
         }
+
+        this.proxyResolve = null;
+        this.proxyCallId = null;
     }
 
-    // Retrieve bucket (resource) data using getResources API
-    // TODO: Add file property support once @ofs-users/proxy implements getResourceFileProperty method
+    // Retrieve bucket (resource) data using proxy.getResource
     private async retrieveBucketData(
         config: DataToRetrieveConfig
     ): Promise<StoredBucketData> {
@@ -186,48 +248,39 @@ export class CustomPlugin extends OFSPlugin {
                 }" with properties: ${config.properties_to_fetch.join(", ")}`
             );
 
-            // Get resources with the required fields
-            const fieldsToFetch = ["resourceId", ...config.properties_to_fetch];
-            const response = await this.customProxy.getResources({
-                fields: fieldsToFetch,
-            });
+            // Get specific resource by resourceId using proxy.getResource
+            const response = await this.customProxy.getResource(config.bucket_name);
 
             this.log(
                 "debug",
-                `getResources response: ${JSON.stringify(response)}`
+                `getResource response: ${JSON.stringify(response)}`
             );
 
-            // Find the bucket resource by resourceId
-            const resources = response?.data?.items || [];
-            const bucket = resources.find(
-                (r: any) => r.resourceId === config.bucket_name
-            );
-
-            if (!bucket) {
-                this.log(
-                    "warn",
-                    `Bucket "${config.bucket_name}" not found in resources`
-                );
+            // Check if resource was found (status >= 400 indicates error)
+            if (!response || response.status >= 400) {
+                const errorMsg = response?.description || `Bucket "${config.bucket_name}" not found`;
+                this.log("warn", errorMsg);
                 for (const propName of config.properties_to_fetch) {
                     result.properties.push({
                         propertyName: propName,
                         value: null,
-                        error: `Bucket "${config.bucket_name}" not found`,
+                        error: errorMsg,
                     });
                 }
                 return result;
             }
 
+            const resourceData = response.data;
+
             // Extract properties from the bucket resource
-            const bucketData = bucket as Record<string, any>;
             for (const propName of config.properties_to_fetch) {
                 const propData: BucketPropertyData = {
                     propertyName: propName,
                     value: null,
                 };
 
-                if (propName in bucketData) {
-                    propData.value = String(bucketData[propName]);
+                if (propName in resourceData) {
+                    propData.value = String((resourceData as any)[propName]);
                     this.log(
                         "log",
                         `Retrieved property "${propName}": ${propData.value}`
@@ -260,7 +313,7 @@ export class CustomPlugin extends OFSPlugin {
     }
 
     // INIT - Called when plugin is first loaded
-    init(message: OFSInitMessage): Promise<OFSMessage> {
+    async init(message: OFSInitMessage): Promise<OFSMessage> {
         this.log("log", "INIT called");
         this.log("debug", `Init message: ${JSON.stringify(message)}`);
 
@@ -276,8 +329,9 @@ export class CustomPlugin extends OFSPlugin {
         const wakeupDelay = this.getWakeupDelay();
         this.log("log", `Requesting wakeup in ${wakeupDelay} seconds`);
 
-        // Send initEnd message directly to trigger wakeup cycle
-        const initEndMessage = {
+        // Create initEnd message with wakeup configuration
+        // The base class will handle sending this message
+        const initEndMessage: OFSMessage = {
             apiVersion: 1,
             method: "initEnd",
             wakeupNeeded: true,
@@ -286,13 +340,33 @@ export class CustomPlugin extends OFSPlugin {
                     wakeupDelay: wakeupDelay,
                 },
             },
-        };
-        this.log("debug", `Sending initEnd: ${JSON.stringify(initEndMessage)}`);
-        this.sendMessage("initEnd" as any, initEndMessage);
+        } as OFSMessage;
 
-        // Return empty promise to satisfy base class signature
-        // (message already sent above, this return is ignored)
-        return Promise.resolve({ apiVersion: 1, method: "initEnd" });
+        this.log("debug", `Returning initEnd: ${JSON.stringify(initEndMessage)}`);
+
+        // Return the message - base class handles sending it
+        return Promise.resolve(initEndMessage);
+    }
+
+    // Ensure proxy is available (check base class proxy first, then create if needed)
+    private async ensureProxy(_message?: { applications?: any }): Promise<boolean> {
+        // If base class proxy exists, use it
+        if (this.proxy) {
+            this.log("debug", "Using this.proxy from base class");
+            this.customProxy = this.proxy;
+            return true;
+        }
+
+        // If customProxy already exists, we're good
+        if (this.customProxy) {
+            this.log("debug", "customProxy already available");
+            return true;
+        }
+
+        // Need to create proxy manually
+        this.log("debug", "No proxy available, creating one");
+        this.customProxy = await this.createProxy();
+        return this.customProxy !== null;
     }
 
     // WAKEUP - Called after wakeupDelay seconds
@@ -314,9 +388,9 @@ export class CustomPlugin extends OFSPlugin {
             return;
         }
 
-        // Create proxy for API calls
-        this.customProxy = await this.createProxy();
-        if (!this.customProxy) {
+        // Ensure proxy is available for API calls
+        const proxyReady = await this.ensureProxy(message);
+        if (!proxyReady) {
             this.log(
                 "error",
                 "Failed to create proxy, going to sleep without data"
