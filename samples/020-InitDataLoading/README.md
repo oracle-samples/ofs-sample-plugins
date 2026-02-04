@@ -1,17 +1,41 @@
 # InitDataLoading Plugin (020)
 
-This plugin demonstrates how to retrieve resource data from OFS in the background using the init/wakeup lifecycle, making the data available before the user opens the plugin.
+This plugin demonstrates how to retrieve data in the background using the init/wakeup lifecycle, making the data available before the user opens the plugin.
 
 ## What This Plugin Does
 
-The plugin fetches property values from OFS resources (buckets) during initialization and stores them locally. When the user opens the plugin, the data is instantly available without waiting for API calls.
+The plugin uses the OFS sleep/wakeup mechanism to fetch data during initialization and store it locally. When the user opens the plugin, the data is instantly available without waiting for API calls.
 
-### Use Case
+**Important:** This plugin uses the OFS Core API as an example, but the same pattern can be applied to call any external API. The key benefit is that data retrieval happens in the background during the wakeup phase, not when the user opens the plugin. This eliminates wait times and improves the user experience.
+
+### Extending to External APIs
+
+You can modify the `wakeup` method to call any external API instead of (or in addition to) the OFS API:
+
+```typescript
+async wakeup(message: OFSWakeupMessage): Promise<void> {
+    // Example: Call an external API
+    const response = await fetch('https://your-external-api.com/data', {
+        headers: { 'Authorization': 'Bearer ' + token }
+    });
+    const externalData = await response.json();
+
+    // Store the data for later use
+    localStorage.setItem('externalData', JSON.stringify(externalData));
+
+    // Go back to sleep
+    this.sendSleepMessage(false);
+}
+```
+
+### Use Cases
 
 This pattern is useful when you need to:
-- Pre-load configuration data stored in OFS resources
-- Fetch reference data that technicians need during their work
+- Pre-load data from external systems (ERP, CRM, inventory systems)
+- Fetch reference data or lookup tables from corporate APIs
+- Retrieve configuration from external services
 - Cache data that doesn't change frequently to improve user experience
+- Avoid making API calls while the user waits for the plugin to load
 
 ## Plugin Lifecycle
 
