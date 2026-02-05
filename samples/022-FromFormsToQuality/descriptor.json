@@ -1,0 +1,8 @@
+{
+  "properties": {
+    "activity": [
+      "aid"
+    ],
+        "provider": ["pid"]
+  }
+}
