@@ -7,7 +7,7 @@
     "@oracle/oraclejet-core-pack": "~15.1.0"
   },
   "devDependencies": {
-    "@oracle/ojet-cli": "~15.1.0",
+    "@oracle/ojet-cli": "~19.0.1",
     "@types/node": "^20.11.10",
     "extract-zip": "^1.7.0",
     "fs-extra": "^8.1.0",
