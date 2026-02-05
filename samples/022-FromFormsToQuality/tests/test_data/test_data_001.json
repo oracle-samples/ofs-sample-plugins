@@ -1,0 +1,70 @@
+{
+    "apiVersion": 1,
+    "method": "open",
+    "entity": "activity",
+    "user": {
+        "allow_desktop_notifications": 0,
+        "allow_vibration": 0,
+        "design_theme": 12,
+        "format": {
+            "date": "m/d/y",
+            "long_date": "l, F jS, Y",
+            "time": "h:i A",
+            "datetime": "m/d/y h:i A"
+        },
+        "providers": [2],
+        "sound_theme": 0,
+        "su_zid": 2,
+        "uid": 2315,
+        "ulanguage": 1,
+        "ulogin": "admin",
+        "uname": "Admin",
+        "week_start": 1
+    },
+    "resource": {
+        "currentTime": "2023-01-26 13:24:18",
+        "deviceUTCDiffSeconds": 0,
+        "timeZoneDiffSeconds": -19860
+    },
+    "team": {
+        "teamMembers": {},
+        "assistingTo": {},
+        "assistingMe": []
+    },
+    "queue": {
+        "date": "2023-01-26",
+        "status": "activated",
+        "isActual": true,
+        "activationTime": "2023-01-26 06:52:08"
+    },
+    "activity": {
+        "aid": "3954799",
+        "resource_email": "technician@example.com",
+        "organization_code": "11270",
+        "work_order_number": "OCO-10510",
+        "asset_number": "OEW-SS001-PR003",
+        "operation_sequence": "10",
+        "inspection_plan_name": "OMS305A.05Y.A.PR-CD_TEST_V2",
+        "operation_code": "OMS305A.05Y.A.PR-CD"
+    },
+    "activityList": {
+        "3954799": {
+            "aid": "3954799",
+            "resource_email": "technician@example.com",
+            "organization_code": "11270",
+            "work_order_number": "OCO-10510",
+            "asset_number": "OEW-SS001-PR003"
+        }
+    },
+    "inventoryList": {},
+    "buttonId": "35182",
+    "securedData": {},
+    "openParams": {
+        "formLabel": "InspectionForm"
+    },
+    "allowedProcedures": {
+        "openLink": true,
+        "getSubmittedForms": true,
+        "getAccessTokenByScope": true
+    }
+}
