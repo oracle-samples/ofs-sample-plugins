@@ -35,7 +35,7 @@
     "webpack-cli": "^5.0.1"
   },
   "dependencies": {
-    "@ofs-users/plugin": "^1.6.0",
+    "@ofs-users/plugin": "^1.7.0",
     "@ofs-users/proxy": "^1.20.0",
     "buffer": "^6.0.3"
   }

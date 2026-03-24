@@ -3,6 +3,12 @@
     "activity": [
       "aid"
     ],
-        "provider": ["pid"]
-  }
+    "provider": ["pid"]
+  },
+  "securedParams": [
+    {
+      "name": "scope",
+      "value": "urn:opc:resource:fa:instanceid=649213527urn:opc:resource:consumer::all"
+    }
+  ]
 }

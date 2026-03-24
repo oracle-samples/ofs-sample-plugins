@@ -28,6 +28,10 @@ interface OFSCustomOpenMessage extends OFSOpenMessage {
         formLabel?: string;
         [key: string]: any;
     };
+    securedData?: {
+        scope?: string;
+        [key: string]: any;
+    };
     resource?: any;
 }
 
@@ -289,32 +293,18 @@ export class CustomPlugin extends OFSPlugin {
     }
 
     /**
-     * Build the scope using environment and request token
+     * Read the scope from securedData and request token
      */
     private async requestTokenByScope(): Promise<void> {
-        const environment = this.environment;
+        const securedData = this.openData?.securedData;
+        const scope = securedData?.scope;
 
-        if (!environment) {
-            console.error(`${this.tag}: Environment not available`);
-            alert('Error: Environment information not available');
+        if (!scope) {
+            console.error(`${this.tag}: Scope not found in securedData`);
+            alert('Error: Scope not configured in plugin secured parameters');
             this.close();
             return;
         }
-
-        console.debug(`${this.tag}: Environment: ${JSON.stringify(environment)}`);
-
-        // Build scope based on environment
-        // The scope format depends on your Fusion Apps configuration
-        const faUrl = environment.faUrl;
-        if (!faUrl) {
-            console.error(`${this.tag}: Fusion Apps URL not available in environment`);
-            alert('Error: Fusion Apps URL not available');
-            this.close();
-            return;
-        }
-
-        // Construct the scope - adjust this based on your requirements
-        const scope = `${faUrl}/.default`;
 
         console.debug(`${this.tag}: Requesting token with scope: ${scope}`);
 
@@ -328,16 +318,16 @@ export class CustomPlugin extends OFSPlugin {
     private async handleTokenResult(data: OFSCallProcedureResultMessage): Promise<void> {
         console.debug(`${this.tag}: Processing token result`);
 
-        const result = data.resultData as { accessToken?: string; error?: string };
+        const result = data.resultData as { token?: string; status?: string; detail?: string };
 
-        if (result.error || !result.accessToken) {
-            console.error(`${this.tag}: Failed to get access token: ${result.error}`);
-            alert(`Error: Failed to get access token - ${result.error}`);
+        if (result.status !== 'success' || !result.token) {
+            console.error(`${this.tag}: Failed to get access token: ${result.detail || result.status}`);
+            alert(`Error: Failed to get access token - ${result.detail || result.status}`);
             this.close();
             return;
         }
 
-        const token = result.accessToken;
+        const token = result.token;
 
         if (this.submittedForms.length === 0) {
             console.error(`${this.tag}: No submitted forms available`);
