@@ -53,7 +53,7 @@ export interface CrewProxy {
   }>;
   getAllResourceAssistants(
     resourceId: string,
-    params?: { fields?: string[] }
+    params: { fields?: string[]; dateFrom: string; dateTo: string }
   ): Promise<{
     items?: OFSAssistant[];
     totalResults?: number;

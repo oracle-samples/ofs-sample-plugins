@@ -39,12 +39,14 @@ export class CrewApiClient implements CrewProxy {
 
   async getAllResourceAssistants(
     resourceId: string,
-    params?: { fields?: string[] }
+    params: { fields?: string[]; dateFrom: string; dateTo: string }
   ): Promise<ListPayload<OFSAssistant>> {
     return this.getAllPages<OFSAssistant>(
       `/rest/ofscCore/v1/resources/${encodeURIComponent(resourceId)}/assistants`,
       {
         fields: joinFields(params?.fields),
+        dateFrom: params.dateFrom,
+        dateTo: params.dateTo,
       }
     );
   }

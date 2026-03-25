@@ -25,7 +25,7 @@ describe("Crew services", () => {
   it("maps assistants to calendar rows", async () => {
     const proxy: CrewProxy = {
       getAllResources: async () => ({ items: [] }),
-      getAllResourceAssistants: async () => ({
+      getAllResourceAssistants: async (_resourceId: string, params: { dateFrom: string; dateTo: string; fields?: string[] }) => ({
         items: [
           { resourceId: "a1", name: "Assistant 1" },
           { resourceId: "a2", name: "Assistant 2" },
@@ -41,7 +41,7 @@ describe("Crew services", () => {
         resourceType: "tech",
         parentResourceId: "1",
       },
-    ]);
+    ], "2026-03-01", "2026-03-31");
 
     expect(rows).to.have.length(1);
     expect(rows[0].assistantsCount).to.equal(2);

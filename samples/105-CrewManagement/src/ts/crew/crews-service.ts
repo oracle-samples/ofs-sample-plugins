@@ -5,14 +5,20 @@ export class CrewsService {
   constructor(private readonly proxy: CrewProxy) {}
 
   async loadCrewCalendarRows(
-    technicians: BucketRow[]
+    technicians: BucketRow[],
+    dateFrom: string,
+    dateTo: string
   ): Promise<CrewCalendarRow[]> {
     const rows: CrewCalendarRow[] = [];
 
     for (const technician of technicians) {
       const assistantsResponse = await this.proxy.getAllResourceAssistants(
         technician.resourceId,
-        { fields: ["resourceId", "name"] }
+        {
+          fields: ["resourceId", "name"],
+          dateFrom,
+          dateTo,
+        }
       );
 
       const assistants = Array.isArray(assistantsResponse?.items)

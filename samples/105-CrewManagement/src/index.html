@@ -43,6 +43,16 @@
             <input class="search-input" placeholder="Type resourceId" data-bind="textInput: selectedBucketId" />
           </section>
 
+          <section class="info-card">
+            <span class="info-card__label">Assistants dateFrom</span>
+            <input class="search-input" type="date" data-bind="value: dateFrom" />
+          </section>
+
+          <section class="info-card">
+            <span class="info-card__label">Assistants dateTo (max +90d)</span>
+            <input class="search-input" type="date" data-bind="value: dateTo" />
+          </section>
+
           <section class="info-card actions-card">
             <oj-c-button label="Refresh Buckets" on-oj-action="[[refreshBuckets]]"></oj-c-button>
             <oj-c-button label="Retrieve Crews" on-oj-action="[[retrieveCrews]]"></oj-c-button>

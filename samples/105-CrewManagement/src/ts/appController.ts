@@ -34,6 +34,8 @@ class RootViewModel extends OFSPlugin {
     totalBuckets = ko.observable(0);
     searchQuery = ko.observable("");
     selectedBucketId = ko.observable("");
+    dateFrom = ko.observable("");
+    dateTo = ko.observable("");
     buckets = ko.observableArray<BucketRow>([]);
     filteredBuckets = ko.observableArray<BucketRow>([]);
     calendarRows = ko.observableArray<CrewCalendarRow>([]);
@@ -67,6 +69,42 @@ class RootViewModel extends OFSPlugin {
     private readonly bucketCache = new BucketCache();
     private resourcesService?: ResourcesService;
     private crewsService?: CrewsService;
+
+    private formatDate(date: Date): string {
+        return date.toISOString().split("T")[0];
+    }
+
+    private addDays(input: string, days: number): string {
+        const base = new Date(`${input}T00:00:00`);
+        base.setDate(base.getDate() + days);
+        return this.formatDate(base);
+    }
+
+    private ensureDateRangeDefaults(): void {
+        const today = this.formatDate(new Date());
+        if (!this.dateFrom()) {
+            this.dateFrom(today);
+        }
+        if (!this.dateTo()) {
+            this.dateTo(this.addDays(this.dateFrom(), 30));
+        }
+    }
+
+    private validateDateRange(): string | null {
+        if (!this.dateFrom() || !this.dateTo()) {
+            return "dateFrom and dateTo are required.";
+        }
+        if (this.dateTo() < this.dateFrom()) {
+            return "dateTo must be on or after dateFrom.";
+        }
+        const start = new Date(`${this.dateFrom()}T00:00:00`);
+        const end = new Date(`${this.dateTo()}T00:00:00`);
+        const diffDays = Math.floor((end.getTime() - start.getTime()) / (24 * 60 * 60 * 1000));
+        if (diffDays > 90) {
+            return "Date range cannot exceed 90 days.";
+        }
+        return null;
+    }
 
     constructor() {
         super("crewManagementPlugin");
@@ -132,6 +170,7 @@ class RootViewModel extends OFSPlugin {
         }
 
         const client = new CrewApiClient(baseURL, authorization);
+        this.ensureDateRangeDefaults();
 
         this.resourcesService = new ResourcesService(client);
         this.crewsService = new CrewsService(client);
@@ -219,13 +258,22 @@ class RootViewModel extends OFSPlugin {
             `Retrieving crews for bucket ${selectedBucket.resourceName}...`
         );
 
+        const rangeError = this.validateDateRange();
+        if (rangeError) {
+            this.loading(false);
+            this.errorMessage(rangeError);
+            return;
+        }
+
         try {
             const technicians = await this.resourcesService.loadDescendantTechnicians(
                 selectedBucket.resourceId,
                 this.currentConfig.techniciansTypes
             );
             const calendarRows = await this.crewsService.loadCrewCalendarRows(
-                technicians
+                technicians,
+                this.dateFrom(),
+                this.dateTo()
             );
             this.calendarRows(calendarRows);
             this.calendarDataProvider(
