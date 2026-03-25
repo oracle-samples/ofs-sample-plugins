@@ -24,7 +24,6 @@ import {
 } from "./crew/types";
 import { ResourcesService } from "./crew/resources-service";
 import { CrewsService } from "./crew/crews-service";
-import { CrewApiClient } from "./crew/api-client";
 
 class RootViewModel extends OFSPlugin {
     appName = ko.observable("Crew Management");
@@ -86,7 +85,7 @@ class RootViewModel extends OFSPlugin {
             this.dateFrom(today);
         }
         if (!this.dateTo()) {
-            this.dateTo(this.addDays(this.dateFrom(), 30));
+            this.dateTo(this.addDays(this.dateFrom(), 14));
         }
     }
 
@@ -100,8 +99,8 @@ class RootViewModel extends OFSPlugin {
         const start = new Date(`${this.dateFrom()}T00:00:00`);
         const end = new Date(`${this.dateTo()}T00:00:00`);
         const diffDays = Math.floor((end.getTime() - start.getTime()) / (24 * 60 * 60 * 1000));
-        if (diffDays > 90) {
-            return "Date range cannot exceed 90 days.";
+        if (diffDays > 14) {
+            return "Date range cannot exceed 14 days.";
         }
         return null;
     }
@@ -160,20 +159,15 @@ class RootViewModel extends OFSPlugin {
             console.info("[crewManagementPlugin] Received open message", data);
         }
 
-        const baseURL = (this.proxy as any)?.baseURL as string | undefined;
-        const authorization = (this.proxy as any)?.authorization as string | undefined;
-
-        if (!baseURL || !authorization) {
+        if (!this.proxy) {
             this.errorMessage("Missing secured OFS credentials in open message.");
             this.statusMessage("Cannot initialize OFS proxy.");
             return;
         }
-
-        const client = new CrewApiClient(baseURL, authorization);
         this.ensureDateRangeDefaults();
 
-        this.resourcesService = new ResourcesService(client);
-        this.crewsService = new CrewsService(client);
+        this.resourcesService = new ResourcesService(this.proxy as any);
+        this.crewsService = new CrewsService(this.proxy as any);
         void this.loadBuckets(false);
     }
 

@@ -395,6 +395,18 @@
          "path": "libs/chai/chai.js",
          "cdnPath": "chai/chai-4.3.10.min"
       }
+   },
+
+   "ofs-proxy": {
+     "cwd": "node_modules/@ofs-users/proxy/dist",
+     "debug": {
+       "src": "ofs.amd.js",
+       "path": "libs/ofs-proxy/ofs-proxy.js"
+     },
+     "release": {
+       "src": "ofs.amd.js",
+       "path": "libs/ofs-proxy/ofs-proxy.js"
+     }
    }
 
   }

@@ -3,7 +3,7 @@
   "version": "1.1.0",
   "description": "An Oracle JavaScript Extension Toolkit(JET) web app",
   "dependencies": {
-    "@ofs-users/proxy": "^1.28.0",
+    "@ofs-users/proxy": "^1.29.0",
     "@oracle/oraclejet": "~17.1.0",
     "@oracle/oraclejet-core-pack": "~17.1.0"
   },
@@ -60,9 +60,11 @@
   },
   "private": true,
   "scripts": {
-    "build": "ojet build --release",
-    "pretest": "rm -rf .test-dist && tsc -p tests/tsconfig.node.json",
+    "sync:ofs-proxy": "mkdir -p src/js/libs/ofs-proxy && cp node_modules/@ofs-users/proxy/dist/ofs.amd.js src/js/libs/ofs-proxy/ofs-proxy.js",
+    "build": "npm run sync:ofs-proxy && ojet build --release && npm run check:amd-bundle",
+    "pretest": "npm run sync:ofs-proxy && rm -rf .test-dist && tsc -p tests/tsconfig.node.json",
     "test": "mocha \".test-dist/**/*.spec.js\"",
+    "check:amd-bundle": "node scripts/check-amd-bundle.js",
     "typecheck": "tsc --noEmit"
   }
 }

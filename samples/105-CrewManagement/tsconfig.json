@@ -29,6 +29,9 @@
       ],
       "preact": [
         "./node_modules/preact"
+      ],
+      "ofs-proxy": [
+        "./node_modules/@ofs-users/proxy/dist/OFS"
       ]
     },
     "declaration": true,

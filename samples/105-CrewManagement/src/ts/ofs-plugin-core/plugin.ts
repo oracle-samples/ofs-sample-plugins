@@ -3,7 +3,7 @@
  * Licensed under the Universal Permissive License (UPL), Version 1.0  as shown at https://oss.oracle.com/licenses/upl/
  */
 
-import { OFS, OFSCredentials } from "./proxy";
+import { OFS, OFSCredentials } from "ofs-proxy";
 
 export class OFSMessage {
     apiVersion: number = -1;

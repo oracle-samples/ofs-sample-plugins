@@ -50,7 +50,8 @@
   'preact/compat': 'libs/preact/compat/dist/compat.umd',
   'preact/jsx-runtime': 'libs/preact/jsx-runtime/dist/jsxRuntime.umd',
   'proj4': 'libs/proj4js/dist/proj4-src',
-  'touchr': 'libs/touchr/touchr'
+  'touchr': 'libs/touchr/touchr',
+  'ofs-proxy': 'libs/ofs-proxy/ofs-proxy'
   ,
         'persist': 'libs/persist/debug',
         'chai': 'libs/chai/chai-4.3.7'
