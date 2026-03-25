@@ -192,6 +192,17 @@ body {
   font-size: 0.88rem;
 }
 
+.crew-view-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.search-input--compact {
+  width: 160px;
+  padding: 8px 10px;
+}
+
 .table-card__title {
   color: var(--hero-ink);
   font-size: 1.45rem;
@@ -215,6 +226,69 @@ oj-c-table.orders-table {
   --oj-c-PRIVATE-DO-NOT-USE-table-row-background-color-selected: rgba(199, 70, 52, 0.08);
   --oj-c-PRIVATE-DO-NOT-USE-table-cell-padding-horizontal: 16px;
   --oj-c-PRIVATE-DO-NOT-USE-table-cell-padding-vertical: 14px;
+}
+
+.crew-calendar {
+  border: 1px solid var(--card-border);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.98);
+  overflow-x: auto;
+}
+
+.crew-calendar-grid {
+  display: grid;
+  min-width: 820px;
+}
+
+.crew-calendar__head {
+  padding: 10px 8px;
+  border-bottom: 1px solid var(--card-border);
+  border-right: 1px solid var(--card-border);
+  text-align: center;
+  font-size: 0.78rem;
+  color: var(--muted-ink);
+  background: rgba(18, 40, 76, 0.03);
+}
+
+.crew-calendar__head--label {
+  text-align: left;
+  padding-left: 12px;
+}
+
+.crew-calendar__crew {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--card-border);
+  border-right: 1px solid var(--card-border);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: rgba(255, 255, 255, 0.94);
+}
+
+.crew-calendar__crew strong {
+  color: var(--hero-ink);
+  font-size: 0.86rem;
+}
+
+.crew-calendar__crew small {
+  color: var(--muted-ink);
+  font-size: 0.72rem;
+  line-height: 1.25;
+}
+
+.crew-calendar__cell {
+  height: 56px;
+  border-bottom: 1px solid var(--card-border);
+  border-right: 1px solid var(--card-border);
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.crew-calendar__cell--active {
+  background: linear-gradient(
+    180deg,
+    rgba(199, 70, 52, 0.2),
+    rgba(199, 70, 52, 0.12)
+  );
 }
 
 .details-drawer {
@@ -384,6 +458,16 @@ oj-c-table.orders-table {
     align-items: flex-start;
     flex-direction: column;
     gap: 8px;
+  }
+
+  .crew-view-controls {
+    width: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .search-input--compact {
+    width: 100%;
   }
 
   .table-card__hint {

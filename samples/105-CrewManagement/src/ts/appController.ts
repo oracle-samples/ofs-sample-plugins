@@ -18,10 +18,11 @@ import {
 import { ResourceCache } from "./crew/cache";
 import {
     BucketRow,
-    CrewCalendarRow,
+    CrewAssignment,
     CrewOpenConfig,
     CrewOpenMessage,
     DescendantsScope,
+    CrewViewMode,
 } from "./crew/types";
 import { ResourcesService } from "./crew/resources-service";
 import { CrewsService } from "./crew/crews-service";
@@ -39,11 +40,13 @@ class RootViewModel extends OFSPlugin {
     showBucketsSection = ko.observable(true);
     selectedBucketId = ko.observable("");
     descendantsScope = ko.observable<DescendantsScope>("all");
+    crewViewMode = ko.observable<CrewViewMode>("list");
     dateFrom = ko.observable("");
     dateTo = ko.observable("");
     buckets = ko.observableArray<BucketRow>([]);
     filteredBuckets = ko.observableArray<BucketRow>([]);
-    calendarRows = ko.observableArray<CrewCalendarRow>([]);
+    crewAssignments = ko.observableArray<CrewAssignment>([]);
+    dateColumns = ko.observableArray<string>([]);
 
     bucketsDataProvider = ko.observable(
         new ArrayDataProvider([] as BucketRow[], {
@@ -51,15 +54,15 @@ class RootViewModel extends OFSPlugin {
         })
     );
     calendarDataProvider = ko.observable(
-        new ArrayDataProvider([] as CrewCalendarRow[], {
-            keyAttributes: "technicianResourceId",
+        new ArrayDataProvider([] as CrewAssignment[], {
+            keyAttributes: "crewId",
         })
     );
 
     subtitleText: ko.PureComputed<string>;
     cacheDiagnosticsText: ko.PureComputed<string>;
     hasBuckets: ko.PureComputed<boolean>;
-    hasCalendarRows: ko.PureComputed<boolean>;
+    hasCrewAssignments: ko.PureComputed<boolean>;
 
     bucketColumnsByKey: Record<string, { field: string; headerText: string; weight: number }>;
     bucketColumnOrder: string[];
@@ -84,7 +87,7 @@ class RootViewModel extends OFSPlugin {
         if (!this.currentConfig.enableLogging) {
             return;
         }
-        console.info("[crewManagementPlugin]", ...args);
+        console.log("[crewManagementPlugin]", ...args);
     }
 
     private formatDate(date: Date): string {
@@ -123,6 +126,17 @@ class RootViewModel extends OFSPlugin {
         return null;
     }
 
+    private buildDateColumns(dateFrom: string, dateTo: string): string[] {
+        const days: string[] = [];
+        const current = new Date(`${dateFrom}T00:00:00`);
+        const end = new Date(`${dateTo}T00:00:00`);
+        while (current.getTime() <= end.getTime()) {
+            days.push(current.toISOString().slice(0, 10));
+            current.setDate(current.getDate() + 1);
+        }
+        return days;
+    }
+
     constructor() {
         super("crewManagementPlugin");
 
@@ -134,16 +148,20 @@ class RootViewModel extends OFSPlugin {
         this.bucketColumnOrder = BUCKET_TABLE_COLUMNS.map((column) => column.field);
 
         this.calendarColumnsByKey = {
-            technicianName: { field: "technicianName", headerText: "Technician", weight: 3 },
-            technicianType: { field: "technicianType", headerText: "Type", weight: 2 },
-            assistantsCount: { field: "assistantsCount", headerText: "Assistants", weight: 2 },
-            assistantsLabel: { field: "assistantsLabel", headerText: "Crew Members", weight: 5 },
+            crewName: { field: "crewName", headerText: "Crew", weight: 3 },
+            leadName: { field: "leadName", headerText: "Team Lead", weight: 3 },
+            membersLabel: { field: "membersLabel", headerText: "Members", weight: 6 },
+            startDate: { field: "startDate", headerText: "Start", weight: 2 },
+            endDate: { field: "endDate", headerText: "End", weight: 2 },
+            durationDays: { field: "durationDays", headerText: "Days", weight: 1 },
         };
         this.calendarColumnOrder = [
-            "technicianName",
-            "technicianType",
-            "assistantsCount",
-            "assistantsLabel",
+            "crewName",
+            "leadName",
+            "membersLabel",
+            "startDate",
+            "endDate",
+            "durationDays",
         ];
 
         this.subtitleText = ko.pureComputed(() => {
@@ -164,7 +182,9 @@ class RootViewModel extends OFSPlugin {
         });
 
         this.hasBuckets = ko.pureComputed(() => this.filteredBuckets().length > 0);
-        this.hasCalendarRows = ko.pureComputed(() => this.calendarRows().length > 0);
+        this.hasCrewAssignments = ko.pureComputed(
+            () => this.crewAssignments().length > 0
+        );
 
         this.closePlugin = () => this.close();
         this.refreshBuckets = () => {
@@ -201,7 +221,8 @@ class RootViewModel extends OFSPlugin {
     open(data: CrewOpenMessage): void {
         this.currentConfig = parseCrewOpenConfig(data.openParams, data.securedData);
         if (this.currentConfig.enableLogging) {
-            console.info("[crewManagementPlugin] Received open message", data);
+            console.log("[crewManagementPlugin] Verbose logging enabled");
+            console.log("[crewManagementPlugin] Received open message", data);
         }
 
         if (!this.proxy) {
@@ -357,10 +378,11 @@ class RootViewModel extends OFSPlugin {
                 techniciansCount: technicians.length,
             });
             if (technicians.length === 0) {
-                this.calendarRows([]);
+                this.crewAssignments([]);
+                this.dateColumns(this.buildDateColumns(this.dateFrom(), this.dateTo()));
                 this.calendarDataProvider(
-                    new ArrayDataProvider([] as CrewCalendarRow[], {
-                        keyAttributes: "technicianResourceId",
+                    new ArrayDataProvider([] as CrewAssignment[], {
+                        keyAttributes: "crewId",
                     })
                 );
                 this.statusMessage(
@@ -368,27 +390,30 @@ class RootViewModel extends OFSPlugin {
                 );
                 return;
             }
-            const calendarRows = await this.crewsService.loadCrewCalendarRows(
+            const assignments = await this.crewsService.loadCrewAssignments(
                 technicians,
                 this.dateFrom(),
-                this.dateTo()
+                this.dateTo(),
+                this.allResources
             );
-            this.debugLog("loadCrewsForSelection: calendar rows generated", {
-                calendarRows: calendarRows.length,
+            this.debugLog("loadCrewsForSelection: crew assignments generated", {
+                assignments: assignments.length,
             });
-            this.calendarRows(calendarRows);
+            this.crewAssignments(assignments);
+            this.dateColumns(this.buildDateColumns(this.dateFrom(), this.dateTo()));
             this.calendarDataProvider(
-                new ArrayDataProvider(calendarRows, {
-                    keyAttributes: "technicianResourceId",
+                new ArrayDataProvider(assignments, {
+                    keyAttributes: "crewId",
                 })
             );
             this.statusMessage(
-                calendarRows.length > 0
-                    ? "Crew relationships loaded and mapped to calendar rows."
-                    : "No crew relationships found for selected bucket."
+                assignments.length > 0
+                    ? "Crew assignments loaded and grouped by consecutive days."
+                    : "No crew assignments found for selected bucket."
             );
-            if (calendarRows.length > 0) {
+            if (assignments.length > 0) {
                 this.showBucketsSection(false);
+                this.crewViewMode("calendar");
             }
         } catch (error) {
             this.errorMessage(

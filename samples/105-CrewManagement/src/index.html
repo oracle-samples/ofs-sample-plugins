@@ -118,15 +118,22 @@
           </oj-c-table>
         </section>
 
-        <section class="table-card" data-bind="visible: hasCalendarRows">
+        <section class="table-card" data-bind="visible: hasCrewAssignments">
           <div class="table-card__header">
             <div>
               <p class="table-card__eyebrow">Crews</p>
-              <h2 class="table-card__title">Calendar-ready crew rows</h2>
+              <h2 class="table-card__title">Crew assignments</h2>
             </div>
-            <p class="table-card__hint">Generated from descendants and assistants for selected bucket.</p>
+            <div class="crew-view-controls">
+              <span class="table-card__hint">View mode</span>
+              <select class="search-input search-input--compact" data-bind="value: crewViewMode">
+                <option value="calendar">Calendar</option>
+                <option value="list">List</option>
+              </select>
+            </div>
           </div>
           <oj-c-table
+            data-bind="visible: crewViewMode() === 'list'"
             id="calendarTable"
             aria-label="Crew calendar rows"
             class="orders-table"
@@ -138,6 +145,25 @@
             vertical-grid-visible="disabled"
             selection-mode='{"row":"single","column":"none"}'>
           </oj-c-table>
+
+          <div class="crew-calendar" data-bind="visible: crewViewMode() === 'calendar'">
+            <div class="crew-calendar-grid" data-bind="style: { gridTemplateColumns: '220px repeat(' + dateColumns().length + ', minmax(42px, 1fr))' }">
+              <div class="crew-calendar__head crew-calendar__head--label">Crew</div>
+              <!-- ko foreach: dateColumns -->
+              <div class="crew-calendar__head" data-bind="text: $data.slice(5)"></div>
+              <!-- /ko -->
+
+              <!-- ko foreach: crewAssignments -->
+              <div class="crew-calendar__crew">
+                <strong data-bind="text: crewName"></strong>
+                <small data-bind="text: membersLabel"></small>
+              </div>
+              <!-- ko foreach: $parent.dateColumns -->
+              <div class="crew-calendar__cell" data-bind="css: { 'crew-calendar__cell--active': $parents[0].dates.includes($data) }, attr: { title: $parents[0].crewName + ' | ' + $parents[0].membersLabel }"></div>
+              <!-- /ko -->
+              <!-- /ko -->
+            </div>
+          </div>
         </section>
       </main>
 

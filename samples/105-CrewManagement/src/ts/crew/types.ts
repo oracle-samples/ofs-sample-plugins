@@ -20,13 +20,20 @@ export interface BucketRow {
   parentResourceId: string;
 }
 
-export interface CrewCalendarRow {
-  technicianResourceId: string;
-  technicianName: string;
-  technicianType: string;
-  assistantsCount: number;
-  assistantsLabel: string;
+export interface CrewAssignment {
+  crewId: string;
+  crewName: string;
+  leadResourceId: string;
+  leadName: string;
+  memberResourceIds: string[];
+  membersLabel: string;
+  startDate: string;
+  endDate: string;
+  dates: string[];
+  durationDays: number;
 }
+
+export type CrewViewMode = "list" | "calendar";
 
 export interface OFSListResponse<T> {
   status: number;

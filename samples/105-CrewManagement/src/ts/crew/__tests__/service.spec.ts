@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { ResourcesService } from "../resources-service";
 import { CrewsService } from "../crews-service";
-import { CrewProxy } from "../types";
+import { BucketRow, CrewProxy } from "../types";
 
 describe("Crew services", () => {
   it("filters buckets by configured bucket types", async () => {
@@ -44,78 +44,70 @@ describe("Crew services", () => {
     expect(all.map((r) => r.resourceId)).to.have.members(["3", "4"]);
   });
 
-  it("maps assistants to calendar rows", async () => {
-    const proxy: CrewProxy = {
-      getAllResources: async () => ({ items: [] }),
-      getAllResourceAssistants: async (_resourceId: string, params: { dateFrom: string; dateTo: string; fields?: string[] }) => ({
-        items: [
-          { resourceId: "a1", name: "Assistant 1" },
-          { resourceId: "a2", name: "Assistant 2" },
-        ],
-      }),
-    };
-
-    const service = new CrewsService(proxy);
-    const rows = await service.loadCrewCalendarRows([
-      {
-        resourceId: "t1",
-        resourceName: "Technician 1",
-        resourceType: "tech",
-        parentResourceId: "1",
-      },
-    ], "2026-03-01", "2026-03-31");
-
-    expect(rows).to.have.length(1);
-    expect(rows[0].assistantsCount).to.equal(2);
-    expect(rows[0].assistantsLabel).to.contain("Assistant 1");
-  });
-
-  it("normalizes nested assistants payload and filters out technicians without assistants", async () => {
+  it("builds consecutive-day crew assignments from nested assistants payload", async () => {
     const proxy: CrewProxy = {
       getAllResources: async () => ({ items: [] }),
       getAllResourceAssistants: async (resourceId: string) => {
-        if (resourceId === "t1") {
-          return {
-            items: [
-              {
-                date: "2026-03-24",
-                assistants: [
-                  {
-                    resourceDetails: { resourceId: "FSL_01" },
-                    teamWorkActivities: [{ activityId: 4250616 }],
-                  },
-                ],
-              },
-            ],
-          };
+        if (resourceId !== "t1") {
+          return { items: [] };
         }
-        return { items: [] };
+
+        return {
+          items: [
+            {
+              date: "2026-03-24",
+              assistants: [{ resourceDetails: { resourceId: "a1" } }],
+            },
+            {
+              date: "2026-03-25",
+              assistants: [{ resourceDetails: { resourceId: "a1" } }],
+            },
+            {
+              date: "2026-03-26",
+              assistants: [{ resourceDetails: { resourceId: "a2" } }],
+            },
+          ],
+        };
       },
     };
 
+    const technicians: BucketRow[] = [
+      {
+        resourceId: "t1",
+        resourceName: "Lead 1",
+        resourceType: "tech",
+        parentResourceId: "b1",
+      },
+      {
+        resourceId: "t2",
+        resourceName: "Lead 2",
+        resourceType: "tech",
+        parentResourceId: "b1",
+      },
+    ];
+    const resources: BucketRow[] = [
+      ...technicians,
+      { resourceId: "a1", resourceName: "Assistant 1", resourceType: "tech", parentResourceId: "b1" },
+      { resourceId: "a2", resourceName: "Assistant 2", resourceType: "tech", parentResourceId: "b1" },
+    ];
+
     const service = new CrewsService(proxy);
-    const rows = await service.loadCrewCalendarRows(
-      [
-        {
-          resourceId: "t1",
-          resourceName: "Michael Riddick",
-          resourceType: "tech",
-          parentResourceId: "1",
-        },
-        {
-          resourceId: "t2",
-          resourceName: "No Assistant Tech",
-          resourceType: "tech",
-          parentResourceId: "1",
-        },
-      ],
-      "2026-03-01",
-      "2026-03-31"
+    const assignments = await service.loadCrewAssignments(
+      technicians,
+      "2026-03-24",
+      "2026-03-27",
+      resources
     );
 
-    expect(rows).to.have.length(1);
-    expect(rows[0].technicianResourceId).to.equal("t1");
-    expect(rows[0].assistantsCount).to.equal(1);
-    expect(rows[0].assistantsLabel).to.equal("FSL_01");
+    expect(assignments).to.have.length(2);
+    expect(assignments[0].crewName).to.equal("Lead 1 Crew");
+    expect(assignments[0].startDate).to.equal("2026-03-24");
+    expect(assignments[0].endDate).to.equal("2026-03-25");
+    expect(assignments[0].durationDays).to.equal(2);
+    expect(assignments[0].membersLabel).to.contain("Assistant 1");
+
+    expect(assignments[1].startDate).to.equal("2026-03-26");
+    expect(assignments[1].endDate).to.equal("2026-03-26");
+    expect(assignments[1].membersLabel).to.contain("Assistant 2");
   });
 });
