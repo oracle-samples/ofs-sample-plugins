@@ -121,6 +121,13 @@ body {
   word-break: break-word;
 }
 
+.info-card__meta {
+  margin: 10px 0 0;
+  color: var(--muted-ink);
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
 .search-input {
   width: 100%;
   border: 1px solid var(--card-border);

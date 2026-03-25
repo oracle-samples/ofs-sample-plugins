@@ -397,7 +397,7 @@
       }
    },
 
-   "ofs-proxy": {
+   "@ofs-users/proxy": {
      "cwd": "node_modules/@ofs-users/proxy/dist",
      "debug": {
        "src": "ofs.amd.js",
@@ -406,6 +406,18 @@
      "release": {
        "src": "ofs.amd.js",
        "path": "libs/ofs-proxy/ofs-proxy.js"
+     }
+   },
+
+   "@ofs-users/plugin": {
+     "cwd": "node_modules/@ofs-users/plugin/dist",
+     "debug": {
+       "src": "ofs-plugin.amd.js",
+       "path": "libs/ofs-plugin/ofs-plugin.js"
+     },
+     "release": {
+       "src": "ofs-plugin.amd.js",
+       "path": "libs/ofs-plugin/ofs-plugin.js"
      }
    }
 

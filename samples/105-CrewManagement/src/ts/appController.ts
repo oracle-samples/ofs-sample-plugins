@@ -10,17 +10,18 @@ import ArrayDataProvider = require("ojs/ojarraydataprovider");
 import "oj-c/button";
 import "oj-c/progress-circle";
 import "oj-c/table";
-import { OFSPlugin } from "./ofs-plugin-core/plugin";
+import { OFSPlugin } from "@ofs-users/plugin";
 import {
     BUCKET_TABLE_COLUMNS,
     parseCrewOpenConfig,
 } from "./crew/config";
-import { BucketCache } from "./crew/cache";
+import { ResourceCache } from "./crew/cache";
 import {
     BucketRow,
     CrewCalendarRow,
     CrewOpenConfig,
     CrewOpenMessage,
+    DescendantsScope,
 } from "./crew/types";
 import { ResourcesService } from "./crew/resources-service";
 import { CrewsService } from "./crew/crews-service";
@@ -31,8 +32,13 @@ class RootViewModel extends OFSPlugin {
     errorMessage = ko.observable("");
     loading = ko.observable(false);
     totalBuckets = ko.observable(0);
+    resourceCacheSource = ko.observable("not_loaded");
+    resourceApiFetchCount = ko.observable(0);
+    resourceCacheHitCount = ko.observable(0);
     searchQuery = ko.observable("");
+    showBucketsSection = ko.observable(true);
     selectedBucketId = ko.observable("");
+    descendantsScope = ko.observable<DescendantsScope>("all");
     dateFrom = ko.observable("");
     dateTo = ko.observable("");
     buckets = ko.observableArray<BucketRow>([]);
@@ -51,6 +57,7 @@ class RootViewModel extends OFSPlugin {
     );
 
     subtitleText: ko.PureComputed<string>;
+    cacheDiagnosticsText: ko.PureComputed<string>;
     hasBuckets: ko.PureComputed<boolean>;
     hasCalendarRows: ko.PureComputed<boolean>;
 
@@ -63,11 +70,22 @@ class RootViewModel extends OFSPlugin {
     refreshBuckets: () => void;
     retrieveCrews: () => void;
     clearSearch: () => void;
+    showBuckets: () => void;
+    onBucketSelectionChanged: (event: any) => void;
+    onBucketCurrentCellChanged: (event: any) => void;
 
     private currentConfig: CrewOpenConfig = parseCrewOpenConfig(undefined, undefined);
-    private readonly bucketCache = new BucketCache();
+    private readonly resourceCache = new ResourceCache();
+    private allResources: BucketRow[] = [];
     private resourcesService?: ResourcesService;
     private crewsService?: CrewsService;
+
+    private debugLog(...args: unknown[]): void {
+        if (!this.currentConfig.enableLogging) {
+            return;
+        }
+        console.info("[crewManagementPlugin]", ...args);
+    }
 
     private formatDate(date: Date): string {
         return date.toISOString().split("T")[0];
@@ -134,6 +152,16 @@ class RootViewModel extends OFSPlugin {
             }
             return this.statusMessage();
         });
+        this.cacheDiagnosticsText = ko.pureComputed(() => {
+            const source = this.resourceCacheSource();
+            const sourceLabel =
+                source === "api"
+                    ? "API"
+                    : source === "cache"
+                    ? "Session cache"
+                    : "Not loaded";
+            return `Source: ${sourceLabel} | API fetches: ${this.resourceApiFetchCount()} | Cache hits: ${this.resourceCacheHitCount()}`;
+        });
 
         this.hasBuckets = ko.pureComputed(() => this.filteredBuckets().length > 0);
         this.hasCalendarRows = ko.pureComputed(() => this.calendarRows().length > 0);
@@ -148,6 +176,23 @@ class RootViewModel extends OFSPlugin {
         this.clearSearch = () => {
             this.searchQuery("");
             this.applyBucketFilter();
+        };
+        this.showBuckets = () => {
+            this.showBucketsSection(true);
+        };
+        this.onBucketSelectionChanged = (event: any) => {
+            const selectedRows = event?.detail?.value?.row;
+            const values = selectedRows?.values?.();
+            const firstSelected = values?.next?.().value;
+            if (firstSelected !== undefined && firstSelected !== null) {
+                this.selectedBucketId(String(firstSelected));
+            }
+        };
+        this.onBucketCurrentCellChanged = (event: any) => {
+            const rowKey = event?.detail?.value?.rowKey;
+            if (rowKey !== undefined && rowKey !== null) {
+                this.selectedBucketId(String(rowKey));
+            }
         };
 
         this.searchQuery.subscribe(() => this.applyBucketFilter());
@@ -166,8 +211,14 @@ class RootViewModel extends OFSPlugin {
         }
         this.ensureDateRangeDefaults();
 
-        this.resourcesService = new ResourcesService(this.proxy as any);
-        this.crewsService = new CrewsService(this.proxy as any);
+        this.resourcesService = new ResourcesService(
+            this.proxy as any,
+            (...args: unknown[]) => this.debugLog(...args)
+        );
+        this.crewsService = new CrewsService(
+            this.proxy as any,
+            (...args: unknown[]) => this.debugLog(...args)
+        );
         void this.loadBuckets(false);
     }
 
@@ -204,20 +255,46 @@ class RootViewModel extends OFSPlugin {
         this.loading(true);
 
         try {
-            const cachedBuckets = this.bucketCache.get();
-            const buckets =
-                !forceRefresh && cachedBuckets
-                    ? cachedBuckets
-                    : await this.resourcesService.loadBuckets(
-                          this.currentConfig.bucketTypes
-                      );
+            const cachedResources = this.resourceCache.get();
+            const loadedFromCache = !forceRefresh && Array.isArray(cachedResources);
+            const allResources =
+                loadedFromCache && cachedResources
+                    ? cachedResources
+                    : await this.resourcesService.fetchAllResources();
+            if (loadedFromCache) {
+                this.resourceCacheSource("cache");
+                this.resourceCacheHitCount(this.resourceCacheHitCount() + 1);
+                this.debugLog("loadBuckets: using cached resources", {
+                    totalResources: allResources.length,
+                    forceRefresh,
+                });
+            } else {
+                this.resourceCacheSource("api");
+                this.resourceApiFetchCount(this.resourceApiFetchCount() + 1);
+                this.debugLog("loadBuckets: fetched resources from API", {
+                    totalResources: allResources.length,
+                    forceRefresh,
+                });
+            }
+            this.allResources = allResources;
+            this.resourceCache.set(allResources);
 
-            this.bucketCache.set(buckets);
+            const buckets = this.resourcesService.filterBuckets(
+                allResources,
+                this.currentConfig.bucketTypes
+            );
+            this.debugLog("loadBuckets: filtered buckets", {
+                bucketTypes: this.currentConfig.bucketTypes,
+                totalBuckets: buckets.length,
+            });
+            this.showBucketsSection(true);
             this.buckets(buckets);
             this.applyBucketFilter();
             this.statusMessage(
                 buckets.length > 0
-                    ? "Buckets loaded. Select one bucket and click Retrieve Crews."
+                    ? `Buckets loaded (${buckets.length}) from ${
+                          loadedFromCache ? "session cache" : "API"
+                      } (${allResources.length} total resources). Select one bucket and click Retrieve Crews.`
                     : "No buckets found for configured bucket types."
             );
         } catch (error) {
@@ -237,6 +314,10 @@ class RootViewModel extends OFSPlugin {
             return;
         }
 
+        if (this.allResources.length === 0) {
+            await this.loadBuckets(false);
+        }
+
         const selectedBucket = this.filteredBuckets().find(
             (bucket: BucketRow) => bucket.resourceId === this.selectedBucketId()
         );
@@ -249,7 +330,9 @@ class RootViewModel extends OFSPlugin {
         this.errorMessage("");
         this.loading(true);
         this.statusMessage(
-            `Retrieving crews for bucket ${selectedBucket.resourceName}...`
+            `Retrieving crews for bucket ${selectedBucket.resourceName} using ${
+                this.descendantsScope() === "direct" ? "direct children" : "all descendants"
+            } from cached resources...`
         );
 
         const rangeError = this.validateDateRange();
@@ -260,15 +343,39 @@ class RootViewModel extends OFSPlugin {
         }
 
         try {
-            const technicians = await this.resourcesService.loadDescendantTechnicians(
+            const technicians = this.resourcesService.findDescendantTechnicians(
+                this.allResources,
                 selectedBucket.resourceId,
-                this.currentConfig.techniciansTypes
+                this.currentConfig.techniciansTypes,
+                this.descendantsScope()
             );
+            this.debugLog("loadCrewsForSelection: technicians resolved", {
+                selectedBucketResourceId: selectedBucket.resourceId,
+                descendantsScope: this.descendantsScope(),
+                techniciansTypes: this.currentConfig.techniciansTypes,
+                technicianIds: technicians.map((t) => t.resourceId),
+                techniciansCount: technicians.length,
+            });
+            if (technicians.length === 0) {
+                this.calendarRows([]);
+                this.calendarDataProvider(
+                    new ArrayDataProvider([] as CrewCalendarRow[], {
+                        keyAttributes: "technicianResourceId",
+                    })
+                );
+                this.statusMessage(
+                    "No technicians found under selected bucket for configured technician types."
+                );
+                return;
+            }
             const calendarRows = await this.crewsService.loadCrewCalendarRows(
                 technicians,
                 this.dateFrom(),
                 this.dateTo()
             );
+            this.debugLog("loadCrewsForSelection: calendar rows generated", {
+                calendarRows: calendarRows.length,
+            });
             this.calendarRows(calendarRows);
             this.calendarDataProvider(
                 new ArrayDataProvider(calendarRows, {
@@ -280,6 +387,9 @@ class RootViewModel extends OFSPlugin {
                     ? "Crew relationships loaded and mapped to calendar rows."
                     : "No crew relationships found for selected bucket."
             );
+            if (calendarRows.length > 0) {
+                this.showBucketsSection(false);
+            }
         } catch (error) {
             this.errorMessage(
                 error instanceof Error

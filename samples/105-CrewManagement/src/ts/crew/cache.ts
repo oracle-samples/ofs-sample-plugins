@@ -1,10 +1,16 @@
 import { BucketRow } from "./types";
 
 const CACHE_KEY = "crewManagement.buckets.cache";
+const RESOURCE_CACHE_KEY = "crewManagement.resources.cache";
 
 interface BucketCachePayload {
   sessionId: string;
   buckets: BucketRow[];
+}
+
+interface ResourceCachePayload {
+  sessionId: string;
+  resources: BucketRow[];
 }
 
 function getSessionId(): string {
@@ -42,5 +48,32 @@ export class BucketCache {
       buckets,
     };
     window.sessionStorage.setItem(CACHE_KEY, JSON.stringify(payload));
+  }
+}
+
+export class ResourceCache {
+  get(): BucketRow[] | null {
+    const raw = window.sessionStorage.getItem(RESOURCE_CACHE_KEY);
+    if (!raw) {
+      return null;
+    }
+
+    try {
+      const parsed = JSON.parse(raw) as ResourceCachePayload;
+      if (parsed.sessionId !== getSessionId()) {
+        return null;
+      }
+      return Array.isArray(parsed.resources) ? parsed.resources : null;
+    } catch (_error) {
+      return null;
+    }
+  }
+
+  set(resources: BucketRow[]): void {
+    const payload: ResourceCachePayload = {
+      sessionId: getSessionId(),
+      resources,
+    };
+    window.sessionStorage.setItem(RESOURCE_CACHE_KEY, JSON.stringify(payload));
   }
 }

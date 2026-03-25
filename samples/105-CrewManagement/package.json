@@ -3,12 +3,12 @@
   "version": "1.1.0",
   "description": "An Oracle JavaScript Extension Toolkit(JET) web app",
   "dependencies": {
+    "@ofs-users/plugin": "^1.7.0",
     "@ofs-users/proxy": "^1.29.0",
     "@oracle/oraclejet": "~17.1.0",
     "@oracle/oraclejet-core-pack": "~17.1.0"
   },
   "devDependencies": {
-    "@ofs-users/plugin": "^1.3.1",
     "@ofs-users/plugin-manager": "file:../ofs-plugin-uploader-js",
     "@oracle/ojet-cli": "~17.1.0",
     "@prefresh/babel-plugin": "0.5.1",
@@ -60,9 +60,8 @@
   },
   "private": true,
   "scripts": {
-    "sync:ofs-proxy": "mkdir -p src/js/libs/ofs-proxy && cp node_modules/@ofs-users/proxy/dist/ofs.amd.js src/js/libs/ofs-proxy/ofs-proxy.js",
-    "build": "npm run sync:ofs-proxy && ojet build --release && npm run check:amd-bundle",
-    "pretest": "npm run sync:ofs-proxy && rm -rf .test-dist && tsc -p tests/tsconfig.node.json",
+    "build": "ojet build --release && npm run check:amd-bundle",
+    "pretest": "rm -rf .test-dist && tsc -p tests/tsconfig.node.json",
     "test": "mocha \".test-dist/**/*.spec.js\"",
     "check:amd-bundle": "node scripts/check-amd-bundle.js",
     "typecheck": "tsc --noEmit"

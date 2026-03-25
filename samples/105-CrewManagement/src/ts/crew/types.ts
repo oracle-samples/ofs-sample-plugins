@@ -1,4 +1,4 @@
-import { OFSOpenMessage } from "../ofs-plugin-core/plugin";
+import { OFSOpenMessage } from "@ofs-users/plugin";
 
 export interface CrewOpenMessage extends OFSOpenMessage {
   openParams?: unknown;
@@ -10,6 +10,8 @@ export interface CrewOpenConfig {
   techniciansTypes: string[];
   enableLogging: boolean;
 }
+
+export type DescendantsScope = "direct" | "all";
 
 export interface BucketRow {
   resourceId: string;
@@ -55,7 +57,7 @@ export interface CrewProxy {
     resourceId: string,
     params: { fields?: string[]; dateFrom: string; dateTo: string }
   ): Promise<{
-    items?: OFSAssistant[];
+    items?: any[];
     totalResults?: number;
   }>;
 }

@@ -36,6 +36,7 @@
           <section class="info-card">
             <span class="info-card__label">Visible buckets</span>
             <strong class="info-card__value" data-bind="text: totalBuckets"></strong>
+            <p class="info-card__meta" data-bind="text: cacheDiagnosticsText"></p>
           </section>
 
           <section class="info-card">
@@ -44,18 +45,29 @@
           </section>
 
           <section class="info-card">
+            <span class="info-card__label">Descendant scope</span>
+            <select class="search-input" data-bind="value: descendantsScope">
+              <option value="all">All descendants</option>
+              <option value="direct">Direct descendants only</option>
+            </select>
+          </section>
+
+          <section class="info-card">
             <span class="info-card__label">Assistants dateFrom</span>
             <input class="search-input" type="date" data-bind="value: dateFrom" />
           </section>
 
           <section class="info-card">
-            <span class="info-card__label">Assistants dateTo (max +90d)</span>
+            <span class="info-card__label">Assistants dateTo (max +14d)</span>
             <input class="search-input" type="date" data-bind="value: dateTo" />
           </section>
 
           <section class="info-card actions-card">
             <oj-c-button label="Refresh Buckets" on-oj-action="[[refreshBuckets]]"></oj-c-button>
             <oj-c-button label="Retrieve Crews" on-oj-action="[[retrieveCrews]]"></oj-c-button>
+            <div data-bind="visible: !showBucketsSection()">
+              <oj-c-button label="Show Buckets" chroming="borderless" on-oj-action="[[showBuckets]]"></oj-c-button>
+            </div>
             <oj-c-button label="Clear Search" chroming="borderless" on-oj-action="[[clearSearch]]"></oj-c-button>
           </section>
         </div>
@@ -82,7 +94,7 @@
           </p>
         </section>
 
-        <section class="table-card" data-bind="visible: hasBuckets">
+        <section class="table-card" data-bind="visible: hasBuckets() && showBucketsSection()">
           <div class="table-card__header">
             <div>
               <p class="table-card__eyebrow">Buckets</p>
@@ -100,6 +112,8 @@
             layout="fixed"
             horizontal-grid-visible="enabled"
             vertical-grid-visible="disabled"
+            on-selected-changed="[[onBucketSelectionChanged]]"
+            on-current-cell-changed="[[onBucketCurrentCellChanged]]"
             selection-mode='{"row":"single","column":"none"}'>
           </oj-c-table>
         </section>

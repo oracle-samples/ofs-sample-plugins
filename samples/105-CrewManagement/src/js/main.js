@@ -51,7 +51,8 @@
   'preact/jsx-runtime': 'libs/preact/jsx-runtime/dist/jsxRuntime.umd',
   'proj4': 'libs/proj4js/dist/proj4-src',
   'touchr': 'libs/touchr/touchr',
-  'ofs-proxy': 'libs/ofs-proxy/ofs-proxy'
+  '@ofs-users/plugin': 'libs/ofs-plugin/ofs-plugin',
+  '@ofs-users/proxy': 'libs/ofs-proxy/ofs-proxy'
   ,
         'persist': 'libs/persist/debug',
         'chai': 'libs/chai/chai-4.3.7'
