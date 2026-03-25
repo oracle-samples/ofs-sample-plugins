@@ -1,0 +1,52 @@
+{
+  "id": "crewManagementPlugin",
+  "src_files": [
+    "plugin_descriptor.json",
+    "index.html",
+    "sw.js",
+    "css/app.css",
+    "css/images/JET-Favicon-Red-32x32.png",
+    "js/bundle.js",
+    "js/libs/oj/17.1.2/ojL10n.js",
+    "js/libs/oj/17.1.2/min/ojcss.js",
+    "js/libs/oj/17.1.2/resources/root/localeElements.js",
+    "js/libs/oj/17.1.2/resources/root/ojtranslations.js",
+    "js/libs/oj/17.1.2/resources/root/timezoneData.js",
+    "js/libs/require/text.js",
+    "js/libs/require-css/css-builder.js",
+    "js/libs/require-css/css.min.js",
+    "js/libs/require-css/normalize.js"
+  ],
+  "properties": {
+    "activity": [
+      "aid"
+    ]
+  },
+  "metadata": {
+    "shortDetailFields": [
+      "activityId",
+      "status",
+      "date",
+      "timeSlot",
+      "activityType",
+      "city",
+      "state",
+      "postalCode"
+    ],
+    "longDetailFields": [
+      "customerName",
+      "streetAddress",
+      "address"
+    ]
+  },
+  "securedParams": [
+    {
+      "name": "bucketTypes",
+      "value": "BK,OU"
+    },
+    {
+      "name": "techniciansTypes",
+      "value": "PR,Tech1,EG,crew,crew_member,CO"
+    }
+  ]
+}
