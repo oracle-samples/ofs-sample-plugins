@@ -2,46 +2,69 @@
 
 ## Description
 
-This plugin is designed to Force the start of any activity in the technician route, no matter which was the previous order.
+`009-ForceStart` lets a technician start the selected activity even when it is not the next ordered activity in the route.
 
-Depending on the condition, it will trigger different actions.
+Before any start/suspend action, the plugin checks route queue status from the `open` payload:
 
-If the technicians wants to start an activity while I have another activity started, it will suspend the current started activity
-If the pending activity I want to start is not the next one in the route, I will suspend such activity to make it non-ordered and it will start it.
+- If `queue.status` is `notActivated`, it sends:
+  - `method: "update"`
+  - `actions: [{ entity: "queue", action: "activate_queue" }]`
+- After activation, it continues with the force-start flow.
+- It retries queue activation up to 3 times; if activation still fails, it redirects back without forcing updates.
+
+## Behavior
+
+When the queue is activated, the plugin decides actions in this order:
+
+1. If selected activity is already `started`: close and redirect.
+2. If selected activity is already non-ordered (`position_in_route = "-1"`): start it.
+3. Otherwise:
+   - If another activity is `started`: suspend that activity, then re-check.
+   - If selected activity is next in route: start it.
+   - If selected activity is not next in route: set selected activity to non-ordered (`position_in_route = "-1"`), then start it.
+
+After successful start, the plugin closes and redirects to the configured back screen.
 
 ## Parameters
 
-**Secure Parameters**
+### Secure Parameters
 
-none
+None.
 
-**Open Parameters**
+### Open Parameters
 
-backScreen : screen where I want to redirect the technician after starting the activity ( default : plugin_by_label )
-redirectPluginLabel : if the redirect option is a plugin, label of the plugin ( default : debriefing )
+- `backScreen`: destination when plugin closes.
+  - Default: `activity_by_id`
+- `redirectPluginLabel`: plugin label used when `backScreen = plugin_by_label`.
 
-**Properties needed**
+## Required Open Message Data
 
-aid
-astatus
-position_in_route
+- `queue.status`
+- `activity.aid`
+- `activity.astatus`
+- `activity.position_in_route`
+- `activityList` entries with `aid`, `astatus`, and `position_in_route`
 
-## How to use
+## How To Use
 
-Add this plugin to the Activity Details Screen for any activity in Pending status
+Add this plugin to Activity Details for activities that technicians may need to force start.
 
-## For development
+## Development
 
-### How to build
+### Build
 
-1. Install the dependencies
+1. Install dependencies: `npm install`
+2. Build: `just pack`
+3. Zip package: `just zip`
 
-   `npm install`
+### Upload Credentials (`$HOME/.secure`)
 
-2. Build and compress the plugin
+`just upload` resolves credentials from:
 
-   `webpack --mode=production`
+- `$HOME/.secure/<env>-plugin_mgr.secret` (preferred)
+- `$HOME/.secure/<env>.secret` (fallback)
 
-3. Create the zip file that can be uploaded to OFS
+Examples:
 
-   `cd dist; zip plugin.zip index.html main.js`
+- `just upload sunrise0511`
+- `just upload env=etaq-dev4`
