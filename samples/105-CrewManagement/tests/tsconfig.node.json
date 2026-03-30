@@ -1,0 +1,16 @@
+{
+  "extends": "../tsconfig",
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es2019",
+    "outDir": "../.test-dist",
+    "declaration": false,
+    "noEmitOnError": true,
+    "types": ["mocha", "node"],
+    "typeRoots": ["../node_modules/@types"],
+    "lib": ["es2021", "dom"]
+  },
+  "include": [
+    "../src/ts/crew/**/*.ts"
+  ]
+}

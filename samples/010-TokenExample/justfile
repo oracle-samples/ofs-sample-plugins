@@ -1,22 +1,45 @@
+set shell := ["zsh", "-cu"]
+
+plugin_label := "TokenExample"
+secure_dir := env_var_or_default("HOME", "") + "/.secure"
+
+default:
+    just --list
+
 build:
-	tsc
+    tsc
 
 dist-clean:
-	-@rm -rf dist/
-	-@mkdir dist
-	@cp index.html dist/
+    -@rm -rf dist/
+    -@mkdir dist
+    @cp index.html dist/
 
 pack: dist-clean
-	webpack --mode=production
+    webpack --mode=production
 
 dev-pack: dist-clean
-	webpack --mode=development
+    webpack --mode=development
 
 zip: pack
-	cd dist; zip plugin.zip index.html main.js
+    cd dist; zip plugin.zip index.html main.js
 
 dev-zip: dev-pack
-	cd dist; zip plugin.zip index.html main.js
+    cd dist; zip plugin.zip index.html main.js
 
-upload:
-	pluginmgr --filename dist/plugin.zip upload TokenExample
+upload env="sunrise0511": zip
+    plugin_mgr_credentials="{{secure_dir}}/{{env}}-plugin_mgr.secret"; \
+    default_credentials="{{secure_dir}}/{{env}}.secret"; \
+    if [ -f "$plugin_mgr_credentials" ]; then \
+      credentials="$plugin_mgr_credentials"; \
+    elif [ -f "$default_credentials" ]; then \
+      credentials="$default_credentials"; \
+    else \
+      echo "No credentials file found for '{{env}}'. Tried:" >&2; \
+      echo "  $plugin_mgr_credentials" >&2; \
+      echo "  $default_credentials" >&2; \
+      exit 1; \
+    fi; \
+    npx pluginmgr upload {{plugin_label}} --credentials "$credentials" --filename dist/plugin.zip
+
+upload-sunrise:
+    just upload sunrise0511
