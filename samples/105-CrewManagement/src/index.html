@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<!--
+ Copyright (c) 2014, 2025, Oracle and/or its affiliates.
+ Licensed under The Universal Permissive License (UPL), Version 1.0
+ as shown at https://oss.oracle.com/licenses/upl/
+ -->
+<html lang="en-us">
+  <head>
+    <title>Crew Management Plugin</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="viewport-fit=cover, width=device-width, initial-scale=1">
+    <link rel="icon" href="css/images/JET-Favicon-Red-32x32.png" type="image/x-icon" />
+
+    <!-- injector:theme -->
+    <!-- endinjector -->
+    <link rel="stylesheet" id="uxiconFont" href="https://static.oracle.com/cdn/fnd/gallery/2404.0.0/images/iconfont/ojuxIconFont.min.css">
+    <link rel="stylesheet" href="css/app.css" type="text/css"/>
+  </head>
+  <body class="oj-web-applayout-body">
+    <div id="globalBody" class="page-shell">
+      <header class="hero">
+        <div>
+          <p class="hero__eyebrow">Oracle Field Service</p>
+          <h1 class="hero__title" data-bind="text: appName"></h1>
+          <p class="hero__subtitle" data-bind="text: subtitleText"></p>
+        </div>
+      </header>
+
+      <main class="content-grid">
+        <div class="summary-grid">
+          <section class="info-card info-card--primary">
+            <span class="info-card__label">Bucket search</span>
+            <input class="search-input" placeholder="Search by name, type, or id" data-bind="textInput: searchQuery" />
+          </section>
+
+          <section class="info-card">
+            <span class="info-card__label">Visible buckets</span>
+            <strong class="info-card__value" data-bind="text: totalBuckets"></strong>
+            <p class="info-card__meta" data-bind="text: cacheDiagnosticsText"></p>
+          </section>
+
+          <section class="info-card">
+            <span class="info-card__label">Selected bucket resource id</span>
+            <input class="search-input" placeholder="Type resourceId" data-bind="textInput: selectedBucketId" />
+          </section>
+
+          <section class="info-card">
+            <span class="info-card__label">Descendant scope</span>
+            <select class="search-input" data-bind="value: descendantsScope">
+              <option value="all">All descendants</option>
+              <option value="direct">Direct descendants only</option>
+            </select>
+          </section>
+
+          <section class="info-card">
+            <span class="info-card__label">Assistants dateFrom</span>
+            <input class="search-input" type="date" data-bind="value: dateFrom" />
+          </section>
+
+          <section class="info-card">
+            <span class="info-card__label">Assistants dateTo (max +14d)</span>
+            <input class="search-input" type="date" data-bind="value: dateTo" />
+          </section>
+
+          <section class="info-card actions-card">
+            <oj-c-button label="Refresh Buckets" on-oj-action="[[refreshBuckets]]"></oj-c-button>
+            <oj-c-button label="Retrieve Crews" on-oj-action="[[retrieveCrews]]"></oj-c-button>
+            <div data-bind="visible: !showBucketsSection()">
+              <oj-c-button label="Show Buckets" chroming="borderless" on-oj-action="[[showBuckets]]"></oj-c-button>
+            </div>
+            <oj-c-button label="Clear Search" chroming="borderless" on-oj-action="[[clearSearch]]"></oj-c-button>
+          </section>
+        </div>
+
+        <section class="state-card" data-bind="visible: loading">
+          <div class="state-card__row">
+            <oj-c-progress-circle value="-1" size="md"></oj-c-progress-circle>
+            <div>
+              <h2 class="state-card__title">Loading data</h2>
+              <p class="state-card__message" data-bind="text: statusMessage"></p>
+            </div>
+          </div>
+        </section>
+
+        <section class="state-card state-card--error" data-bind="visible: errorMessage">
+          <h2 class="state-card__title">Could not load crew data</h2>
+          <p class="state-card__message" data-bind="text: errorMessage"></p>
+        </section>
+
+        <section class="state-card" data-bind="visible: !loading() && !errorMessage() && !hasBuckets()">
+          <h2 class="state-card__title">No buckets available</h2>
+          <p class="state-card__message">
+            Adjust secure parameters <code>bucketTypes</code> and click refresh to fetch bucket resources.
+          </p>
+        </section>
+
+        <section class="table-card" data-bind="visible: hasBuckets() && showBucketsSection()">
+          <div class="table-card__header">
+            <div>
+              <p class="table-card__eyebrow">Buckets</p>
+              <h2 class="table-card__title">Bucket list</h2>
+            </div>
+            <p class="table-card__hint">Search and select bucket by resource id, then click Retrieve Crews.</p>
+          </div>
+          <oj-c-table
+            id="bucketsTable"
+            aria-label="Buckets"
+            class="orders-table"
+            data="[[bucketsDataProvider()]]"
+            columns="[[bucketColumnsByKey]]"
+            column-order="[[bucketColumnOrder]]"
+            layout="fixed"
+            horizontal-grid-visible="enabled"
+            vertical-grid-visible="disabled"
+            on-selected-changed="[[onBucketSelectionChanged]]"
+            on-current-cell-changed="[[onBucketCurrentCellChanged]]"
+            selection-mode='{"row":"single","column":"none"}'>
+          </oj-c-table>
+        </section>
+
+        <section class="table-card" data-bind="visible: hasCrewAssignments">
+          <div class="table-card__header">
+            <div>
+              <p class="table-card__eyebrow">Crews</p>
+              <h2 class="table-card__title">Crew assignments</h2>
+            </div>
+            <div class="crew-view-controls">
+              <span class="table-card__hint">View mode</span>
+              <select class="search-input search-input--compact" data-bind="value: crewViewMode">
+                <option value="calendar">Calendar</option>
+                <option value="list">List</option>
+              </select>
+            </div>
+          </div>
+          <oj-c-table
+            data-bind="visible: crewViewMode() === 'list'"
+            id="calendarTable"
+            aria-label="Crew calendar rows"
+            class="orders-table"
+            data="[[calendarDataProvider()]]"
+            columns="[[calendarColumnsByKey]]"
+            column-order="[[calendarColumnOrder]]"
+            layout="fixed"
+            horizontal-grid-visible="enabled"
+            vertical-grid-visible="disabled"
+            selection-mode='{"row":"single","column":"none"}'>
+          </oj-c-table>
+
+          <div class="crew-calendar" data-bind="visible: crewViewMode() === 'calendar'">
+            <div class="crew-calendar-grid" data-bind="style: { gridTemplateColumns: '220px repeat(' + dateColumns().length + ', minmax(42px, 1fr))' }">
+              <div class="crew-calendar__head crew-calendar__head--label">Crew</div>
+              <!-- ko foreach: dateColumns -->
+              <div class="crew-calendar__head" data-bind="text: $data.slice(5)"></div>
+              <!-- /ko -->
+
+              <!-- ko foreach: crewAssignments -->
+              <div class="crew-calendar__crew">
+                <strong data-bind="text: crewName"></strong>
+                <small data-bind="text: membersLabel"></small>
+              </div>
+              <!-- ko foreach: $parent.dateColumns -->
+              <div class="crew-calendar__cell" data-bind="css: { 'crew-calendar__cell--active': $parents[0].dates.includes($data) }, attr: { title: $parents[0].crewName + ' | ' + $parents[0].membersLabel }"></div>
+              <!-- /ko -->
+              <!-- /ko -->
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer class="page-footer">
+        <oj-c-button id="closeButton" label="Close" on-oj-action="[[closePlugin]]"></oj-c-button>
+      </footer>
+    </div>
+
+    <!-- injector:scripts -->
+    <!-- endinjector -->
+  </body>
+</html>
