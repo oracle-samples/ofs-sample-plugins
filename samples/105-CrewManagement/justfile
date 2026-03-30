@@ -1,0 +1,47 @@
+set shell := ["zsh", "-cu"]
+
+plugin_label := "crewManagementPlugin"
+package_zip := "dist/crewManagementPlugin.zip"
+descriptor_file := "plugin_descriptor.json"
+secure_dir := env_var_or_default("HOME", "") + "/.secure"
+
+default:
+    just --list
+
+build:
+    npm run build
+
+package: build
+    mkdir -p dist
+    rm -f {{package_zip}}
+    stage_dir=$(mktemp -d /tmp/history-search-package.XXXXXX); \
+    trap 'rm -rf "$stage_dir"' EXIT; \
+    jq -r '.src_files[]' {{descriptor_file}} | while read -r file; do \
+      if [ "$file" = "{{descriptor_file}}" ]; then \
+        source_path="$file"; \
+      else \
+        source_path="web/$file"; \
+      fi; \
+      target_path="$stage_dir/$file"; \
+      mkdir -p "$(dirname "$target_path")"; \
+      cp "$source_path" "$target_path"; \
+    done; \
+    cd "$stage_dir" && zip -rq "$OLDPWD/{{package_zip}}" .
+
+upload env: package
+    plugin_mgr_credentials="{{secure_dir}}/{{env}}-plugin_mgr.secret"; \
+    default_credentials="{{secure_dir}}/{{env}}.secret"; \
+    if [ -f "$plugin_mgr_credentials" ]; then \
+      credentials="$plugin_mgr_credentials"; \
+    elif [ -f "$default_credentials" ]; then \
+      credentials="$default_credentials"; \
+    else \
+      echo "No credentials file found for '{{env}}'. Tried:" >&2; \
+      echo "  $plugin_mgr_credentials" >&2; \
+      echo "  $default_credentials" >&2; \
+      exit 1; \
+    fi; \
+    npx pluginmgr upload {{plugin_label}} --credentials "$credentials" --filename {{package_zip}} --descriptorFile {{descriptor_file}}
+
+upload-sunrise:
+    just upload sunrise0511
