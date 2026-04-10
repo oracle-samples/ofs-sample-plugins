@@ -12,6 +12,7 @@ class OFSCustomOpenMessage extends OFSOpenMessage {
   resource: any;
   activityList: any;
   openParams: any;
+  queue: any;
 }
 
 class OFSError {
@@ -44,6 +45,27 @@ enum Method {
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export class CustomPlugin extends OFSPlugin {
+  private static readonly MAX_QUEUE_ACTIVATION_ATTEMPTS = 3;
+  private queueActivationAttempts = 0;
+
+  private queue_not_activated(data: any): boolean {
+    return data?.queue?.status == "notActivated";
+  }
+
+  activate_queue() {
+    var dataToSend = {
+      actions: [
+        {
+          entity: "queue",
+          action: "activate_queue",
+        },
+      ],
+    };
+    this.queueActivationAttempts += 1;
+    globalThis.actionAtReturn = "RECHECK";
+    this.update(dataToSend);
+  }
+
   start_activity() {
     let activityToUpdate = {
       aid: globalThis.aid,
@@ -125,6 +147,7 @@ export class CustomPlugin extends OFSPlugin {
     var plugin = this;
     globalThis.backScreen = "activity_by_id";
     globalThis.aid = data.activity.aid;
+    this.queueActivationAttempts = 0;
 
     for (var param in data.openParams) {
       if (param == "redirectPluginLabel") {
@@ -136,6 +159,21 @@ export class CustomPlugin extends OFSPlugin {
     this.decide_action(data);
   }
   decide_action(data?: any) {
+    if (this.queue_not_activated(data)) {
+      if (
+        this.queueActivationAttempts < CustomPlugin.MAX_QUEUE_ACTIVATION_ATTEMPTS
+      ) {
+        this.activate_queue();
+      } else {
+        console.error(
+          `${this.tag} Queue activation failed after ${this.queueActivationAttempts} attempts`
+        );
+        this.redirect();
+      }
+      return;
+    }
+    this.queueActivationAttempts = 0;
+
     if (data.activity.astatus == "started") {
       this.redirect();
     } else if (data.activity.position_in_route == "-1") {
