@@ -81,20 +81,52 @@ export class CustomPlugin extends OFSPlugin {
     private submittedForms: SubmittedForm[] = [];
     private isReturningFromForm: boolean = false;
 
+    private trace(message: string, details?: unknown): void {
+        if (typeof details === 'undefined') {
+            console.info(`[${this.tag}] ${message}`);
+            return;
+        }
+
+        console.info(`[${this.tag}] ${message}`, details);
+    }
+
+    async init(message: OFSMessage): Promise<OFSMessage> {
+        this.trace('INIT received', message);
+        this.trace('INIT environment', this.environment);
+
+        const initEndMessage: OFSMessage = {
+            apiVersion: 1,
+            method: 'initEnd'
+        };
+
+        this.trace('INIT completed, sending initEnd', initEndMessage);
+        return initEndMessage;
+    }
+
     /**
      * Handle the open message from OFS
      * Identifies context (activity vs inventory) and determines workflow
      */
     open(data: OFSCustomOpenMessage): void {
+        this.trace('OPEN received', {
+            activityId: data.activity?.aid,
+            inventoryId: data.inventory?.invid,
+            formLabel: data.openParams?.formLabel,
+            hasSecuredData: Boolean(data.securedData),
+            resourceId: data.resource?.pid
+        });
+        this.trace('OPEN payload', data);
         console.debug(`${this.tag}: OPEN received`);
         console.debug(`${this.tag}: Data: ${JSON.stringify(data)}`);
 
         this.openData = data;
         this.context = this.identifyContext(data);
 
+        this.trace('OPEN context identified', this.context);
         console.debug(`${this.tag}: Context identified: ${JSON.stringify(this.context)}`);
 
         if (!this.context.formLabel) {
+            this.trace('OPEN aborted because formLabel is missing');
             console.error(`${this.tag}: No form label provided in openParams`);
             alert('Error: No form label provided in openParams');
             this.close();
@@ -103,13 +135,18 @@ export class CustomPlugin extends OFSPlugin {
 
         // Check if we're returning from a form submission
         this.isReturningFromForm = this.checkIfReturningFromForm();
+        this.trace('OPEN return-from-form check', {
+            isReturningFromForm: this.isReturningFromForm
+        });
         console.debug(`${this.tag}: Is returning from form: ${this.isReturningFromForm}`);
 
         if (this.isReturningFromForm) {
+            this.trace('OPEN flow selected: checking submitted forms');
             // We're returning from a form submission - check for submitted forms
             this.clearFormOpenedFlag();
             this.checkForSubmittedForms();
         } else {
+            this.trace('OPEN flow selected: opening form');
             // First time opening - open the form directly
             this.openFormForContext();
         }

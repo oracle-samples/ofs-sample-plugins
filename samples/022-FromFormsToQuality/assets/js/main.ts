@@ -13,5 +13,9 @@ declare global {
 }
 
 window.onload = function () {
+  console.info("[FromFormsToQuality] window.onload fired");
   window.ofs = new CustomPlugin("FromFormsToQuality");
+  console.info("[FromFormsToQuality] CustomPlugin instance created", {
+    tag: window.ofs.tag,
+  });
 };
