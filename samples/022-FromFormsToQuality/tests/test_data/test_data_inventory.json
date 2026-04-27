@@ -1,0 +1,64 @@
+{
+    "apiVersion": 1,
+    "method": "open",
+    "entity": "inventory",
+    "user": {
+        "allow_desktop_notifications": 0,
+        "allow_vibration": 0,
+        "design_theme": 12,
+        "format": {
+            "date": "m/d/y",
+            "long_date": "l, F jS, Y",
+            "time": "h:i A",
+            "datetime": "m/d/y h:i A"
+        },
+        "providers": [2],
+        "sound_theme": 0,
+        "su_zid": 2,
+        "uid": 2315,
+        "ulanguage": 1,
+        "ulogin": "admin",
+        "uname": "Admin",
+        "week_start": 1
+    },
+    "resource": {
+        "currentTime": "2023-01-26 13:24:18",
+        "deviceUTCDiffSeconds": 0,
+        "timeZoneDiffSeconds": -19860
+    },
+    "team": {
+        "teamMembers": {},
+        "assistingTo": {},
+        "assistingMe": []
+    },
+    "queue": {
+        "date": "2023-01-26",
+        "status": "activated",
+        "isActual": true,
+        "activationTime": "2023-01-26 06:52:08"
+    },
+    "inventory": {
+        "invid": "21259059"
+    },
+    "inventoryList": {
+        "21259059": {
+            "invpool": "customer",
+            "invtype": "RH_HW",
+            "invid": "21259059",
+            "inventory_model": "RH40G",
+            "part_item_desc": "40 Gal Rheem H/W Heater",
+            "invsn": "SABGVRWPX",
+            "quantity": 1
+        }
+    },
+    "buttonId": "35182",
+    "securedData": {},
+    "openParams": {
+        "formLabel": "InventoryInspectionForm"
+    },
+    "allowedProcedures": {
+        "openLink": true,
+        "getSubmittedForms": true,
+        "getAccessTokenByScope": true
+    }
+}
