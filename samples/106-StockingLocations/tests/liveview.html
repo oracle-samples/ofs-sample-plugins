@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Customer Orders Plugin Liveview</title>
+    <script src="./liveview.local.js"></script>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: "Oracle Sans", Arial, sans-serif;
+        --bg: #f5f7fb;
+        --card: #ffffff;
+        --ink: #10233f;
+        --muted: #667085;
+        --accent: #c74634;
+        --line: rgba(16, 35, 63, 0.1);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: linear-gradient(180deg, #f7f9fc 0%, #eef3f9 100%);
+        color: var(--ink);
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: 360px 1fr;
+        min-height: 100vh;
+      }
+
+      .panel,
+      .viewer {
+        padding: 20px;
+      }
+
+      .panel {
+        border-right: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(8px);
+      }
+
+      .card {
+        padding: 16px;
+        margin-bottom: 16px;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: var(--card);
+      }
+
+      h1,
+      h2,
+      p {
+        margin-top: 0;
+      }
+
+      h1 {
+        font-size: 1.4rem;
+        margin-bottom: 8px;
+      }
+
+      h2 {
+        font-size: 0.95rem;
+        margin-bottom: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--muted);
+      }
+
+      label {
+        display: block;
+        margin-bottom: 12px;
+        font-size: 0.9rem;
+      }
+
+      input,
+      textarea {
+        width: 100%;
+        margin-top: 6px;
+        padding: 10px 12px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        font: inherit;
+      }
+
+      textarea {
+        min-height: 180px;
+        resize: vertical;
+      }
+
+      .actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      button {
+        border: 0;
+        border-radius: 999px;
+        padding: 10px 14px;
+        font: inherit;
+        color: white;
+        background: var(--accent);
+        cursor: pointer;
+      }
+
+      button.secondary {
+        background: #163a6b;
+      }
+
+      iframe {
+        width: 100%;
+        height: calc(100vh - 40px);
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        background: white;
+      }
+
+      .log {
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 0.8rem;
+        white-space: pre-wrap;
+        color: var(--muted);
+      }
+
+      @media (max-width: 900px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+
+        iframe {
+          height: 70vh;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="layout">
+      <aside class="panel">
+        <div class="card">
+          <h1>Customer Orders Plugin</h1>
+          <p>Live harness for Code Live Preview. Update the payload, then click <strong>Send Open</strong>.</p>
+        </div>
+
+        <div class="card">
+          <h2>Plugin URL</h2>
+          <label>
+            Relative iframe source
+            <input id="pluginSrc" value="../web/index.html?nosw=1" />
+          </label>
+          <div class="actions">
+            <button class="secondary" id="reloadFrame">Reload Frame</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Open Params</h2>
+          <label>
+            Activity field
+            <input id="activityField" value="customer_number" />
+          </label>
+          <label>
+            Search field
+            <input id="searchField" value="customerNumber" />
+          </label>
+          <label>
+            Enable logging
+            <input id="enableLogging" value="false" />
+          </label>
+          <label>
+            Table columns
+            <input id="tableColumns" value="activityId,status,date,timeSlot,workType,address" />
+          </label>
+          <label>
+            Search value
+            <input id="customerNumber" />
+          </label>
+          <label>
+            Activity JSON
+            <textarea id="activityJson"></textarea>
+          </label>
+          <div class="actions">
+            <button id="sendOpen">Send Open</button>
+            <button class="secondary" id="resetDefaults">Reset Defaults</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Messages</h2>
+          <div id="messageLog" class="log"></div>
+        </div>
+      </aside>
+
+      <main class="viewer">
+        <iframe id="pluginFrame" src="../web/index.html?nosw=1&boot=1" title="Plugin preview"></iframe>
+      </main>
+    </div>
+
+    <script>
+      const defaults = window.liveviewConfig || {
+        credentials: null,
+        activityField: "customer_number",
+        searchField: "customerNumber",
+        enableLogging: "false",
+        tableColumns: "activityId,status,date,timeSlot,workType,address",
+        activity: {
+          customer_number: ""
+        }
+      };
+
+      const getEl = (id) => document.getElementById(id);
+      const pluginFrame = getEl("pluginFrame");
+      const pluginSrc = getEl("pluginSrc");
+      const activityField = getEl("activityField");
+      const searchField = getEl("searchField");
+      const enableLogging = getEl("enableLogging");
+      const tableColumns = getEl("tableColumns");
+      const customerNumber = getEl("customerNumber");
+      const activityJson = getEl("activityJson");
+      const messageLog = getEl("messageLog");
+      const cacheBustVersion = Date.now().toString();
+
+      function withCacheBust(url, baseHref = window.location.href) {
+        const resolvedUrl = new URL(url, baseHref);
+        resolvedUrl.searchParams.set("v", cacheBustVersion);
+        return resolvedUrl.toString();
+      }
+
+      function setDefaults() {
+        const defaultActivityField =
+          defaults.activityField || defaults.customerField || "customer_number";
+        const defaultSearchField = defaults.searchField || defaultActivityField;
+        const defaultActivity = defaults.activity || { customer_number: "" };
+
+        pluginSrc.value = withCacheBust("../web/index.html?nosw=1");
+        pluginFrame.src = pluginSrc.value;
+        activityField.value = defaultActivityField;
+        searchField.value = defaultSearchField;
+        enableLogging.value = defaults.enableLogging || "false";
+        tableColumns.value =
+          defaults.tableColumns || "activityId,status,date,timeSlot,workType,address";
+        customerNumber.value = defaultActivity[defaultActivityField] || "";
+        activityJson.value = JSON.stringify(defaultActivity, null, 2);
+      }
+
+      function log(message, payload) {
+        const line = `[${new Date().toLocaleTimeString()}] ${message}`;
+        messageLog.textContent = payload
+          ? `${line}\n${JSON.stringify(payload, null, 2)}\n\n${messageLog.textContent}`
+          : `${line}\n${messageLog.textContent}`;
+      }
+
+      function dispatchToPlugin(payload) {
+        const serialized = JSON.stringify(payload);
+        pluginFrame.contentWindow.postMessage(serialized, "*");
+        log("Posted message with postMessage", payload);
+
+        try {
+          pluginFrame.contentWindow.dispatchEvent(
+            new MessageEvent("message", {
+              data: serialized,
+              origin: window.location.origin,
+              source: window
+            })
+          );
+          log("Dispatched fallback MessageEvent inside iframe", payload);
+        } catch (error) {
+          log("Fallback MessageEvent dispatch was unavailable", {
+            message: error.message
+          });
+        }
+      }
+
+      function attachIframeDiagnostics() {
+        try {
+          const iframeWindow = pluginFrame.contentWindow;
+          if (!iframeWindow || iframeWindow.__liveviewDiagnosticsAttached) {
+            return;
+          }
+
+          iframeWindow.__liveviewDiagnosticsAttached = true;
+
+          iframeWindow.addEventListener("error", (event) => {
+            log("Iframe error", {
+              message: event.message,
+              filename: event.filename,
+              lineno: event.lineno,
+              colno: event.colno
+            });
+          });
+
+          iframeWindow.addEventListener("unhandledrejection", (event) => {
+            log("Iframe unhandled rejection", {
+              reason:
+                event.reason instanceof Error
+                  ? event.reason.message
+                  : String(event.reason)
+            });
+          });
+        } catch (error) {
+          log("Could not attach iframe diagnostics", {
+            message: error.message
+          });
+        }
+      }
+
+      function snapshotIframeState(label) {
+        try {
+          const iframeDocument = pluginFrame.contentWindow.document;
+          const bodyText = iframeDocument.body
+            ? iframeDocument.body.innerText.trim().slice(0, 800)
+            : "";
+          log(label, {
+            href: pluginFrame.contentWindow.location.href,
+            title: iframeDocument.title,
+            bodyPreview: bodyText
+          });
+        } catch (error) {
+          log("Could not inspect iframe DOM", {
+            message: error.message
+          });
+        }
+      }
+
+      function refreshIframeStylesheets() {
+        try {
+          const iframeDocument = pluginFrame.contentWindow.document;
+          const links = iframeDocument.querySelectorAll('link[rel="stylesheet"]');
+          links.forEach((link) => {
+            const href = link.getAttribute("href");
+            if (!href) {
+              return;
+            }
+
+            if (
+              href.startsWith("css/") ||
+              href.includes("/web/css/") ||
+              href.includes("css/app.css") ||
+              href.includes("css/app-min.css")
+            ) {
+              const refreshedHref = withCacheBust(
+                href,
+                pluginFrame.contentWindow.location.href
+              );
+              link.setAttribute("href", refreshedHref);
+              log("Refreshed iframe stylesheet", { from: href, to: refreshedHref });
+            }
+          });
+        } catch (error) {
+          log("Could not refresh iframe stylesheets", {
+            message: error.message
+          });
+        }
+      }
+
+      function buildOpenMessage() {
+        const activity = JSON.parse(activityJson.value || "{}");
+        activity[activityField.value] = customerNumber.value;
+
+        if (!defaults.credentials) {
+          throw new Error("Missing tests/liveview.local.js with Sunrise credentials.");
+        }
+
+        return {
+          apiVersion: 1,
+          method: "open",
+          entity: "activity",
+          user: {
+            uname: "liveview",
+            ulogin: "liveview",
+            languageCode: "en"
+          },
+          activity,
+          openParams: {
+            activityField: activityField.value,
+            searchField: searchField.value,
+            enableLogging: enableLogging.value,
+            tableColumns: tableColumns.value
+          },
+          securedData: {
+            ofsInstance: defaults.credentials.instance,
+            ofsClientId: defaults.credentials.clientId,
+            ofsClientSecret: defaults.credentials.clientSecret
+          }
+        };
+      }
+
+      function sendOpenMessage() {
+        const payload = buildOpenMessage();
+        dispatchToPlugin(payload);
+        window.setTimeout(() => snapshotIframeState("Iframe snapshot after 1s"), 1000);
+        window.setTimeout(() => snapshotIframeState("Iframe snapshot after 3s"), 3000);
+      }
+
+      window.addEventListener("message", (event) => {
+        let payload = event.data;
+        try {
+          payload = typeof event.data === "string" ? JSON.parse(event.data) : event.data;
+        } catch (error) {
+          // keep raw payload
+        }
+
+        log("Received message", payload);
+
+        if (payload?.method === "ready") {
+          sendOpenMessage();
+        }
+      });
+
+      getEl("reloadFrame").addEventListener("click", () => {
+        pluginSrc.value = withCacheBust(pluginSrc.value);
+        pluginFrame.src = pluginSrc.value;
+      });
+
+      pluginFrame.addEventListener("load", () => {
+        log("Plugin iframe loaded");
+        attachIframeDiagnostics();
+        refreshIframeStylesheets();
+        window.setTimeout(() => snapshotIframeState("Iframe snapshot after load"), 500);
+      });
+
+      getEl("sendOpen").addEventListener("click", () => {
+        sendOpenMessage();
+      });
+
+      getEl("resetDefaults").addEventListener("click", () => {
+        setDefaults();
+      });
+
+      setDefaults();
+    </script>
+  </body>
+</html>

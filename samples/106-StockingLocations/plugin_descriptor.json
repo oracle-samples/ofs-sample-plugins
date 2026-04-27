@@ -1,0 +1,26 @@
+{
+  "id": "stockingLocationsPlugin",
+  "src_files": [
+    "plugin_descriptor.json",
+    "index.html",
+    "sw.js",
+    "css/app.css",
+    "js/bundle.js"
+  ],
+  "properties": {
+    "provider": [
+      "pid",
+      "pname"
+    ]
+  },
+  "securedParams": [
+    {
+      "name": "scope",
+      "value": "urn:opc:resource:fa:instanceid=649213527urn:opc:resource:consumer::all"
+    },
+    {
+      "name": "enableLogging",
+      "value": "true"
+    }
+  ]
+}
