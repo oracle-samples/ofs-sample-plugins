@@ -1,7 +1,6 @@
 import { OFSOpenMessage } from "@ofs-users/plugin";
 
 export interface StockingLocationsSecuredData {
-  scope?: string;
   enableLogging?: string;
   [key: string]: unknown;
 }
