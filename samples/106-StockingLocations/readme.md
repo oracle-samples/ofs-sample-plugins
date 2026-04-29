@@ -2,7 +2,7 @@
 
 Oracle Field Service plugin built with Oracle JET MVVM and Redwood styling. This first iteration focuses on browsing service logistics stocking locations from Fusion using the Maintenance Technician Subinventories REST API.
 
-Current scope:
+Current behavior:
 
 - request a Fusion access token through OFS `getAccessTokenByScope`
 - load all technician subinventories from `technicianSubinventories` using `limit=500`
@@ -12,14 +12,20 @@ Current scope:
 
 ## Secure Parameters
 
-The plugin reads these secure params from `securedData`:
+The plugin reads this secure param from `securedData`:
 
-- `scope`: Fusion scope used for `getAccessTokenByScope`
 - `enableLogging`: set to `true` to enable verbose console logging
 
 The Fusion host comes from the OFS open message:
 
 - `environment.faUrl`
+- `environment.fsUrl`
+
+The OFS scope value is derived from `environment.fsUrl` by taking the first hostname segment.
+
+Example:
+
+- `https://ETAQ-DEV4.fs.ocs.oraclecloud.com` -> `ETAQ-DEV4`
 
 ## Plugin Context
 

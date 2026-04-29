@@ -15,10 +15,6 @@
   },
   "securedParams": [
     {
-      "name": "scope",
-      "value": "urn:opc:resource:fa:instanceid=649213527urn:opc:resource:consumer::all"
-    },
-    {
       "name": "enableLogging",
       "value": "true"
     }

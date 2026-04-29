@@ -22,10 +22,9 @@ import {
   TokenProcedureResult,
 } from "./stocking-locations/types";
 
-const DEFAULT_SCOPE = "urn:opc:resource:consumer::all";
-
 interface PluginConfig {
   faUrl: string;
+  fsUrl: string;
   scope: string;
   enableLogging: boolean;
 }
@@ -140,6 +139,17 @@ class RootViewModel extends OFSPlugin {
     console.error("[stockingLocationsPlugin]", message, detail);
   }
 
+  private deriveScopeFromFsUrl(fsUrl: string): string {
+    try {
+      const hostname = new URL(fsUrl).hostname;
+      const [scope] = hostname.split(".");
+
+      return scope || "";
+    } catch {
+      return "";
+    }
+  }
+
   async init(message: OFSMessage): Promise<OFSMessage> {
     this.info("INIT received", message);
     return {
@@ -157,6 +167,7 @@ class RootViewModel extends OFSPlugin {
     this.info("OPEN received", {
       provider: data.provider,
       faUrl: this.currentConfig.faUrl,
+      fsUrl: this.currentConfig.fsUrl,
       scopeConfigured: Boolean(this.currentConfig.scope),
       securedDataKeys: Object.keys(data.securedData || {}),
       environment: data.environment,
@@ -193,12 +204,12 @@ class RootViewModel extends OFSPlugin {
   }
 
   private buildConfig(data: StockingLocationsOpenMessage): PluginConfig {
+    const scope = this.deriveScopeFromFsUrl(data.environment?.fsUrl || "");
+
     return {
       faUrl: data.environment?.faUrl || "",
-      scope:
-        typeof data.securedData?.scope === "string" && data.securedData.scope.trim()
-          ? data.securedData.scope.trim()
-          : DEFAULT_SCOPE,
+      fsUrl: data.environment?.fsUrl || "",
+      scope,
       enableLogging: String(data.securedData?.enableLogging || "").toLowerCase() === "true",
     };
   }
@@ -212,6 +223,16 @@ class RootViewModel extends OFSPlugin {
       this.fail("Missing Fusion URL in openData.environment.faUrl.");
       return;
     }
+    if (!this.currentConfig.fsUrl) {
+      this.fail("Missing OFS URL in openData.environment.fsUrl.");
+      return;
+    }
+    if (!this.currentConfig.scope) {
+      this.fail("Could not derive scope from openData.environment.fsUrl.", {
+        fsUrl: this.currentConfig.fsUrl,
+      });
+      return;
+    }
     this.errorMessage("");
     this.loading(true);
     this.statusMessage("Requesting Fusion access token...");
@@ -220,12 +241,13 @@ class RootViewModel extends OFSPlugin {
   }
 
   private async requestTokenByScope(): Promise<void> {
-    const scope = this.openData?.securedData?.scope?.trim() || DEFAULT_SCOPE;
+    const scope = this.currentConfig?.scope || "";
 
     this.info("Requesting token by scope", {
       faUrl: this.currentConfig?.faUrl,
+      fsUrl: this.currentConfig?.fsUrl,
       scope,
-      scopeSource: this.openData?.securedData?.scope ? "securedData.scope" : "default",
+      scopeSource: "environment.fsUrl",
     });
 
     this.tokenCallId = this.getAccessTokenByScope(scope);
