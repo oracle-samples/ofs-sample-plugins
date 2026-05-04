@@ -1,0 +1,43 @@
+{
+  "id": "fusionInitLoadingPlugin",
+  "src_files": [
+    "plugin_descriptor.json",
+    "index.html",
+    "sw.js",
+    "css/app.css",
+    "js/bundle.js"
+  ],
+  "properties": {
+    "provider": [
+      "pid",
+      "pname",
+      "mwo_resource_orgid"
+    ]
+  },
+  "securedParams": [
+    {
+      "name": "fusionPath",
+      "value": "/fscmRestApi/resources/11.13.18.05/installedBaseAssets"
+    },
+    {
+      "name": "fusionQuery",
+      "value": "q=OperatingOrganizationId=${provider.mwo_resource_orgid}"
+    },
+    {
+      "name": "itemsPath",
+      "value": "items"
+    },
+    {
+      "name": "title",
+      "value": "Installed Base Assets for ${provider.mwo_resource_orgid}"
+    },
+    {
+      "name": "enableLogging",
+      "value": "false"
+    },
+    {
+      "name": "WAKEUP_DELAY",
+      "value": "15"
+    }
+  ]
+}
