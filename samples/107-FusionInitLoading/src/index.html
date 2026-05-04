@@ -100,6 +100,33 @@
             selection-mode='{"row":"none","column":"none"}'>
           </oj-c-table>
         </section>
+
+        <section class="table-card diagnostics-card">
+          <div class="table-card__header">
+            <div>
+              <p class="table-card__eyebrow">Diagnostics</p>
+              <h2 class="table-card__title">Last Fusion request and response</h2>
+            </div>
+          </div>
+          <div class="diagnostics-grid">
+            <label class="diagnostics-field">
+              <span class="info-card__label">Resolved config</span>
+              <textarea class="diagnostics-textarea" readonly data-bind="value: diagnosticsResolvedQuery"></textarea>
+            </label>
+            <label class="diagnostics-field">
+              <span class="info-card__label">Captured securedData</span>
+              <textarea class="diagnostics-textarea" readonly data-bind="value: diagnosticsSecuredData"></textarea>
+            </label>
+            <label class="diagnostics-field diagnostics-field--full">
+              <span class="info-card__label">Request URL</span>
+              <textarea class="diagnostics-textarea diagnostics-textarea--compact" readonly data-bind="value: diagnosticsRequestUrl"></textarea>
+            </label>
+            <label class="diagnostics-field diagnostics-field--full">
+              <span class="info-card__label">Raw response preview</span>
+              <textarea class="diagnostics-textarea diagnostics-textarea--large" readonly data-bind="value: diagnosticsResponseText"></textarea>
+            </label>
+          </div>
+        </section>
       </main>
 
       <footer class="page-footer">

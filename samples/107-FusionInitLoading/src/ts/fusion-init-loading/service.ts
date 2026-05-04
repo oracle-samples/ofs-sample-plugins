@@ -1,5 +1,6 @@
 import {
   CachedDataset,
+  FusionFetchDiagnosticEntry,
   FusionPageResponse,
   RuntimeConfig,
   TableColumn,
@@ -8,6 +9,7 @@ import {
 import { buildCacheKey } from "./config";
 
 const FUSION_API_PREFIX = "/fscmRestApi/resources/11.13.18.05";
+const RESPONSE_PREVIEW_LIMIT = 6000;
 
 function normalizeFusionUrl(baseUrl: string, fusionPath: string): string {
   const trimmedBase = baseUrl.replace(/\/+$/, "");
@@ -159,6 +161,7 @@ function shouldContinuePaging(response: FusionPageResponse, itemCount: number): 
 
 export class FusionInitLoadingService {
   readonly endpoint: string;
+  private diagnostics: FusionFetchDiagnosticEntry[] = [];
 
   constructor(
     baseUrl: string,
@@ -203,6 +206,11 @@ export class FusionInitLoadingService {
       rows,
       columnOrder,
       columnsByKey,
+      diagnostics: {
+        resolvedFusionPath: this.config.fusionPath,
+        resolvedQueryParams: { ...this.config.queryParams },
+        requests: [...this.diagnostics],
+      },
     };
   }
 
@@ -231,7 +239,7 @@ export class FusionInitLoadingService {
 
     for (;;) {
       pageNumber += 1;
-      const response = await this.fetchPage(offset);
+      const response = await this.fetchPage(offset, pageNumber);
       const items = resolveItems(response, this.config.itemsPath);
       this.log("[FusionInitLoadingService] fetched page", {
         pageNumber,
@@ -257,7 +265,7 @@ export class FusionInitLoadingService {
     return collected;
   }
 
-  private async fetchPage(offset: number): Promise<FusionPageResponse> {
+  private async fetchPage(offset: number, pageNumber: number): Promise<FusionPageResponse> {
     const url = new URL(this.endpoint);
 
     Object.entries(this.config.queryParams).forEach(([key, value]) => {
@@ -271,7 +279,10 @@ export class FusionInitLoadingService {
       url.searchParams.set("offset", String(offset));
     }
 
-    const response = await fetch(url.toString(), {
+    const requestUrl = url.toString();
+    this.log("[FusionInitLoadingService] request URL", requestUrl);
+
+    const response = await fetch(requestUrl, {
       method: "GET",
       headers: {
         Accept: "application/json",
@@ -279,13 +290,30 @@ export class FusionInitLoadingService {
       },
     });
 
+    const responseText = await response.text();
+    this.log("[FusionInitLoadingService] response status", {
+      requestUrl,
+      status: response.status,
+      statusText: response.statusText,
+    });
+    this.log("[FusionInitLoadingService] response body", responseText);
+    this.diagnostics.push({
+      pageNumber,
+      requestUrl,
+      status: response.status,
+      statusText: response.statusText,
+      responseBodyPreview:
+        responseText.length > RESPONSE_PREVIEW_LIMIT
+          ? `${responseText.slice(0, RESPONSE_PREVIEW_LIMIT)}\n...[truncated ${responseText.length - RESPONSE_PREVIEW_LIMIT} chars]`
+          : responseText,
+    });
+
     if (!response.ok) {
-      const detail = await response.text();
       throw new Error(
-        `Fusion API request failed (${response.status}): ${detail || response.statusText}`
+        `Fusion API request failed (${response.status}): ${responseText || response.statusText}`
       );
     }
 
-    return (await response.json()) as FusionPageResponse;
+    return JSON.parse(responseText) as FusionPageResponse;
   }
 }

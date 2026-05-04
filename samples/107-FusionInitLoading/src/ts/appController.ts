@@ -23,6 +23,7 @@ import {
 import { FusionInitLoadingService } from "./fusion-init-loading/service";
 import {
   CachedDataset,
+  FusionFetchDiagnosticEntry,
   FusionInitLifecycleMessage,
   FusionInitOpenMessage,
   PersistedPluginState,
@@ -39,6 +40,30 @@ const STORAGE_KEYS = {
 
 const DEFAULT_WAKEUP_DELAY = 15;
 
+function hasObjectKeys(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === "object" && Object.keys(value as Record<string, unknown>).length > 0;
+}
+
+function preferIncomingValue<T>(incoming: T | undefined, existing: T | undefined): T | undefined {
+  if (incoming === undefined || incoming === null) {
+    return existing;
+  }
+
+  if (typeof incoming === "string") {
+    return incoming.trim() ? incoming : existing;
+  }
+
+  if (typeof incoming === "object") {
+    if (Array.isArray(incoming)) {
+      return incoming.length > 0 ? incoming : existing;
+    }
+
+    return hasObjectKeys(incoming) ? incoming : existing;
+  }
+
+  return incoming;
+}
+
 class RootViewModel extends OFSPlugin {
   appName = ko.observable("Fusion Init Loading");
   statusMessage = ko.observable("Waiting for the plugin to initialize.");
@@ -50,6 +75,10 @@ class RootViewModel extends OFSPlugin {
   totalRowsCount = ko.observable(0);
   visibleRowsCount = ko.observable(0);
   cacheTimestamp = ko.observable("No cached data yet.");
+  diagnosticsRequestUrl = ko.observable("No request captured yet.");
+  diagnosticsResponseText = ko.observable("No response captured yet.");
+  diagnosticsResolvedQuery = ko.observable("No resolved query captured yet.");
+  diagnosticsSecuredData = ko.observable("No securedData captured yet.");
   rows = ko.observableArray<TableRow>([]);
   filteredRows = ko.observableArray<TableRow>([]);
   columnsByKey = ko.observable<Record<string, { field: string; headerText: string; weight: number }>>({});
@@ -184,17 +213,25 @@ class RootViewModel extends OFSPlugin {
 
   private mergeState(message: FusionInitLifecycleMessage | FusionInitOpenMessage): PersistedPluginState {
     const existingState = this.loadState();
-    const runtimeConfig = parseRuntimeConfig(message.securedData) || existingState.runtimeConfig;
+    const mergedSecuredData = preferIncomingValue(message.securedData, existingState.securedData);
+    const runtimeConfig = parseRuntimeConfig(mergedSecuredData) || existingState.runtimeConfig;
     const nextState: PersistedPluginState = {
       runtimeConfig,
-      environment: message.environment || existingState.environment,
-      provider: message.provider || existingState.provider,
-      activity: message.activity || existingState.activity,
-      openParams: message.openParams || existingState.openParams,
-      securedData: message.securedData || existingState.securedData,
+      environment: preferIncomingValue(message.environment, existingState.environment),
+      provider: preferIncomingValue(message.provider, existingState.provider),
+      activity: preferIncomingValue(message.activity, existingState.activity),
+      openParams: preferIncomingValue(message.openParams, existingState.openParams),
+      securedData: mergedSecuredData,
     };
     this.persistState(nextState);
     this.currentState = nextState;
+    this.diagnosticsSecuredData(JSON.stringify(nextState.securedData || {}, null, 2));
+    this.info("Merged plugin state", {
+      securedDataKeys: Object.keys(nextState.securedData || {}),
+      hasRuntimeConfig: Boolean(nextState.runtimeConfig),
+      providerKeys: Object.keys(nextState.provider || {}),
+      environment: nextState.environment,
+    });
     return nextState;
   }
 
@@ -346,19 +383,51 @@ class RootViewModel extends OFSPlugin {
           keyAttributes: "rowId",
         })
       );
+      this.diagnosticsRequestUrl("No request captured yet.");
+      this.diagnosticsResponseText("No response captured yet.");
+      this.diagnosticsResolvedQuery(
+        JSON.stringify(
+          {
+            fusionPath: resolvedConfig.fusionPath,
+            queryParams: resolvedConfig.queryParams,
+          },
+          null,
+          2
+        )
+      );
       this.appName(resolvedConfig.title);
       this.endpointText(resolvedConfig.fusionPath);
       this.statusMessage(resolvedConfig.emptyStateMessage);
       return;
     }
 
-    this.endpointText(dataset.endpoint);
+    const latestRequest = this.getLatestDiagnosticRequest(dataset);
+    this.endpointText(latestRequest?.requestUrl || dataset.endpoint);
     this.cacheTimestamp(new Date(dataset.fetchedAt).toLocaleString());
     this.columnsByKey(dataset.columnsByKey);
     this.columnOrder(dataset.columnOrder);
     this.rows(dataset.rows);
     this.totalRowsCount(dataset.rowCount);
     this.appName(resolvedConfig.title);
+    this.diagnosticsResolvedQuery(
+      JSON.stringify(
+        dataset.diagnostics
+          ? {
+              fusionPath: dataset.diagnostics.resolvedFusionPath,
+              queryParams: dataset.diagnostics.resolvedQueryParams,
+            }
+          : {
+              fusionPath: resolvedConfig.fusionPath,
+              queryParams: resolvedConfig.queryParams,
+            },
+        null,
+        2
+      )
+    );
+    this.diagnosticsRequestUrl(latestRequest?.requestUrl || "No request captured yet.");
+    this.diagnosticsResponseText(
+      latestRequest?.responseBodyPreview || "No response captured yet."
+    );
     this.statusMessage(`Showing cached data refreshed at ${this.cacheTimestamp()}.`);
     this.applyFilter();
   }
@@ -398,6 +467,21 @@ class RootViewModel extends OFSPlugin {
 
     try {
       const resolvedConfig = resolveRuntimeConfig(this.currentConfig, this.currentState);
+      this.diagnosticsResolvedQuery(
+        JSON.stringify(
+          {
+            fusionPath: resolvedConfig.fusionPath,
+            queryParams: resolvedConfig.queryParams,
+          },
+          null,
+          2
+        )
+      );
+      this.info("Resolved runtime config", {
+        source,
+        fusionPath: resolvedConfig.fusionPath,
+        queryParams: resolvedConfig.queryParams,
+      });
       const token = await this.requestTokenByScope(scope);
       const service = new FusionInitLoadingService(
         faUrl,
@@ -417,6 +501,7 @@ class RootViewModel extends OFSPlugin {
         source,
         rows: dataset.rowCount,
         endpoint: dataset.endpoint,
+        lastRequestUrl: this.getLatestDiagnosticRequest(dataset)?.requestUrl || "",
       });
     } catch (error) {
       const detail = error instanceof Error ? error.message : String(error);
@@ -447,6 +532,13 @@ class RootViewModel extends OFSPlugin {
         scope,
       });
     });
+  }
+
+  private getLatestDiagnosticRequest(
+    dataset: CachedDataset
+  ): FusionFetchDiagnosticEntry | null {
+    const requests = dataset.diagnostics?.requests || [];
+    return requests.length > 0 ? requests[requests.length - 1] : null;
   }
 
   private applyFilter(): void {

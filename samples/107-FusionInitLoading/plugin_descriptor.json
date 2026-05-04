@@ -21,7 +21,7 @@
     },
     {
       "name": "fusionQuery",
-      "value": "q=OperatingOrganizationId=${provider.mwo_resource_orgid}"
+      "value": ""
     },
     {
       "name": "itemsPath",
@@ -29,7 +29,7 @@
     },
     {
       "name": "title",
-      "value": "Installed Base Assets for ${provider.mwo_resource_orgid}"
+      "value": "Installed Base Assets"
     },
     {
       "name": "enableLogging",

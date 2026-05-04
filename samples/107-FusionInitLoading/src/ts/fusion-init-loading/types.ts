@@ -34,7 +34,22 @@ export interface CachedDataset {
   rows: TableRow[];
   columnOrder: string[];
   columnsByKey: Record<string, TableColumn>;
+  diagnostics?: FusionFetchDiagnostics;
   errorMessage?: string;
+}
+
+export interface FusionFetchDiagnosticEntry {
+  pageNumber: number;
+  requestUrl: string;
+  status: number;
+  statusText: string;
+  responseBodyPreview: string;
+}
+
+export interface FusionFetchDiagnostics {
+  resolvedFusionPath: string;
+  resolvedQueryParams: Record<string, string>;
+  requests: FusionFetchDiagnosticEntry[];
 }
 
 export interface TableRow extends Record<string, string> {

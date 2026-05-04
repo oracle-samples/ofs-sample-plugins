@@ -64,16 +64,10 @@ Example for your case:
 ```json
 {
   "fusionPath": "/fscmRestApi/resources/11.13.18.05/installedBaseAssets",
-  "fusionQuery": "q=OperatingOrganizationId=${provider.mwo_resource_orgid}",
+  "fusionQuery": "",
   "itemsPath": "items",
-  "title": "Installed Base Assets for ${provider.mwo_resource_orgid}"
+  "title": "Installed Base Assets"
 }
-```
-
-If `provider.mwo_resource_orgid` is `300000152243516`, the resolved query sent to Fusion will be:
-
-```text
-q=OperatingOrganizationId=300000152243516
 ```
 
 Because the config lives in `securedData`, init and wakeup can use it immediately without depending on `openParams`.
@@ -114,9 +108,9 @@ Example:
 ```json
 {
   "fusionPath": "/fscmRestApi/resources/11.13.18.05/installedBaseAssets",
-  "fusionQuery": "q=OperatingOrganizationId=${provider.mwo_resource_orgid}",
+  "fusionQuery": "",
   "itemsPath": "items",
-  "title": "Installed Base Assets for ${provider.mwo_resource_orgid}",
+  "title": "Installed Base Assets",
   "subtitle": "Background-loaded installed base assets",
   "enableLogging": "true"
 }

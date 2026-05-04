@@ -178,6 +178,41 @@ body {
   padding: 18px;
 }
 
+.diagnostics-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.diagnostics-field {
+  display: grid;
+  gap: 8px;
+}
+
+.diagnostics-field--full {
+  grid-column: 1 / -1;
+}
+
+.diagnostics-textarea {
+  min-height: 180px;
+  width: 100%;
+  border: 1px solid var(--card-border);
+  border-radius: 14px;
+  padding: 12px;
+  font: 0.82rem/1.45 ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: var(--hero-ink);
+  background: rgba(255, 255, 255, 0.98);
+  resize: vertical;
+}
+
+.diagnostics-textarea--compact {
+  min-height: 92px;
+}
+
+.diagnostics-textarea--large {
+  min-height: 260px;
+}
+
 .table-card__header {
   display: flex;
   align-items: center;
@@ -394,6 +429,14 @@ oj-c-table.orders-table {
 
   .hero {
     flex-direction: column;
+  }
+
+  .diagnostics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .diagnostics-field--full {
+    grid-column: auto;
   }
 }
 
