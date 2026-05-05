@@ -1,2 +1,2 @@
 deploy:
-    pluginmgr upload {{cookiecutter.plugin_name}} --credentials $HOME/.ssh/credentials.json --descriptor plugin_descriptor.json
+    npx pluginmgr upload {{cookiecutter.plugin_name}} --credentials $HOME/.ssh/credentials.json --descriptor plugin_descriptor.json

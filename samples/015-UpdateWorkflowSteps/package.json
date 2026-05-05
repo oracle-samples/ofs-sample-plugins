@@ -17,6 +17,7 @@
   "author": "developer",
   "license": "UPL-1.0",
   "devDependencies": {
+    "@ofs-users/plugin-manager": "1.8.0",
     "@types/jest": "^29.4.0",
     "css-loader": "^6.7.3",
     "sass": "^1.57.1",

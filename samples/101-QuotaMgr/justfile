@@ -2,7 +2,7 @@ build:
     ojet build --release
 
 deploy:
-    pluginmgr upload TESTOJET --credentials $HOME/.ssh/credentials.json
+    npx pluginmgr upload TESTOJET --credentials $HOME/.ssh/credentials.json
 
 convert $library $file:
     echo Converting $library
@@ -16,4 +16,3 @@ signals:
     convert("@preact/signals", signals.js)
     convert("@preact/signals-core", signals-core.js)
     
-

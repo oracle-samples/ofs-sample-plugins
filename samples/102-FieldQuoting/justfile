@@ -2,4 +2,4 @@ build:
     ojet build --release
 	
 deploy: 
-	pluginmgr upload FieldQuoting --credentials $HOME/.ssh/credentials.json
+	npx pluginmgr upload FieldQuoting --credentials $HOME/.ssh/credentials.json

@@ -9,6 +9,7 @@
     "@preact/signals": "^1.2.2"
   },
   "devDependencies": {
+    "@ofs-users/plugin-manager": "1.8.0",
     "@babel/preset-env": "^7.24.0",
     "@babel/preset-typescript": "^7.23.3",
     "@jest/globals": "^29.7.0",

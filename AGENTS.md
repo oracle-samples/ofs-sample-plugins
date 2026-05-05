@@ -15,27 +15,6 @@ In this project, you will 2 kind of plugins within the ./samples folder.
 
 ## Commands
 
-If the user asks for `deploy`, you should show them all the environments available. Enviroments should be shown based on this logic.
-
-secure_dir := env_var_or_default("HOME", "") + "/.secure"
-
-In this folder, you will find files with this format $ENV_NAME.secret
-
-e.g if I have 2 files DEMO.secret and PROD.secret, I should respond the user with this
-
-```text
-
-Please select one of these environments :
-1. DEMO
-2. PROD
-```
-
-Once the user selects one of those options, you should execute
-
-just upload $ENV_SELECTED
-
-If the user asks for `create plugin`, you should guide and execute the workflow below.
-
 ## Create Plugin Command
 
 When the user asks for `create plugin`, follow these steps in order:
@@ -58,8 +37,48 @@ When the user asks for `create plugin`, follow these steps in order:
 10. Switch the current folder/worktree to that new branch.
 11. Start the plugin implementation in the proper sample folder or a new sample folder derived from the selected template.
 
-The `create plugin` command is not complete until:
+The `create` or `create plugin` command is not complete until:
 
 - the issue has been created
 - the branch has been created from the latest remote `main`
 - the current folder has been switched to that branch
+
+# Deploy Plugin Command
+
+If the user asks for `deploy` or `deploy plugin` , you should show them all the environments available. Enviroments should be shown based on this logic.
+
+secure_dir := env_var_or_default("HOME", "") + "/.secure"
+
+In this folder, you will find files with this format $ENV_NAME.secret
+
+e.g if I have 2 files DEMO.secret and PROD.secret, I should respond the user with this
+
+```text
+
+Please select one of these environments :
+1. DEMO
+2. PROD
+```
+
+Once the user selects one of those options, you should execute
+
+just upload $ENV_SELECTED
+
+# Commit Plugin Command
+
+If the user asks for `commit` or `commit plugin`, you should execute this workflow:
+
+1. Sync the current working branch with the latest remote state before creating the commit.
+2. Review and stage all pending files in the current branch, including tracked and untracked files that belong to the requested work.
+3. Create the commit with all staged branch changes.
+4. Push the branch to `origin`.
+5. Create the Pull Request against the appropriate base branch.
+6. Assign the Pull Request to the GitHub users `miquelgall` and `JamalAkram89`.
+
+The `commit` or `commit plugin` command is not complete until:
+
+- the current branch has been synced with the remote state
+- all pending branch files have been staged and committed
+- the branch has been pushed to `origin`
+- the Pull Request has been created
+- the Pull Request has been assigned to `miquelgall` and `JamalAkram89`
