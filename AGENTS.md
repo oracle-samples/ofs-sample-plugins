@@ -73,7 +73,9 @@ If the user asks for `commit` or `commit plugin`, you should execute this workfl
 3. Create the commit with all staged branch changes.
 4. Push the branch to `origin`.
 5. Create the Pull Request against the appropriate base branch.
-6. Request review on the Pull Request from the GitHub users `miquelgall` and `JamalAkram89`.
+6. Request review on the Pull Request using this rule:
+   - if the Pull Request author is `miquelgall`, request review from `JamalAkram89` only
+   - otherwise, request review from `miquelgall` only
 
 The `commit` or `commit plugin` command is not complete until:
 
@@ -81,4 +83,6 @@ The `commit` or `commit plugin` command is not complete until:
 - all pending branch files have been staged and committed
 - the branch has been pushed to `origin`
 - the Pull Request has been created
-- the Pull Request has review requests for `miquelgall` and `JamalAkram89`
+- the Pull Request has the correct review request based on the Pull Request author:
+  - `JamalAkram89` only when the author is `miquelgall`
+  - otherwise `miquelgall` only
