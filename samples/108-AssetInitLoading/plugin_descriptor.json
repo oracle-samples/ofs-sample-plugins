@@ -1,0 +1,42 @@
+{
+  "id": "assetInitLoadingPlugin",
+  "src_files": [
+    "plugin_descriptor.json",
+    "index.html",
+    "sw.js",
+    "css/app.css",
+    "js/bundle.js"
+  ],
+  "properties": {
+    "provider": [
+      "pid",
+      "pname"
+    ]
+  },
+  "securedParams": [
+    {
+      "name": "assetsPath",
+      "value": "/fscmRestApi/resources/11.13.18.05/installedBaseAssets"
+    },
+    {
+      "name": "title",
+      "value": "Asset Init Loading"
+    },
+    {
+      "name": "subtitle",
+      "value": "Background-loaded installed base assets cached for offline use"
+    },
+    {
+      "name": "pageLimit",
+      "value": "500"
+    },
+    {
+      "name": "enableLogging",
+      "value": "false"
+    },
+    {
+      "name": "WAKEUP_DELAY",
+      "value": "15"
+    }
+  ]
+}

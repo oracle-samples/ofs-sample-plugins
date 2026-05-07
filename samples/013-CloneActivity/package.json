@@ -17,6 +17,7 @@
   "author": "miguel.gall@oracle.com",
   "license": "UPL-1.0",
   "devDependencies": {
+    "@ofs-users/plugin-manager": "1.8.0",
     "@types/jest": "^29.4.0",
     "@types/node-sass": "^4.11.3",
     "css-loader": "^6.7.3",

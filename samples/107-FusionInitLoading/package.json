@@ -8,6 +8,7 @@
     "@oracle/oraclejet-core-pack": "~17.1.0"
   },
   "devDependencies": {
+    "@ofs-users/plugin-manager": "1.8.0",
     "@oracle/ojet-cli": "~17.1.0",
     "@prefresh/babel-plugin": "0.5.1",
     "@prefresh/webpack": "4.0.1",
