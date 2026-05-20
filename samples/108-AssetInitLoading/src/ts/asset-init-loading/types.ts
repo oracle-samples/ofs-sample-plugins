@@ -3,6 +3,7 @@ import { OFSMessage, OFSOpenMessage } from "@ofs-users/plugin";
 export interface PluginEnvironment {
   faUrl?: string;
   fsUrl?: string;
+  environmentName?: string;
   [key: string]: unknown;
 }
 
@@ -15,6 +16,7 @@ export interface PluginUser {
 
 export interface RuntimeConfig {
   assetsPath: string;
+  alternativeUrl: string;
   pageLimit: number;
   title: string;
   subtitle: string;
@@ -25,11 +27,17 @@ export interface RuntimeConfig {
 export interface PersistedPluginState {
   runtimeConfig?: RuntimeConfig;
   environment?: PluginEnvironment;
-  provider?: Record<string, unknown>;
+  provider?: PluginProvider;
   activity?: Record<string, unknown>;
   user?: PluginUser;
   openParams?: Record<string, unknown> | string;
   securedData?: Record<string, unknown>;
+}
+
+export interface PluginProvider {
+  pid?: string;
+  pname?: string;
+  [key: string]: unknown;
 }
 
 export interface CachedDataset {
@@ -45,7 +53,7 @@ export interface CachedDataset {
 }
 
 export interface AssetFetchDiagnosticEntry {
-  step: "getUserDetails" | "getResource" | "getAssets";
+  step: "getUserDetails" | "getUserDetailsAlternative" | "getResource" | "getAssets";
   pageNumber?: number;
   requestUrl: string;
   status: number;
@@ -56,7 +64,7 @@ export interface AssetFetchDiagnosticEntry {
 export interface AssetFetchDiagnostics {
   userLogin: string;
   mainResourceId?: string;
-  operatingOrganizationCode?: string;
+  operatingOrganizationId?: string;
   assetsPath: string;
   requests: AssetFetchDiagnosticEntry[];
 }
@@ -86,11 +94,7 @@ export interface AssetInitOpenMessage extends OFSOpenMessage {
   activity?: Record<string, unknown>;
   user?: PluginUser;
   openParams?: Record<string, unknown> | string;
-  provider?: {
-    pid?: string;
-    pname?: string;
-    [key: string]: unknown;
-  };
+  provider?: PluginProvider;
 }
 
 export interface TokenProcedureResult {

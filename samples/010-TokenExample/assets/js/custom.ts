@@ -14,7 +14,7 @@ import {
     OFSOpenMessage,
     OFSCallProcedureResultMessage,
 } from "@ofs-users/plugin";
-import { OFSSubscriptionResponse } from "@ofs-users/proxy";
+import { OFSResponse } from "@ofs-users/proxy";
 class OFSCustomOpenMessage extends OFSOpenMessage {
     activity: any;
     openParams: any;
@@ -29,7 +29,7 @@ export class CustomPlugin extends OFSPlugin {
         console.debug(`${this.tag} : OPEN: ${JSON.stringify(data)}`);
         var plugin = this;
         if (this.proxy) {
-            this.getSubscriptions();
+            this.getResources();
         } else {
             alert(
                 "Proxy not available. Review if you have included an application in the plugin configuration and it you have, review the logs for any errors."
@@ -37,15 +37,15 @@ export class CustomPlugin extends OFSPlugin {
             this.close();
         }
     }
-    async getSubscriptions() {
-        const subscriptions_list: OFSSubscriptionResponse =
-            await this.proxy.getSubscriptions();
+    async getResources() {
+        const resourcesList: OFSResponse =
+            await this.proxy.getAllResources();
         console.debug(
-            `${this.tag} : Subscriptions: ${JSON.stringify(subscriptions_list)}`
+            `${this.tag} : Resources: ${JSON.stringify(resourcesList)}`
         );
         alert(
-            `Subscriptions captured successfully ${JSON.stringify(
-                subscriptions_list
+            `Resources captured successfully ${JSON.stringify(
+                resourcesList
             )}`
         );
         this.close();

@@ -24,8 +24,8 @@ none
 
 Add this plugin as part of any screen.
 Add an application as part of the plugin configuration.
-Ensure that the application has access to the getSubscriptions API.
-If the application has been properly configured, it will return a popup window with the result of the getSubscriptions API
+Ensure that the application has access to the resources API.
+If the application has been properly configured, it will return a popup window with the list of resources retrieved through the getAllResources API
 If the application is missing, it will return an alert indicating that the proxy has not been created.
 If the application doesn't have the right permission configured, it will show the response in the popup window.
 

@@ -51,12 +51,41 @@ This pattern is useful when you need to:
 
 1. **Init**: Plugin receives configuration, stores it, and requests a wakeup after a delay
 2. **Sleep**: Plugin waits for the configured delay
-3. **Wakeup**: Plugin creates an API proxy, fetches resource data, stores it in localStorage
+3. **Wakeup**: Plugin requests a scoped access token, creates an API proxy, fetches resource data, stores it in localStorage
 4. **Open**: Plugin displays the previously retrieved data to the user
 
 ## Configuration via descriptor.json
 
 The plugin is configured using secured parameters in `descriptor.json`.
+
+The wakeup proxy also requires the OFS runtime `environment` object:
+
+| Runtime field | Required | Description |
+|---------------|----------|-------------|
+| `environment.environmentName` | Yes | Environment name used to build the Fusion token scope |
+| `environment.fsUrl` | Yes | OFS REST base URL used by the proxy |
+
+## URL and Scope Selection
+
+This sample invokes Fusion Field Service APIs, also called FusionFS APIs, through `environment.fsUrl`.
+
+| API call | URL source | Token scope |
+|----------|------------|-------------|
+| `OFS.getResource(resourceId)` | `environment.fsUrl` | `urn:opc:resource:fusion:${environment.environmentName.toLowerCase()}:field-service-common/use` |
+
+For FusionFS / `fsUrl` calls, the access token scope is built from the lowercase environment name:
+
+```text
+urn:opc:resource:fusion:${environment.environmentName.toLowerCase()}:field-service-common/use
+```
+
+For example, `environment.environmentName = "ETAQ-DEV4"` creates:
+
+```text
+urn:opc:resource:fusion:etaq-dev4:field-service-common/use
+```
+
+This sample does not call Fusion Applications APIs through `environment.faUrl`.
 
 ### descriptor.json Structure
 
@@ -166,9 +195,10 @@ Formatted for readability (the actual value must be a single-line escaped JSON s
 
 This configuration will:
 1. Wait 10 seconds after initialization
-2. Fetch the resource with `resourceId = "my_data_bucket"`
-3. Extract properties `PA_DATA_01` and `PA_DATA_02`
-4. Store the values in localStorage for display when opened
+2. Request an OFS access token using `getAccessTokenByScope`
+3. Fetch the resource with `resourceId = "my_data_bucket"`
+4. Extract properties `PA_DATA_01` and `PA_DATA_02`
+5. Store the values in localStorage for display when opened
 
 ## Building the Plugin
 
@@ -191,7 +221,7 @@ npm test
 
 ## Dependencies
 
-- `@ofs-users/plugin`: ^1.5.2 - OFS plugin base class
+- `@ofs-users/plugin`: ^1.8.0 - OFS plugin base class with scoped token support
 - `@ofs-users/proxy`: ^1.27.0 - OFS REST API proxy
 
 ## License

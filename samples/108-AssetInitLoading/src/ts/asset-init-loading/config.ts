@@ -2,6 +2,8 @@ import { PersistedPluginState, RuntimeConfig } from "./types";
 
 const DEFAULT_ASSETS_PATH =
   "/fscmRestApi/resources/11.13.18.05/installedBaseAssets";
+const DEFAULT_ALTERNATIVE_URL =
+  "https://plugins-0-etaq-dev4.fs.ocs.oraclecloud.com";
 const DEFAULT_PAGE_LIMIT = 500;
 const DEFAULT_TITLE = "Asset Init Loading";
 const DEFAULT_SUBTITLE =
@@ -147,6 +149,7 @@ export function buildCacheKey(
 ): string {
   return JSON.stringify({
     assetsPath: config.assetsPath,
+    alternativeUrl: config.alternativeUrl,
     pageLimit: config.pageLimit,
     userLogin: String(state.user?.ulogin || ""),
     faUrl: String(state.environment?.faUrl || ""),
@@ -162,6 +165,8 @@ export function resolveRuntimeConfig(
     ...config,
     assetsPath:
       resolveTemplate(config.assetsPath, state) || config.assetsPath,
+    alternativeUrl:
+      resolveTemplate(config.alternativeUrl, state) || config.alternativeUrl,
     title: resolveTemplate(config.title, state) || config.title,
     subtitle: resolveTemplate(config.subtitle, state) || config.subtitle,
     emptyStateMessage:
@@ -188,6 +193,10 @@ export function parseRuntimeConfig(
         normalizedSecuredData.DEFAULT_PAGE_LIMIT,
       DEFAULT_PAGE_LIMIT
     ),
+    alternativeUrl:
+      normalizedSecuredData.alternativeUrl?.trim() ||
+      normalizedSecuredData.ALTERNATIVE_URL?.trim() ||
+      DEFAULT_ALTERNATIVE_URL,
     title:
       normalizedSecuredData.title?.trim() ||
       normalizedSecuredData.TITLE?.trim() ||

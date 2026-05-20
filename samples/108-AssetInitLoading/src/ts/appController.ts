@@ -196,14 +196,25 @@ class RootViewModel extends OFSPlugin {
     }
   }
 
-  private deriveScopeFromFsUrl(fsUrl: string): string {
-    try {
-      const hostname = new URL(fsUrl).hostname;
-      const [scope] = hostname.split(".");
-      return scope || "";
-    } catch {
-      return "";
-    }
+  private buildFsAccessTokenScope(
+    environment: PluginEnvironment | null | undefined
+  ): string {
+    const environmentName =
+      typeof environment?.environmentName === "string"
+        ? environment.environmentName.trim().toLowerCase()
+        : "";
+
+    return environmentName
+      ? `urn:opc:resource:fusion:${environmentName}:field-service-common/use`
+      : "";
+  }
+
+  private buildFaAccessTokenScope(
+    environment: PluginEnvironment | null | undefined
+  ): string {
+    return typeof environment?.environmentName === "string"
+      ? environment.environmentName.trim().toUpperCase()
+      : "";
   }
 
   private getWakeupDelay(rawValue: unknown): number {
@@ -237,12 +248,14 @@ class RootViewModel extends OFSPlugin {
     return JSON.stringify(
       {
         assetsPath: dataset?.diagnostics?.assetsPath || config.assetsPath,
+        alternativeUrl: config.alternativeUrl,
         userLogin: dataset?.diagnostics?.userLogin || this.getCurrentUserLogin(),
         mainResourceId: dataset?.diagnostics?.mainResourceId || "",
-        operatingOrganizationCode:
-          dataset?.diagnostics?.operatingOrganizationCode || "",
+        operatingOrganizationId:
+          dataset?.diagnostics?.operatingOrganizationId || "",
         faUrl: this.currentState.environment?.faUrl || "",
         fsUrl: this.currentState.environment?.fsUrl || "",
+        environmentName: this.currentState.environment?.environmentName || "",
       },
       null,
       2
@@ -348,7 +361,7 @@ class RootViewModel extends OFSPlugin {
     this.pendingTokenResolve = null;
     this.pendingTokenReject = null;
     reject?.(
-      new Error(result.detail || result.status || "Failed to get scoped access token.")
+      new Error(result.detail || result.status || "Failed to get access token.")
     );
   }
 
@@ -440,17 +453,32 @@ class RootViewModel extends OFSPlugin {
       typeof environment?.faUrl === "string" ? environment.faUrl.trim() : "";
     const fsUrl =
       typeof environment?.fsUrl === "string" ? environment.fsUrl.trim() : "";
-    const scope = this.deriveScopeFromFsUrl(fsUrl);
+    const faScope = this.buildFaAccessTokenScope(environment);
+    const fsScope = this.buildFsAccessTokenScope(environment);
     const userLogin = this.getCurrentUserLogin();
 
     if (!faUrl) {
       this.handleRefreshError(source, "Missing Fusion URL in environment.faUrl.");
       return;
     }
-    if (!fsUrl || !scope) {
+    if (!faScope) {
       this.handleRefreshError(
         source,
-        "Missing OFS environment.fsUrl or could not derive the scope."
+        "Missing OFS environment.environmentName or could not derive the Fusion Applications access token scope."
+      );
+      return;
+    }
+    if (!fsScope) {
+      this.handleRefreshError(
+        source,
+        "Could not derive the Field Service access token scope."
+      );
+      return;
+    }
+    if (!fsUrl) {
+      this.handleRefreshError(
+        source,
+        "Missing environment.fsUrl for the OFS proxy fallback."
       );
       return;
     }
@@ -462,7 +490,7 @@ class RootViewModel extends OFSPlugin {
     if (source === "open") {
       this.loading(true);
       this.errorMessage("");
-      this.statusMessage("Requesting scoped access token...");
+      this.statusMessage("Requesting Fusion access token...");
     }
 
     try {
@@ -471,14 +499,17 @@ class RootViewModel extends OFSPlugin {
       this.info("Resolved runtime config", {
         source,
         assetsPath: resolvedConfig.assetsPath,
+        alternativeUrl: resolvedConfig.alternativeUrl,
         userLogin,
       });
 
-      const token = await this.requestTokenByScope(scope);
+      const fusionToken = await this.requestFusionAccessToken(faScope);
+      const ofsToken = await this.requestFsAccessToken(fsScope);
       const service = new AssetInitLoadingService(
         faUrl,
         fsUrl,
-        token,
+        fusionToken,
+        ofsToken,
         buildCacheKey(resolvedConfig, this.currentState),
         userLogin,
         resolvedConfig,
@@ -497,8 +528,8 @@ class RootViewModel extends OFSPlugin {
         userLogin,
         rows: dataset.rowCount,
         endpoint: dataset.endpoint,
-        operatingOrganizationCode:
-          dataset.diagnostics?.operatingOrganizationCode || "",
+        operatingOrganizationId:
+          dataset.diagnostics?.operatingOrganizationId || "",
         lastRequestUrl: this.getLatestDiagnosticRequest(dataset)?.requestUrl || "",
       });
     } catch (error) {
@@ -520,12 +551,24 @@ class RootViewModel extends OFSPlugin {
     return new Error(message);
   }
 
-  private requestTokenByScope(scope: string): Promise<string> {
+  private requestFusionAccessToken(scope: string): Promise<string> {
     return new Promise((resolve, reject) => {
       this.pendingTokenResolve = resolve;
       this.pendingTokenReject = reject;
       this.tokenCallId = this.getAccessTokenByScope(scope);
-      this.info("Requested scoped access token", {
+      this.info("Requested Fusion access token", {
+        callId: this.tokenCallId,
+        scope,
+      });
+    });
+  }
+
+  private requestFsAccessToken(scope: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+      this.pendingTokenResolve = resolve;
+      this.pendingTokenReject = reject;
+      this.tokenCallId = this.getAccessTokenByScope(scope);
+      this.info("Requested Field Service access token", {
         callId: this.tokenCallId,
         scope,
       });

@@ -1,3 +1,11 @@
+set shell := ["zsh", "-cu"]
+
+plugin_label := "initDataLoading"
+secure_dir := env_var_or_default("HOME", "") + "/.secure"
+
+default:
+	just --list
+
 build:
 	tsc
 
@@ -18,5 +26,20 @@ zip: pack
 dev-zip: dev-pack
 	cd dist; zip plugin.zip index.html main.js
 
-upload:
-	npx pluginmgr --filename dist/plugin.zip upload initDataLoading
+upload env="sunrise0511": zip
+	plugin_mgr_credentials="{{secure_dir}}/{{env}}-plugin_mgr.secret"; \
+	default_credentials="{{secure_dir}}/{{env}}.secret"; \
+	if [ -f "$plugin_mgr_credentials" ]; then \
+	  credentials="$plugin_mgr_credentials"; \
+	elif [ -f "$default_credentials" ]; then \
+	  credentials="$default_credentials"; \
+	else \
+	  echo "No credentials file found for '{{env}}'. Tried:" >&2; \
+	  echo "  $plugin_mgr_credentials" >&2; \
+	  echo "  $default_credentials" >&2; \
+	  exit 1; \
+	fi; \
+	npx pluginmgr upload {{plugin_label}} --credentials "$credentials" --filename dist/plugin.zip
+
+upload-sunrise:
+	just upload sunrise0511

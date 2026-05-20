@@ -31,8 +31,12 @@
       "value": "500"
     },
     {
+      "name": "alternativeUrl",
+      "value": "https://plugins-0-etaq-dev4.fs.ocs.oraclecloud.com"
+    },
+    {
       "name": "enableLogging",
-      "value": "false"
+      "value": "true"
     },
     {
       "name": "WAKEUP_DELAY",
