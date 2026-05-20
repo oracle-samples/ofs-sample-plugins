@@ -16,7 +16,6 @@ export interface PluginUser {
 
 export interface RuntimeConfig {
   assetsPath: string;
-  alternativeUrl: string;
   pageLimit: number;
   title: string;
   subtitle: string;
@@ -26,6 +25,7 @@ export interface RuntimeConfig {
 
 export interface PersistedPluginState {
   runtimeConfig?: RuntimeConfig;
+  origin?: string;
   environment?: PluginEnvironment;
   provider?: PluginProvider;
   activity?: Record<string, unknown>;
@@ -53,7 +53,7 @@ export interface CachedDataset {
 }
 
 export interface AssetFetchDiagnosticEntry {
-  step: "getUserDetails" | "getUserDetailsAlternative" | "getResource" | "getAssets";
+  step: "getUserDetails" | "getUserDetailsOrigin" | "getResource" | "getAssets";
   pageNumber?: number;
   requestUrl: string;
   status: number;
@@ -81,6 +81,7 @@ export interface TableColumn {
 
 export interface AssetInitLifecycleMessage extends OFSMessage {
   securedData?: Record<string, unknown>;
+  origin?: string;
   environment?: PluginEnvironment;
   provider?: Record<string, unknown>;
   activity?: Record<string, unknown>;
@@ -90,6 +91,7 @@ export interface AssetInitLifecycleMessage extends OFSMessage {
 
 export interface AssetInitOpenMessage extends OFSOpenMessage {
   securedData?: Record<string, unknown>;
+  origin?: string;
   environment?: PluginEnvironment;
   activity?: Record<string, unknown>;
   user?: PluginUser;

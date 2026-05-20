@@ -7,7 +7,7 @@ Oracle Field Service plugin built with Oracle JET MVVM and Redwood styling. This
 1. `init()` persists runtime configuration and schedules a wakeup.
 2. `wakeup()` requests a Fusion Applications access token through OFS `getAccessTokenByScope` using the uppercase environment name.
 3. The plugin requests a separate Field Service access token through `getAccessTokenByScope` using the `field-service-common/use` scope.
-4. The plugin creates an OFS proxy with `environment.fsUrl`, calls `getUserDetails(user.ulogin)`, and retries the same call with `alternativeUrl` if the original call fails.
+4. The plugin creates an OFS proxy with `environment.fsUrl`, calls `getUserDetails(user.ulogin)`, and retries the same call with the init message `origin` if the original call fails.
 5. The plugin calls `getResource(mainResourceId)` and reads `mwo_resource_orgid` from that resource response.
 6. The plugin calls `/fscmRestApi/resources/11.13.18.05/installedBaseAssets` on `environment.faUrl` with `OperatingOrganizationId`.
 7. The resulting assets are flattened and stored in `localStorage`.
@@ -23,10 +23,6 @@ The plugin reads its runtime configuration from `securedData`. Supported keys:
 - `pageLimit`
   - Optional.
   - Default page size for the Fusion asset request.
-- `alternativeUrl`
-  - Optional.
-  - Alternative FusionFS base URL used only when `getUserDetails(user.ulogin)` fails against `environment.fsUrl`.
-  - Defaults to `https://plugins-0-etaq-dev4.fs.ocs.oraclecloud.com`.
 - `title`, `subtitle`, `emptyStateMessage`
   - Optional display strings for the UI.
 - `enableLogging`
@@ -40,7 +36,7 @@ This sample can invoke both Fusion Field Service / FusionFS APIs and Fusion Appl
 
 | API call | URL source | Token scope |
 |----------|------------|-------------|
-| `OFS.getUserDetails(user.ulogin)` | `environment.fsUrl`, then `alternativeUrl` if it fails | `urn:opc:resource:fusion:${environment.environmentName.toLowerCase()}:field-service-common/use` |
+| `OFS.getUserDetails(user.ulogin)` | `environment.fsUrl`, then init message `origin` if it fails | `urn:opc:resource:fusion:${environment.environmentName.toLowerCase()}:field-service-common/use` |
 | `OFS.getResource(mainResourceId)` | `environment.fsUrl` | `urn:opc:resource:fusion:${environment.environmentName.toLowerCase()}:field-service-common/use` |
 | Direct `fetch()` to `assetsPath` | `environment.faUrl` unless `assetsPath` is already a full URL | `${environment.environmentName.toUpperCase()}` |
 
@@ -68,6 +64,7 @@ faUrl scope: ETAQ-DEV4
 - `environment.fsUrl`
 - `environment.faUrl`
 - `environment.environmentName`
+- `origin` for the `getUserDetails` retry URL when the initial `environment.fsUrl` call fails
 - `user.ulogin`
 
 The plugin does not expect `provider.mwo_resource_orgid` in init or wakeup data. It always resolves that value through `getUserDetails(user.ulogin)` followed by `getResource(mainResourceId)`.
@@ -81,7 +78,6 @@ See "URL and Scope Selection" for the `fsUrl` and `faUrl` scope rules used by th
   "title": "Asset Init Loading",
   "subtitle": "Background-loaded installed base assets cached for offline use",
   "pageLimit": "500",
-  "alternativeUrl": "https://plugins-0-etaq-dev4.fs.ocs.oraclecloud.com",
   "enableLogging": "true",
   "WAKEUP_DELAY": "15"
 }

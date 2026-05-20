@@ -64,6 +64,15 @@ function preferIncomingValue<T>(incoming: T | undefined, existing: T | undefined
   return incoming;
 }
 
+function normalizeOrigin(origin: unknown): string | undefined {
+  if (typeof origin !== "string") {
+    return undefined;
+  }
+
+  const trimmed = origin.trim();
+  return trimmed || undefined;
+}
+
 class RootViewModel extends OFSPlugin {
   appName = ko.observable("Asset Init Loading");
   statusMessage = ko.observable("Waiting for the plugin to initialize.");
@@ -248,7 +257,7 @@ class RootViewModel extends OFSPlugin {
     return JSON.stringify(
       {
         assetsPath: dataset?.diagnostics?.assetsPath || config.assetsPath,
-        alternativeUrl: config.alternativeUrl,
+        origin: this.currentState.origin || "",
         userLogin: dataset?.diagnostics?.userLogin || this.getCurrentUserLogin(),
         mainResourceId: dataset?.diagnostics?.mainResourceId || "",
         operatingOrganizationId:
@@ -272,6 +281,10 @@ class RootViewModel extends OFSPlugin {
     );
     const nextState: PersistedPluginState = {
       runtimeConfig: parseRuntimeConfig(mergedSecuredData),
+      origin: preferIncomingValue(
+        normalizeOrigin(message.origin),
+        existingState.origin
+      ),
       environment: preferIncomingValue(message.environment, existingState.environment),
       provider: preferIncomingValue(message.provider, existingState.provider),
       activity: preferIncomingValue(message.activity, existingState.activity),
@@ -286,6 +299,7 @@ class RootViewModel extends OFSPlugin {
       securedDataKeys: Object.keys(nextState.securedData || {}),
       hasRuntimeConfig: Boolean(nextState.runtimeConfig),
       userLogin: nextState.user?.ulogin || "",
+      origin: nextState.origin || "",
       environment: nextState.environment,
     });
     return nextState;
@@ -499,7 +513,7 @@ class RootViewModel extends OFSPlugin {
       this.info("Resolved runtime config", {
         source,
         assetsPath: resolvedConfig.assetsPath,
-        alternativeUrl: resolvedConfig.alternativeUrl,
+        origin: this.currentState.origin || "",
         userLogin,
       });
 
@@ -508,6 +522,7 @@ class RootViewModel extends OFSPlugin {
       const service = new AssetInitLoadingService(
         faUrl,
         fsUrl,
+        this.currentState.origin || "",
         fusionToken,
         ofsToken,
         buildCacheKey(resolvedConfig, this.currentState),

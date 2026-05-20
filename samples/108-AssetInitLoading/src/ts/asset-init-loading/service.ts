@@ -193,6 +193,7 @@ export class AssetInitLoadingService {
   constructor(
     private readonly faUrl: string,
     private readonly fsUrl: string,
+    private readonly origin: string,
     private readonly fusionAccessToken: string,
     private readonly ofsAccessToken: string,
     private readonly cacheKey: string,
@@ -293,7 +294,7 @@ export class AssetInitLoadingService {
   }
 
   private recordProxyDiagnostic(
-    step: "getUserDetails" | "getUserDetailsAlternative" | "getResource",
+    step: "getUserDetails" | "getUserDetailsOrigin" | "getResource",
     response: OFSResponse
   ): void {
     this.diagnostics.push({
@@ -318,9 +319,9 @@ export class AssetInitLoadingService {
       return response.data as unknown as Record<string, unknown>;
     }
 
-    const alternativeUserDetails = await this.fetchAlternativeUserDetails();
-    if (alternativeUserDetails) {
-      return alternativeUserDetails;
+    const originUserDetails = await this.fetchOriginUserDetails();
+    if (originUserDetails) {
+      return originUserDetails;
     }
 
     if (response.status >= 400 || !response.data || typeof response.data !== "object") {
@@ -332,19 +333,19 @@ export class AssetInitLoadingService {
     return response.data as unknown as Record<string, unknown>;
   }
 
-  private async fetchAlternativeUserDetails(): Promise<Record<string, unknown> | null> {
-    const alternativeUrl = normalizeOfsBaseUrl(this.config.alternativeUrl || "");
-    if (!alternativeUrl) {
+  private async fetchOriginUserDetails(): Promise<Record<string, unknown> | null> {
+    const originUrl = normalizeOfsBaseUrl(this.origin || "");
+    if (!originUrl) {
       return null;
     }
 
-    const alternativeProxy = new OFS({
-      baseURL: alternativeUrl,
+    const originProxy = new OFS({
+      baseURL: originUrl,
       token: this.ofsAccessToken,
     });
-    const response = await alternativeProxy.getUserDetails(this.userLogin);
-    this.recordProxyDiagnostic("getUserDetailsAlternative", response);
-    this.log("[AssetInitLoadingService] fetched user details using alternative URL", {
+    const response = await originProxy.getUserDetails(this.userLogin);
+    this.recordProxyDiagnostic("getUserDetailsOrigin", response);
+    this.log("[AssetInitLoadingService] fetched user details using message origin", {
       userLogin: this.userLogin,
       status: response.status,
       url: response.url.toString(),
@@ -352,7 +353,7 @@ export class AssetInitLoadingService {
 
     if (response.status >= 400 || !response.data || typeof response.data !== "object") {
       throw new Error(
-        `alternative getUserDetails failed (${response.status}): ${response.description || "Unknown error"}`
+        `origin getUserDetails failed (${response.status}): ${response.description || "Unknown error"}`
       );
     }
 
