@@ -89,6 +89,7 @@ function resolvePlaceholderValue(
       provider: state.provider || {},
       activity: state.activity || {},
       environment: state.environment || {},
+      origin: state.origin || "",
       securedData: state.securedData || {},
       user: state.user || {},
       openParams:
@@ -148,6 +149,7 @@ export function buildCacheKey(
   return JSON.stringify({
     assetsPath: config.assetsPath,
     pageLimit: config.pageLimit,
+    origin: String(state.origin || ""),
     userLogin: String(state.user?.ulogin || ""),
     faUrl: String(state.environment?.faUrl || ""),
     fsUrl: String(state.environment?.fsUrl || ""),

@@ -3,7 +3,7 @@
   "version": "1.1.0",
   "description": "Oracle Field Service plugin that preloads installed base assets during init and wakeup for offline use",
   "dependencies": {
-    "@ofs-users/plugin": "^1.7.0",
+    "@ofs-users/plugin": "^1.8.0",
     "@ofs-users/proxy": "^1.29.0",
     "@oracle/oraclejet": "~17.1.0",
     "@oracle/oraclejet-core-pack": "~17.1.0"

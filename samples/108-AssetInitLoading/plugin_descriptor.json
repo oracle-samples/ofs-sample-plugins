@@ -32,7 +32,7 @@
     },
     {
       "name": "enableLogging",
-      "value": "false"
+      "value": "true"
     },
     {
       "name": "WAKEUP_DELAY",

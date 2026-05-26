@@ -5,11 +5,11 @@ Oracle Field Service plugin built with Oracle JET MVVM and Redwood styling. This
 ## Functional Flow
 
 1. `init()` persists runtime configuration and schedules a wakeup.
-2. `wakeup()` requests a scoped token through OFS `getAccessTokenByScope`.
-3. The plugin creates a custom OFS proxy with that token and `environment.fsUrl`.
-4. The proxy calls `getUserDetails(user.ulogin)` to resolve the current user's `mainResourceId`.
-5. The proxy calls `getResource(mainResourceId)` and reads `mwo_resource_orgid`.
-6. The plugin calls `/fscmRestApi/resources/11.13.18.05/installedBaseAssets` on `environment.faUrl` using `OperatingOrganizationCode=mwo_resource_orgid`.
+2. `wakeup()` requests a Fusion Applications access token through OFS `getAccessTokenByScope` using the uppercase environment name.
+3. The plugin requests a separate Field Service access token through `getAccessTokenByScope` using the `field-service-common/use` scope.
+4. The plugin creates an OFS proxy with `environment.fsUrl`, calls `getUserDetails(user.ulogin)`, and retries the same call with the init message `origin` if the original call fails.
+5. The plugin calls `getResource(mainResourceId)` and reads `mwo_resource_orgid` from that resource response.
+6. The plugin calls `/fscmRestApi/resources/11.13.18.05/installedBaseAssets` on `environment.faUrl` with `OperatingOrganizationId`.
 7. The resulting assets are flattened and stored in `localStorage`.
 8. `open()` renders the latest cached snapshot immediately and exposes diagnostics for the last OFS/Fusion calls.
 
@@ -30,17 +30,46 @@ The plugin reads its runtime configuration from `securedData`. Supported keys:
 - `WAKEUP_DELAY`
   - Optional timer in seconds before `wakeup()` executes.
 
+## URL and Scope Selection
+
+This sample can invoke both Fusion Field Service / FusionFS APIs and Fusion Applications APIs. Each URL family requires the matching token scope.
+
+| API call | URL source | Token scope |
+|----------|------------|-------------|
+| `OFS.getUserDetails(user.ulogin)` | `environment.fsUrl`, then init message `origin` if it fails | `urn:opc:resource:fusion:${environment.environmentName.toLowerCase()}:field-service-common/use` |
+| `OFS.getResource(mainResourceId)` | `environment.fsUrl` | `urn:opc:resource:fusion:${environment.environmentName.toLowerCase()}:field-service-common/use` |
+| Direct `fetch()` to `assetsPath` | `environment.faUrl` unless `assetsPath` is already a full URL | `${environment.environmentName.toUpperCase()}` |
+
+For FusionFS / `fsUrl` calls, the Field Service scope is:
+
+```text
+urn:opc:resource:fusion:${environment.environmentName.toLowerCase()}:field-service-common/use
+```
+
+For Fusion Applications / `faUrl` calls, the Fusion Applications scope is:
+
+```text
+${environment.environmentName.toUpperCase()}
+```
+
+For example, `environment.environmentName = "etaq-dev4"` creates:
+
+```text
+fsUrl scope: urn:opc:resource:fusion:etaq-dev4:field-service-common/use
+faUrl scope: ETAQ-DEV4
+```
+
 ## Required Context
 
 - `environment.fsUrl`
 - `environment.faUrl`
+- `environment.environmentName`
+- `origin` for the `getUserDetails` retry URL when the initial `environment.fsUrl` call fails
 - `user.ulogin`
 
-The OFS scope value is derived from the first hostname segment in `environment.fsUrl`.
+The plugin does not expect `provider.mwo_resource_orgid` in init or wakeup data. It always resolves that value through `getUserDetails(user.ulogin)` followed by `getResource(mainResourceId)`.
 
-Example:
-
-- `https://ETAQ-DEV4.fs.ocs.oraclecloud.com` -> `ETAQ-DEV4`
+See "URL and Scope Selection" for the `fsUrl` and `faUrl` scope rules used by this sample.
 
 ## Example `securedData`
 

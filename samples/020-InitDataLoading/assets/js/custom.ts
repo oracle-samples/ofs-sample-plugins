@@ -13,12 +13,19 @@ import { OFS } from "@ofs-users/proxy";
 
 // Storage keys
 const STORAGE_KEYS = {
-    APPLICATIONS: "initDataLoading_applications",
+    ENVIRONMENT: "initDataLoading_environment",
     SECURED_DATA: "initDataLoading_securedData",
     BUCKET_DATA: "initDataLoading_bucketData",
 };
 
 // Interfaces
+interface PluginEnvironment {
+    environmentName?: string;
+    fsUrl?: string;
+    faUrl?: string;
+    [key: string]: unknown;
+}
+
 interface DataToRetrieveConfig {
     bucket_name: string;
     properties_to_fetch: string[];
@@ -37,13 +44,19 @@ interface StoredBucketData {
 }
 
 interface OFSInitMessage extends OFSMessage {
-    applications: any;
+    environment?: PluginEnvironment;
     securedData: any;
 }
 
 interface OFSWakeupMessage extends OFSMessage {
-    applications?: any;
+    environment?: PluginEnvironment;
     securedData?: any;
+}
+
+interface TokenProcedureResult {
+    token?: string;
+    status?: string;
+    detail?: string;
 }
 
 export class CustomPlugin extends OFSPlugin {
@@ -112,79 +125,85 @@ export class CustomPlugin extends OFSPlugin {
         return delay;
     }
 
-    // Generate unique call ID for tracking callProcedure responses
-    private generateCallId(): string {
-        const characters =
-            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        let result = "";
-        for (let i = 0; i < 32; i++) {
-            result += characters.charAt(
-                Math.floor(Math.random() * characters.length)
-            );
-        }
-        return result;
+    private buildFusionAccessTokenScope(
+        environment: PluginEnvironment | null | undefined
+    ): string {
+        const environmentName =
+            typeof environment?.environmentName === "string"
+                ? environment.environmentName.trim().toLowerCase()
+                : "";
+
+        return environmentName
+            ? `urn:opc:resource:fusion:${environmentName}:field-service-common/use`
+            : "";
     }
 
-    // Create proxy from stored applications (follows geowatch pattern)
-    private async createProxy(): Promise<OFS | null> {
-        const applications = this.getData<any>(STORAGE_KEYS.APPLICATIONS);
-        if (!applications) {
-            this.log("error", "No stored applications data for proxy creation");
+    private resolveEnvironment(
+        incomingEnvironment?: PluginEnvironment
+    ): PluginEnvironment | null {
+        const storedEnvironment = this.getData<PluginEnvironment>(
+            STORAGE_KEYS.ENVIRONMENT
+        );
+
+        const environment = {
+            ...(storedEnvironment || {}),
+            ...(incomingEnvironment || {}),
+        };
+
+        return Object.keys(environment).length > 0 ? environment : null;
+    }
+
+    // Create proxy using a Fusion scoped token from the OFS plugin API.
+    private async createProxy(
+        environment?: PluginEnvironment
+    ): Promise<OFS | null> {
+        const resolvedEnvironment = this.resolveEnvironment(environment);
+        const scope = this.buildFusionAccessTokenScope(resolvedEnvironment);
+        const fsUrl =
+            typeof resolvedEnvironment?.fsUrl === "string"
+                ? resolvedEnvironment.fsUrl.trim()
+                : "";
+
+        if (!scope) {
+            this.log(
+                "error",
+                "Cannot create proxy: missing environment.environmentName for scoped token"
+            );
             return null;
         }
 
+        if (!fsUrl) {
+            this.log(
+                "error",
+                "Cannot create proxy: missing environment.fsUrl for OFS proxy base URL"
+            );
+            return null;
+        }
+
+        this.baseURL = fsUrl;
+
         return new Promise((resolve) => {
             this.proxyResolve = resolve;
+            this.proxyCallId = this.getAccessTokenByScope(scope);
 
-            // Find the OFS application and extract applicationKey dynamically
-            const parsedApplications =
-                typeof applications === "string"
-                    ? JSON.parse(applications)
-                    : applications;
+            this.log(
+                "debug",
+                `Requesting scoped token for ${scope}, callId: ${this.proxyCallId}`
+            );
 
-            for (const [key, value] of Object.entries(parsedApplications)) {
-                const applicationKey: string = key;
-                const application: any = value;
-
-                if (application.type === "ofs") {
-                    this.baseURL = application.resourceUrl;
-                    this.proxyCallId = this.generateCallId();
-
-                    this.log(
-                        "debug",
-                        `Requesting token for applicationKey: ${applicationKey}, callId: ${this.proxyCallId}`
-                    );
-
-                    // Use callProcedure method from base class
-                    this.callProcedure({
-                        callId: this.proxyCallId,
-                        procedure: "getAccessToken",
-                        params: {
-                            applicationKey: applicationKey,
-                        },
-                    });
-
-                    // Timeout after 10 seconds
-                    setTimeout(() => {
-                        if (this.proxyResolve) {
-                            this.log("warn", "Proxy creation timed out");
-                            this.proxyResolve(null);
-                            this.proxyResolve = null;
-                            this.proxyCallId = null;
-                        }
-                    }, 10000);
-
-                    return;
+            // Timeout after 10 seconds
+            setTimeout(() => {
+                if (this.proxyResolve) {
+                    this.log("warn", "Scoped proxy creation timed out");
+                    this.proxyResolve(null);
+                    this.proxyResolve = null;
+                    this.proxyCallId = null;
                 }
-            }
-
-            // No OFS application found
-            this.log("error", "No OFS application found in applications data");
-            resolve(null);
+            }, 10000);
         });
     }
 
-    // Handle callProcedureResult for proxy creation (follows geowatch pattern)
+    // Handle callProcedureResult for scoped proxy creation.
     callProcedureResult(message: OFSCallProcedureResultMessage): void {
         this.log("debug", `callProcedureResult: ${JSON.stringify(message)}`);
 
@@ -199,7 +218,7 @@ export class CustomPlugin extends OFSPlugin {
             return;
         }
 
-        const resultData = message.resultData as any;
+        const resultData = (message.resultData || {}) as TokenProcedureResult;
 
         if (resultData?.status === "success" && resultData?.token) {
             try {
@@ -216,7 +235,7 @@ export class CustomPlugin extends OFSPlugin {
         } else {
             this.log(
                 "error",
-                `Token request failed: ${JSON.stringify(resultData)}`
+                `Scoped token request failed: ${JSON.stringify(resultData)}`
             );
             this.proxyResolve(null);
         }
@@ -317,9 +336,9 @@ export class CustomPlugin extends OFSPlugin {
         this.log("log", "INIT called");
         this.log("debug", `Init message: ${JSON.stringify(message)}`);
 
-        // Store applications and securedData for later use in wakeup
-        if (message.applications) {
-            this.storeData(STORAGE_KEYS.APPLICATIONS, message.applications);
+        // Store environment and securedData for later use in wakeup
+        if (message.environment) {
+            this.storeData(STORAGE_KEYS.ENVIRONMENT, message.environment);
         }
         if (message.securedData) {
             this.storeData(STORAGE_KEYS.SECURED_DATA, message.securedData);
@@ -348,15 +367,8 @@ export class CustomPlugin extends OFSPlugin {
         return Promise.resolve(initEndMessage);
     }
 
-    // Ensure proxy is available (check base class proxy first, then create if needed)
-    private async ensureProxy(_message?: { applications?: any }): Promise<boolean> {
-        // If base class proxy exists, use it
-        if (this.proxy) {
-            this.log("debug", "Using this.proxy from base class");
-            this.customProxy = this.proxy;
-            return true;
-        }
-
+    // Ensure scoped proxy is available for wakeup API calls.
+    private async ensureProxy(message?: { environment?: PluginEnvironment }): Promise<boolean> {
         // If customProxy already exists, we're good
         if (this.customProxy) {
             this.log("debug", "customProxy already available");
@@ -364,8 +376,8 @@ export class CustomPlugin extends OFSPlugin {
         }
 
         // Need to create proxy manually
-        this.log("debug", "No proxy available, creating one");
-        this.customProxy = await this.createProxy();
+        this.log("debug", "No scoped proxy available, creating one");
+        this.customProxy = await this.createProxy(message?.environment);
         return this.customProxy !== null;
     }
 
@@ -373,6 +385,10 @@ export class CustomPlugin extends OFSPlugin {
     async wakeup(message: OFSWakeupMessage): Promise<void> {
         this.log("log", "WAKEUP called - Starting bucket data retrieval");
         this.log("debug", `Wakeup message: ${JSON.stringify(message)}`);
+
+        if (message.environment) {
+            this.storeData(STORAGE_KEYS.ENVIRONMENT, message.environment);
+        }
 
         // Restore securedData from storage if not in message
         this.securedData =
@@ -449,6 +465,7 @@ export class CustomPlugin extends OFSPlugin {
         if (this.proxyResolve) {
             this.proxyResolve(null);
             this.proxyResolve = null;
+            this.proxyCallId = null;
         }
     }
 
@@ -462,6 +479,10 @@ export class CustomPlugin extends OFSPlugin {
             (data as any).securedData ||
             this.getData(STORAGE_KEYS.SECURED_DATA) ||
             {};
+
+        if ((data as any).environment) {
+            this.storeData(STORAGE_KEYS.ENVIRONMENT, (data as any).environment);
+        }
 
         // Retrieve stored bucket data
         const storedData = this.getData<StoredBucketData[]>(

@@ -193,7 +193,9 @@ export class AssetInitLoadingService {
   constructor(
     private readonly faUrl: string,
     private readonly fsUrl: string,
-    private readonly token: string,
+    private readonly origin: string,
+    private readonly fusionAccessToken: string,
+    private readonly ofsAccessToken: string,
     private readonly cacheKey: string,
     private readonly userLogin: string,
     private readonly config: RuntimeConfig,
@@ -209,23 +211,9 @@ export class AssetInitLoadingService {
   }
 
   async fetchDataset(): Promise<CachedDataset> {
-    const proxy = new OFS({
-      baseURL: normalizeOfsBaseUrl(this.fsUrl),
-      token: this.token,
-    });
-    const userDetails = await this.fetchUserDetails(proxy);
-    const mainResourceId = extractRequiredString(
-      userDetails,
-      "mainResourceId",
-      "User details did not include mainResourceId."
-    );
-    const resourceDetails = await this.fetchResourceDetails(proxy, mainResourceId);
-    const operatingOrganizationCode = extractRequiredString(
-      resourceDetails,
-      "mwo_resource_orgid",
-      "Resource details did not include mwo_resource_orgid."
-    );
-    const rawItems = await this.fetchAllAssets(operatingOrganizationCode);
+    const { mainResourceId, operatingOrganizationId } =
+      await this.resolveOperatingOrganizationId();
+    const rawItems = await this.fetchAllAssets(operatingOrganizationId);
     const rows = rawItems.map((item, index) => this.toTableRow(item, index));
     const columnOrder = Array.from(
       rows.reduce((keys, row) => {
@@ -255,15 +243,58 @@ export class AssetInitLoadingService {
       diagnostics: {
         userLogin: this.userLogin,
         mainResourceId,
-        operatingOrganizationCode,
+        operatingOrganizationId,
         assetsPath: this.config.assetsPath,
         requests: [...this.diagnostics],
       } as AssetFetchDiagnostics,
     };
   }
 
+  private async resolveOperatingOrganizationId(): Promise<{
+    mainResourceId?: string;
+    operatingOrganizationId: string;
+  }> {
+    if (!this.fsUrl) {
+      throw new Error(
+        "environment.fsUrl is not available for the OFS proxy fallback."
+      );
+    }
+
+    if (!this.ofsAccessToken) {
+      throw new Error(
+        "An OFS access token is not available for the OFS proxy fallback."
+      );
+    }
+
+    const ofsProxy = new OFS({
+      baseURL: normalizeOfsBaseUrl(this.fsUrl),
+      token: this.ofsAccessToken,
+    });
+    this.log("[AssetInitLoadingService] created OFS proxy fallback", {
+      fsUrl: this.fsUrl,
+    });
+
+    const userDetails = await this.fetchUserDetails(ofsProxy);
+    const mainResourceId = extractRequiredString(
+      userDetails,
+      "mainResourceId",
+      "User details did not include mainResourceId."
+    );
+    const resourceDetails = await this.fetchResourceDetails(ofsProxy, mainResourceId);
+    const operatingOrganizationId = extractRequiredString(
+      resourceDetails,
+      "mwo_resource_orgid",
+      "Resource details did not include mwo_resource_orgid."
+    );
+
+    return {
+      mainResourceId,
+      operatingOrganizationId,
+    };
+  }
+
   private recordProxyDiagnostic(
-    step: "getUserDetails" | "getResource",
+    step: "getUserDetails" | "getUserDetailsOrigin" | "getResource",
     response: OFSResponse
   ): void {
     this.diagnostics.push({
@@ -284,9 +315,45 @@ export class AssetInitLoadingService {
       url: response.url.toString(),
     });
 
+    if (response.status < 400 && response.data && typeof response.data === "object") {
+      return response.data as unknown as Record<string, unknown>;
+    }
+
+    const originUserDetails = await this.fetchOriginUserDetails();
+    if (originUserDetails) {
+      return originUserDetails;
+    }
+
     if (response.status >= 400 || !response.data || typeof response.data !== "object") {
       throw new Error(
         `getUserDetails failed (${response.status}): ${response.description || "Unknown error"}`
+      );
+    }
+
+    return response.data as unknown as Record<string, unknown>;
+  }
+
+  private async fetchOriginUserDetails(): Promise<Record<string, unknown> | null> {
+    const originUrl = normalizeOfsBaseUrl(this.origin || "");
+    if (!originUrl) {
+      return null;
+    }
+
+    const originProxy = new OFS({
+      baseURL: originUrl,
+      token: this.ofsAccessToken,
+    });
+    const response = await originProxy.getUserDetails(this.userLogin);
+    this.recordProxyDiagnostic("getUserDetailsOrigin", response);
+    this.log("[AssetInitLoadingService] fetched user details using message origin", {
+      userLogin: this.userLogin,
+      status: response.status,
+      url: response.url.toString(),
+    });
+
+    if (response.status >= 400 || !response.data || typeof response.data !== "object") {
+      throw new Error(
+        `origin getUserDetails failed (${response.status}): ${response.description || "Unknown error"}`
       );
     }
 
@@ -333,7 +400,7 @@ export class AssetInitLoadingService {
     };
   }
 
-  private async fetchAllAssets(operatingOrganizationCode: string): Promise<unknown[]> {
+  private async fetchAllAssets(operatingOrganizationId: string): Promise<unknown[]> {
     const collected: unknown[] = [];
     let offset = 0;
     let pageNumber = 0;
@@ -343,13 +410,13 @@ export class AssetInitLoadingService {
       const response = await this.fetchAssetsPage(
         offset,
         pageNumber,
-        operatingOrganizationCode
+        operatingOrganizationId
       );
       const items = resolveItems(response);
       this.log("[AssetInitLoadingService] fetched assets page", {
         pageNumber,
         offset,
-        operatingOrganizationCode,
+        operatingOrganizationId,
         hasMore: response.hasMore,
         count: response.count,
         limit: response.limit,
@@ -374,20 +441,21 @@ export class AssetInitLoadingService {
   private async fetchAssetsPage(
     offset: number,
     pageNumber: number,
-    operatingOrganizationCode: string
+    operatingOrganizationId: string
   ): Promise<AssetPageResponse> {
     const url = new URL(this.endpoint);
-    url.searchParams.set(
-      "OperatingOrganizationCode",
-      operatingOrganizationCode
-    );
+    const existingQuery = url.searchParams.get("q")?.trim();
+    const qFilters = existingQuery
+      ? existingQuery.includes("OperatingOrganizationId=")
+        ? [existingQuery]
+        : [existingQuery, "OperatingOrganizationId=" + operatingOrganizationId]
+      : ["OperatingOrganizationId=" + operatingOrganizationId];
 
-    if (!url.searchParams.has("limit")) {
-      url.searchParams.set("limit", String(this.config.pageLimit));
-    }
-    if (!url.searchParams.has("offset")) {
-      url.searchParams.set("offset", String(offset));
-    }
+    url.search = "";
+    url.searchParams.set("q", qFilters.join(";"));
+    url.searchParams.set("limit", String(this.config.pageLimit));
+    url.searchParams.set("offset", String(offset));
+    url.searchParams.set("onlyData", "true");
 
     const requestUrl = url.toString();
     this.log("[AssetInitLoadingService] request URL", requestUrl);
@@ -396,7 +464,7 @@ export class AssetInitLoadingService {
       method: "GET",
       headers: {
         Accept: "application/json",
-        Authorization: `Bearer ${this.token}`,
+        Authorization: `Bearer ${this.fusionAccessToken}`,
       },
     });
 

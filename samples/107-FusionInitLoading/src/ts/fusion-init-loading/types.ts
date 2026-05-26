@@ -3,6 +3,7 @@ import { OFSMessage, OFSOpenMessage } from "@ofs-users/plugin";
 export interface PluginEnvironment {
   faUrl?: string;
   fsUrl?: string;
+  environmentName?: string;
   [key: string]: unknown;
 }
 

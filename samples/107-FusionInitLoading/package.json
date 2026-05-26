@@ -3,7 +3,7 @@
   "version": "1.1.0",
   "description": "Oracle Field Service plugin that loads Fusion data during init/wakeup and renders cached rows in OJET",
   "dependencies": {
-    "@ofs-users/plugin": "^1.7.0",
+    "@ofs-users/plugin": "^1.8.0",
     "@oracle/oraclejet": "~17.1.0",
     "@oracle/oraclejet-core-pack": "~17.1.0"
   },

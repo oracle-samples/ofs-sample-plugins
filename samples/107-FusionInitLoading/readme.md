@@ -48,6 +48,32 @@ The plugin reads the Fusion target from `securedData`. Supported keys:
 3. `open()` loads the cached snapshot for the secured config and renders it instantly in the OJET table.
 4. `Refresh Now` lets you force the same fetch path while the plugin is open.
 
+## URL and Scope Selection
+
+This sample invokes Fusion Applications APIs through `environment.faUrl`. It does not invoke Fusion Field Service / FusionFS APIs through `environment.fsUrl`.
+
+| API call | URL source | Token scope |
+|----------|------------|-------------|
+| Direct `fetch()` to `fusionPath` | `environment.faUrl` unless `fusionPath` is already a full URL | `${environment.environmentName.toUpperCase()}` |
+
+For Fusion Applications / `faUrl` calls, the access token scope is the uppercase environment name:
+
+```text
+${environment.environmentName.toUpperCase()}
+```
+
+For example, `environment.environmentName = "etaq-dev4"` creates:
+
+```text
+ETAQ-DEV4
+```
+
+If this sample is extended to call FusionFS / `fsUrl` APIs, use the FusionFS scope instead:
+
+```text
+urn:opc:resource:fusion:${environment.environmentName.toLowerCase()}:field-service-common/use
+```
+
 ## Template Resolution
 
 `fusionPath`, `fusionQuery`, `title`, `subtitle`, and `emptyStateMessage` support placeholders resolved from the saved OFS context before the Fusion request runs.
@@ -95,13 +121,9 @@ The plugin reads these secure params from `securedData`:
 The Fusion host comes from OFS environment data:
 
 - `environment.faUrl`
-- `environment.fsUrl`
+- `environment.environmentName`
 
-The OFS scope value is derived from the first hostname segment in `environment.fsUrl`.
-
-Example:
-
-- `https://ETAQ-DEV4.fs.ocs.oraclecloud.com` -> `ETAQ-DEV4`
+See "URL and Scope Selection" for the `faUrl` scope rule used by this sample.
 
 ## Example `securedData`
 

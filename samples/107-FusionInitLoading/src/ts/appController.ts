@@ -196,14 +196,12 @@ class RootViewModel extends OFSPlugin {
     }
   }
 
-  private deriveScopeFromFsUrl(fsUrl: string): string {
-    try {
-      const hostname = new URL(fsUrl).hostname;
-      const [scope] = hostname.split(".");
-      return scope || "";
-    } catch {
-      return "";
-    }
+  private buildFaAccessTokenScope(
+    environment: PluginEnvironment | null | undefined
+  ): string {
+    return typeof environment?.environmentName === "string"
+      ? environment.environmentName.trim().toUpperCase()
+      : "";
   }
 
   private getWakeupDelay(rawValue: unknown): number {
@@ -444,17 +442,16 @@ class RootViewModel extends OFSPlugin {
 
     const environment = this.currentEnvironment;
     const faUrl = environment?.faUrl || "";
-    const fsUrl = environment?.fsUrl || "";
-    const scope = this.deriveScopeFromFsUrl(fsUrl);
+    const scope = this.buildFaAccessTokenScope(environment);
 
     if (!faUrl) {
       this.handleRefreshError(source, "Missing Fusion URL in environment.faUrl.");
       return;
     }
-    if (!fsUrl || !scope) {
+    if (!scope) {
       this.handleRefreshError(
         source,
-        "Missing OFS environment.fsUrl or could not derive the scope."
+        "Missing OFS environment.environmentName or could not derive the Fusion Applications access token scope."
       );
       return;
     }
